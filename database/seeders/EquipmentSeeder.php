@@ -1,0 +1,225 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class EquipmentSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('equipments')->insert([
+            [
+                'code' => 'MND-3008B-CTO-S01',
+                'name' => 'CONTADOR HEMATOLOGICO BC-20S',
+                'fob' => 2111.00,
+                'ups' => 87.40,
+                'pc' => 0.00,
+                'impresora' => 272.32,
+                'control' => 52.98,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.35,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3008B-CTO-S02',
+                'name' => 'CONTADOR HEMATOLOGICO BC-30S',
+                'fob' => 3297.00,
+                'ups' => 87.40,
+                'pc' => 0.00,
+                'impresora' => 272.32,
+                'control' => 52.98,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.35,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3107B-CTO-S01',
+                'name' => 'CONTADOR HEMATOLOGICO BC-5000',
+                'fob' => 4401.00,
+                'ups' => 87.40,
+                'pc' => 0.00,
+                'impresora' => 272.32,
+                'control' => 50.57,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.45,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3107B-CTO-S02',
+                'name' => 'CONTADOR HEMATOLOGICO BC-5150',
+                'fob' => 6259.00,
+                'ups' => 87.40,
+                'pc' => 0.00,
+                'impresora' => 272.32,
+                'control' => 50.57,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.45,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3101B-CTO-S01',
+                'name' => 'CONTADOR HEMATOLOGICO BC-5300',
+                'fob' => 7500.00,
+                'ups' => 662.57,
+                'pc' => 616.16,
+                'impresora' => 272.32,
+                'control' => 50.57,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.50,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3102B-CTO-S01',
+                'name' => 'CONTADOR HEMATOLOGICO BC-5380',
+                'fob' => 8064.00,
+                'ups' => 662.57,
+                'pc' => 616.16,
+                'impresora' => 272.32,
+                'control' => 50.57,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.50,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3206B-CTO-S01',
+                'name' => 'CONTADOR HEMATOLOGICO BC-6000',
+                'fob' => 15000.00,
+                'ups' => 746.33,
+                'pc' => 559.54,
+                'impresora' => 272.32,
+                'control' => 150.89,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.60,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3206B-CTO-S02',
+                'name' => 'CONTADOR HEMATOLOGICO BC-6200',
+                'fob' => 19000.00,
+                'ups' => 746.33,
+                'pc' => 559.54,
+                'impresora' => 272.32,
+                'control' => 150.89,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.60,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3201B-CTO-S01',
+                'name' => 'CONTADOR HEMATOLOGICO BC-6800',
+                'fob' => 25000.00,
+                'ups' => 746.33,
+                'pc' => 559.54,
+                'impresora' => 272.32,
+                'control' => 150.89,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.65,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-3205B-PA00010',
+                'name' => 'CONTADOR HEMATOLOGICO BC-6800PLUS',
+                'fob' => 23250.00,
+                'ups' => 746.33,
+                'pc' => 559.54,
+                'impresora' => 272.32,
+                'control' => 150.89,
+                'calibrador' => 100.30,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.65,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'BE-018-016',
+                'name' => 'COAGULOMETRO THROMBOLYZER COMPACT X AUTO.',
+                'fob' => 10988.00,
+                'ups' => 519.48,
+                'pc' => 616.16,
+                'impresora' => 272.32,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Coagulación',
+                'default_reagent_cost' => 0.70,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'BE-018-028',
+                'name' => 'COAGULOMETRO THROMBOLYZER XRC CON ACCESORIOS',
+                'fob' => 17570.00,
+                'ups' => 519.48,
+                'pc' => 616.16,
+                'impresora' => 272.32,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Coagulación',
+                'default_reagent_cost' => 0.70,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'YHLO-C6104',
+                'name' => 'iFLASH 1800A YHLO ANALIZADOR DE INMUNOENSAYO CLIA',
+                'fob' => 19023.00,
+                'ups' => 746.33,
+                'pc' => 559.54,
+                'impresora' => 272.32,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Inmunoensayo',
+                'default_reagent_cost' => 1.20,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'LFT-008',
+                'name' => 'ANALIZADOR HBA1C HPLC H-9 LIFOTRONIC',
+                'fob' => 8700.00,
+                'ups' => 519.48,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'HPLC',
+                'default_reagent_cost' => 0.80,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'LFT-014',
+                'name' => 'ANALIZADOR HbA1c HPLC H8 LIFOTRONIC',
+                'fob' => 7350.00,
+                'ups' => 519.48,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'HPLC',
+                'default_reagent_cost' => 0.80,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]
+        ]);
+    }
+}
