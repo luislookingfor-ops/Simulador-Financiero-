@@ -856,7 +856,9 @@ export default {
           }
         };
       });
-    },
+    }
+  },
+  methods: {
     getEmptyConfig() {
       return createEmptyConfig();
     },
