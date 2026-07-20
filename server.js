@@ -32,7 +32,13 @@ const EQUIPMENTS = [
   { id: 12, code: 'BE-018-028', name: 'COAGULOMETRO THROMBOLYZER XRC CON ACCESORIOS', fob: 17570.00, ups: 519.48, pc: 616.16, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Coagulación', default_reagent_cost: 0.70 },
   { id: 13, code: 'YHLO-C6104', name: 'iFLASH 1800A YHLO ANALIZADOR DE INMUNOENSAYO CLIA', fob: 19023.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Inmunoensayo', default_reagent_cost: 1.20 },
   { id: 14, code: 'LFT-008', name: 'ANALIZADOR HBA1C HPLC H-9 LIFOTRONIC', fob: 8700.00, ups: 519.48, pc: 0.00, impresora: 0.00, control: 0.00, calibrador: 0.00, line: 'HPLC', default_reagent_cost: 0.80 },
-  { id: 15, code: 'LFT-014', name: 'ANALIZADOR HbA1c HPLC H8 LIFOTRONIC', fob: 7350.00, ups: 519.48, pc: 0.00, impresora: 0.00, control: 0.00, calibrador: 0.00, line: 'HPLC', default_reagent_cost: 0.80 }
+  { id: 15, code: 'LFT-014', name: 'ANALIZADOR HbA1c HPLC H8 LIFOTRONIC', fob: 7350.00, ups: 519.48, pc: 0.00, impresora: 0.00, control: 0.00, calibrador: 0.00, line: 'HPLC', default_reagent_cost: 0.80 },
+  { id: 16, code: 'MND-700-CTO', name: 'CONTADOR HEMATOLOGICO BC-700 (SIN PRECIO)', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Hematología', default_reagent_cost: 0.40 },
+  { id: 17, code: 'BE-018-035', name: 'COAGULOMETRO THROMBOLYZER C3510 / C3100 (SIN PRECIO)', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Coagulación', default_reagent_cost: 0.65 },
+  { id: 18, code: 'YHLO-C1200', name: 'iFLASH 1200 YHLO ANALIZADOR DE INMUNOENSAYO CLIA (SIN PRECIO)', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Inmunoensayo', default_reagent_cost: 1.10 },
+  { id: 19, code: 'MND-BS240', name: 'BS-240 ANALIZADOR DE QUÍMICA CLÍNICA', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química Clínica', default_reagent_cost: 0.25 },
+  { id: 20, code: 'MND-BS430', name: 'BS-430 ANALIZADOR DE QUÍMICA CLÍNICA', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química Clínica', default_reagent_cost: 0.25 },
+  { id: 21, code: 'MND-GE50', name: 'ANALIZADOR DE GASES Y ELECTROLITOS', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Gases y Electrolitos', default_reagent_cost: 0.50 }
 ];
 
 // Helper to read saved simulations
@@ -132,7 +138,8 @@ app.post('/simulations/calculate', (req, res) => {
   const global = req.body.global_settings || {};
   const configs = req.body.equipment_settings || [];
   
-  const months = parseInt(global.months) || 36;
+  const contractMonths = parseInt(global.contract_months) || parseInt(global.months) || 36;
+  const amortizationMonths = parseInt(global.amortization_months) || parseInt(global.months) || 36;
   const annualInterest = (parseFloat(global.interest_rate) || 11) / 100;
   const annualInflation = (parseFloat(global.inflation_rate) || 1) / 100;
   const importIndex = (parseFloat(global.import_index) || 1.15);
@@ -175,20 +182,20 @@ app.post('/simulations/calculate', (req, res) => {
     // PMT Amortization
     const pv = landedTeoricoTotal;
     const r = annualInterest / 12;
-    const n = months;
+    const n = amortizationMonths;
     let pmt = 0;
 
     if (r > 0) {
       pmt = (pv * r) / (1 - Math.pow(1 + r, -n));
     } else {
-      pmt = pv / n;
+      pmt = n > 0 ? (pv / n) : 0;
     }
 
     // Volumetrics
     const dailyTests = parseInt(cfg.daily_tests) || 0;
     const monthlyTests = dailyTests * 30 * qty;
     const annualTests = monthlyTests * 12;
-    const totalTests = monthlyTests * months;
+    const totalTests = monthlyTests * contractMonths;
 
     const pvp = parseFloat(cfg.pvp_per_test) || 1.10;
     const totalRevenue = totalTests * pvp;
@@ -198,7 +205,7 @@ app.post('/simulations/calculate', (req, res) => {
     let totalReagentCost = 0;
     const monthlyTestsPerEq = dailyTests * 30;
 
-    for (let m = 1; m <= months; m++) {
+    for (let m = 1; m <= contractMonths; m++) {
       const year = Math.floor((m - 1) / 12);
       const inflatedCost = baseReagentCost * Math.pow(1 + annualInflation, year);
       totalReagentCost += (monthlyTestsPerEq * qty) * inflatedCost;
@@ -207,7 +214,7 @@ app.post('/simulations/calculate', (req, res) => {
     const grossProfitUSD = totalRevenue - totalReagentCost;
     const grossProfitPercent = totalRevenue > 0 ? (grossProfitUSD / totalRevenue) * 100 : 0;
 
-    const totalAmortization = pmt * months;
+    const totalAmortization = pmt * contractMonths;
     const netProfitUSD = grossProfitUSD - totalAmortization;
     const netProfitPercent = totalRevenue > 0 ? (netProfitUSD / totalRevenue) * 100 : 0;
 

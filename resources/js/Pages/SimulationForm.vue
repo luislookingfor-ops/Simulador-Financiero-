@@ -59,38 +59,49 @@
         <!-- Global Settings Card -->
         <section class="card global-settings-card">
           <div class="card-header">
-            <h3>Parámetros Globales (Configuración General)</h3>
+            <h3>Consideraciones Generales:</h3>
             <span class="badge">Afecta todos los cálculos</span>
           </div>
           <div class="settings-grid">
             <div class="form-group">
-              <label>Tipo de Cliente</label>
-              <select v-model="globalSettings.client_type" class="form-input">
-                <option value="Privado">Cliente Privado</option>
-                <option value="Público">Cliente Público</option>
+              <label>Tipo de cliente</label>
+              <select v-model="globalSettings.client_type" class="form-input text-success font-semibold">
+                <option value="Público">Público</option>
+                <option value="Privado">Privado</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Amortización (Meses)</label>
-              <input type="number" v-model.number="globalSettings.months" class="form-input" min="6" max="120" />
+              <label>Periodo Contrato (Meses)</label>
+              <input type="number" v-model.number="globalSettings.contract_months" class="form-input" min="1" max="120" />
             </div>
             <div class="form-group">
-              <label>Tasa de Interés Anual (%)</label>
+              <label>Periodo Amortizacion Equipos (Meses)</label>
+              <input type="number" v-model.number="globalSettings.amortization_months" class="form-input text-success font-semibold" min="1" max="120" />
+            </div>
+            <div class="form-group">
+              <label>Tasa de Interés Anual</label>
               <div class="input-with-suffix">
-                <input type="number" v-model.number="globalSettings.interest_rate" class="form-input" min="0" max="100" step="0.1" />
+                <input type="number" v-model.number="globalSettings.interest_rate" class="form-input text-danger font-semibold" min="0" max="100" step="0.1" />
                 <span class="suffix">%</span>
               </div>
             </div>
             <div class="form-group">
-              <label>Inflación Anual (%)</label>
+              <label>Inflación Anual</label>
               <div class="input-with-suffix">
-                <input type="number" v-model.number="globalSettings.inflation_rate" class="form-input" min="0" max="50" step="0.1" />
+                <input type="number" v-model.number="globalSettings.inflation_rate" class="form-input text-danger font-semibold" min="0" max="50" step="0.1" />
                 <span class="suffix">%</span>
               </div>
             </div>
             <div class="form-group">
-              <label>Índice Importación Base</label>
-              <input type="number" v-model.number="globalSettings.import_index" class="form-input" min="1.0" max="3.0" step="0.01" />
+              <label>Indice de Importación</label>
+              <input type="number" v-model.number="globalSettings.import_index" class="form-input text-danger font-semibold" min="1.0" max="3.0" step="0.01" />
+            </div>
+            <div class="form-group">
+              <label>Prueba Reportada</label>
+              <select v-model="globalSettings.reported_test" class="form-input text-danger font-semibold">
+                <option value="No">No</option>
+                <option value="Sí">Sí</option>
+              </select>
             </div>
           </div>
         </section>
@@ -144,7 +155,7 @@
                         :key="eq.id" 
                         :value="eq.id"
                       >
-                        [{{ eq.code }}] {{ truncateText(eq.name, 35) }}
+                        {{ eq.name }}
                       </option>
                     </select>
                   </div>
@@ -394,11 +405,13 @@ export default {
       scenarioName: '',
       saving: false,
       globalSettings: {
-        client_type: 'Privado',
-        months: 36,
+        client_type: 'Público',
+        contract_months: 36,
+        amortization_months: 36,
         interest_rate: 11,
         inflation_rate: 1,
-        import_index: 1.15
+        import_index: 1.15,
+        reported_test: 'No'
       },
       equipmentConfigs: [
         this.getEmptyConfig(),
@@ -452,10 +465,11 @@ export default {
         const landedRealTotal = landedRealUnit * qty;
 
         // PMT Amortization calculation
-        const months = Number(this.globalSettings.months) || 36;
+        const contractMonths = Number(this.globalSettings.contract_months) || Number(this.globalSettings.months) || 36;
+        const amortizationMonths = Number(this.globalSettings.amortization_months) || Number(this.globalSettings.months) || 36;
         const annualInterest = (Number(this.globalSettings.interest_rate) || 0) / 100;
         const r = annualInterest / 12;
-        const n = months;
+        const n = amortizationMonths;
         let pmt = 0;
 
         if (r > 0) {
@@ -468,7 +482,7 @@ export default {
         const dailyTests = Number(cfg.daily_tests) || 0;
         const monthlyTests = dailyTests * 30 * qty;
         const annualTests = monthlyTests * 12;
-        const totalTests = monthlyTests * months;
+        const totalTests = monthlyTests * contractMonths;
 
         const pvp = Number(cfg.pvp_per_test) || 0;
         const totalRevenue = totalTests * pvp;
@@ -480,7 +494,7 @@ export default {
         let totalReagentCost = 0;
         const monthlyTestsPerEq = dailyTests * 30;
 
-        for (let m = 1; m <= months; m++) {
+        for (let m = 1; m <= contractMonths; m++) {
           const year = Math.floor((m - 1) / 12);
           const inflatedCost = baseReagentCost * Math.pow(1 + annualInflation, year);
           totalReagentCost += (monthlyTestsPerEq * qty) * inflatedCost;
@@ -490,7 +504,7 @@ export default {
         const grossProfitUSD = totalRevenue - totalReagentCost;
         const grossProfitPercent = totalRevenue > 0 ? (grossProfitUSD / totalRevenue) * 100 : 0;
 
-        const totalAmortization = pmt * months;
+        const totalAmortization = pmt * contractMonths;
         const netProfitUSD = grossProfitUSD - totalAmortization;
         const netProfitPercent = totalRevenue > 0 ? (netProfitUSD / totalRevenue) * 100 : 0;
 
