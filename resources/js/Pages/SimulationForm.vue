@@ -208,9 +208,28 @@
                       <div class="excel-val col-span-3">
                         <select v-model="equipmentConfigs[colIndex].equipment_type" class="excel-select font-bold text-primary">
                           <option value="EQUIPO NUEVO">EQUIPO NUEVO</option>
+                          <option value="EQUIPO REPOTENCIADO">EQUIPO REPOTENCIADO</option>
                           <option value="EQUIPO REACONDICIONADO">EQUIPO REACONDICIONADO</option>
                           <option value="EQUIPO USADO">EQUIPO USADO</option>
                           <option value="EQUIPO EN COMODATO">EQUIPO EN COMODATO</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="excel-form-row" v-if="equipmentConfigs[colIndex].equipment_type === 'EQUIPO REPOTENCIADO'">
+                      <div class="excel-label">Depreciación:</div>
+                      <div class="excel-val col-span-3">
+                        <select v-model.number="equipmentConfigs[colIndex].depreciation_percent" class="excel-select font-bold text-amber-700 bg-amber-50">
+                          <option :value="10">10% del Costo Total</option>
+                          <option :value="20">20% del Costo Total</option>
+                          <option :value="30">30% del Costo Total</option>
+                          <option :value="40">40% del Costo Total</option>
+                          <option :value="50">50% del Costo Total</option>
+                          <option :value="60">60% del Costo Total</option>
+                          <option :value="70">70% del Costo Total</option>
+                          <option :value="80">80% del Costo Total</option>
+                          <option :value="90">90% del Costo Total</option>
+                          <option :value="100">100% (Sin Descuento)</option>
                         </select>
                       </div>
                     </div>
@@ -653,6 +672,12 @@ export default {
           fobTotalSelected = Number(eq.fob) + upsCost + pcCost + printerBaseCost + zebraCost + softwareCost + syringesCost + controlCost + calibratorCost;
         }
 
+        // Apply depreciation factor for EQUIPO REPOTENCIADO (10% to 100%)
+        if (cfg.equipment_type === 'EQUIPO REPOTENCIADO') {
+          const depPercent = Number(cfg.depreciation_percent) || 100;
+          fobTotalSelected = fobTotalSelected * (depPercent / 100);
+        }
+
         const landedTeoricoUnit = fobTotalSelected * importIndex;
         const landedTeoricoTotal = landedTeoricoUnit * qty;
 
@@ -811,6 +836,7 @@ export default {
         lineFilter: '',
         equipment_id: null,
         equipment_type: 'EQUIPO NUEVO',
+        depreciation_percent: 100,
         quantity: 1,
         customItems: [],
         include_ups: true,
