@@ -507,8 +507,8 @@ export default {
         const landedRealUnit = fobTotalBase * importIndex;
         const landedRealTotal = landedRealUnit * qty;
 
-        // PMT Amortization calculation: PV is Total FOB sum
-        const pv = fobTotalSelected * qty;
+        // PMT Amortization calculation: PV is Total FOB sum from breakdown table
+        const pv = fobTotalSelected;
         const contractMonths = Number(this.globalSettings.contract_months) || Number(this.globalSettings.months) || 36;
         const amortizationMonths = Number(this.globalSettings.amortization_months) || Number(this.globalSettings.months) || 36;
         const annualInterest = (Number(this.globalSettings.interest_rate) || 0) / 100;
