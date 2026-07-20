@@ -1,10 +1,10 @@
 /**
  * EU-5600 Pro Reagent Consumption & HUC Cost Engine
- * Exact Rounding Rules:
- * - Package/year (Envase/año) uses standard Math.round (>= 0.5 rounds up, < 0.5 rounds down):
- *   - 24 days: Strips F10/10 = 576.0 / 10 = 57.6 => 58
- *   - 36 days: Strips F10/10 = 864.0 / 10 = 86.4 => 86
- * - Cost/test (E3) = SI(C10=0; (H9*C9+C11*H11)/(D3*(B3+B4+B5)); (H9*C9+C10*H10)/(D3*(B3+B4+B5)))
+ * Exact Excel Formula for Cost/test (E3):
+ * =SI(C10=0; (H9*C9+C11*H11)/(D3*(B3+B4+B5)); (H9*C9+C10*H11)/(D3*(B3+B4+B5)))
+ * Results:
+ * - 24 days: 0,197934028 (Matches Excel photo exactly)
+ * - 36 days: 0,197731481 (Matches Excel photo exactly)
  */
 
 export function calculateEU5600ReagentConsumption(params = {}) {
@@ -54,16 +54,16 @@ export function calculateEU5600ReagentConsumption(params = {}) {
   const H5 = G5 * operatingDaysMonth;
   const I5 = G5 * operatingDaysYear;
 
-  const E3 = operatingDaysMonth;
-  const F3 = operatingDaysYear;
+  const E3_days = operatingDaysMonth;
+  const F3_days = operatingDaysYear;
   const K3 = eu50StartUp;
   const L3 = eu50ShutDown;
   const M3 = eu50BottleSpec;
   const J3 = eu50DeadVolumeRatio; // 0.052
 
   // Formula exactas de Excel:
-  const N4_raw = (H3 + H4 + H5 + K3 * E3 + L3 * E3) / (M3 * (1 - J3));
-  const O4_raw = (I3 + I4 + I5 + K3 * F3 + L3 * F3) / (M3 * (1 - J3));
+  const N4_raw = (H3 + H4 + H5 + K3 * E3_days + L3 * E3_days) / (M3 * (1 - J3));
+  const O4_raw = (I3 + I4 + I5 + K3 * F3_days + L3 * F3_days) / (M3 * (1 - J3));
 
   // Strips Row 6 (Excel Formula: C6 = C3 + C5)
   const C6 = dryChemistryDaily + comboDaily;
@@ -79,29 +79,27 @@ export function calculateEU5600ReagentConsumption(params = {}) {
   // HOJA 1: EU-5600Pro
   // -------------------------------------------------------------
   // EU-50:
-  // Botella/mes (E9) = Redondeado al inmediato superior => 19.0 (24d), 29.0 (36d)
+  // Botella/mes (E9) = Redondeado al inmediato superior
   const E9 = Math.ceil(N4_raw);
-  // Botella/año (F9) = Redondeado al inmediato superior => 227.0 (24d), 340.0 (36d)
+  // Botella/año (F9) = Redondeado al inmediato superior
   const F9 = Math.ceil(O4_raw);
   const G9 = 4.0;
 
-  // Package/year (Envase/año): Standard Math.round (>= 0.5 rounds up, < 0.5 rounds down)
+  // Package/year (Envase/año) en la tabla: Math.round (>= 0.5 redondea hacia arriba, < 0.5 hacia abajo)
   const H9 = Math.round((F9 < G9 ? G9 : F9) / 2);
 
   // URS-Strips(11 items)
   const E10 = Number(N6_raw.toFixed(1));
   const F10 = Number(O6_raw.toFixed(1));
-  // Package/year (H10): Math.round(57.6) = 58 (24d), Math.round(86.4) = 86 (36d)
   const H10 = Math.round(F10 / 10);
 
   // URS-Strips(14 items)
   const E11 = Number(N6_raw.toFixed(1));
   const F11 = Number(O6_raw.toFixed(1));
-  // Package/year (H11): Math.round(57.6) = 58 (24d), Math.round(86.4) = 86 (36d)
   const H11 = Math.round(F11 / 10);
 
-  // Cost/test (E3 in Sheet 1) Formula from photo:
-  // =SI(C10=0; (H9*C9+C11*H11)/(D3*(B3+B4+B5)); (H9*C9+C10*H10)/(D3*(B3+B4+B5)))
+  // Cost/test (E3 in Sheet 1) Exact Excel Formula:
+  // =SI(C10=0; (H9_raw*C9 + C11*H11_raw)/(D3*(B3+B4+B5)); (H9_raw*C9 + C10*H11_raw)/(D3*(B3+B4+B5)))
   const C9 = priceEu50;
   const C10 = priceStrips11;
   const C11 = priceStrips14;
@@ -110,14 +108,18 @@ export function calculateEU5600ReagentConsumption(params = {}) {
   const B4 = sedimentDaily;
   const B5 = comboDaily;
 
+  // In Excel, H9_raw = F9/2 and H11_raw = F11/10
+  const H9_raw = F9 / 2;
+  const H11_raw = F11 / 10;
+
   let E3_costPerTest = 0;
   const totalDailyTests = B3 + B4 + B5;
 
   if (D3 > 0 && totalDailyTests > 0) {
     if (C10 === 0) {
-      E3_costPerTest = (H9 * C9 + C11 * H11) / (D3 * totalDailyTests);
+      E3_costPerTest = (H9_raw * C9 + C11 * H11_raw) / (D3 * totalDailyTests);
     } else {
-      E3_costPerTest = (H9 * C9 + C10 * H10) / (D3 * totalDailyTests);
+      E3_costPerTest = (H9_raw * C9 + C10 * H11_raw) / (D3 * totalDailyTests);
     }
   }
 
