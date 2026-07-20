@@ -18,27 +18,54 @@ const SIMULATIONS_FILE = path.join(__dirname, 'simulations.json');
 
 // Preloaded equipments matching the database seeder exactly
 const EQUIPMENTS = [
-  { id: 1, code: 'MND-3008B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-20S', fob: 2111.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 52.98, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.35 },
-  { id: 2, code: 'MND-3008B-CTO-S02', name: 'CONTADOR HEMATOLOGICO BC-30S', fob: 3297.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 52.98, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.35 },
-  { id: 3, code: 'MND-3107B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-5000', fob: 4401.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.45 },
-  { id: 4, code: 'MND-3107B-CTO-S02', name: 'CONTADOR HEMATOLOGICO BC-5150', fob: 6259.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.45 },
-  { id: 5, code: 'MND-3101B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-5300', fob: 7500.00, ups: 662.57, pc: 616.16, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.50 },
-  { id: 6, code: 'MND-3102B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-5380', fob: 8064.00, ups: 662.57, pc: 616.16, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.50 },
-  { id: 7, code: 'MND-3206B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-6000', fob: 15000.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.60 },
-  { id: 8, code: 'MND-3206B-CTO-S02', name: 'CONTADOR HEMATOLOGICO BC-6200', fob: 19000.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.60 },
-  { id: 9, code: 'MND-3201B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-6800', fob: 25000.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.65 },
-  { id: 10, code: 'MND-3205B-PA00010', name: 'CONTADOR HEMATOLOGICO BC-6800PLUS', fob: 23250.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.65 },
-  { id: 11, code: 'BE-018-016', name: 'COAGULOMETRO THROMBOLYZER COMPACT X AUTO.', fob: 10988.00, ups: 519.48, pc: 616.16, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Coagulación', default_reagent_cost: 0.70 },
-  { id: 12, code: 'BE-018-028', name: 'COAGULOMETRO THROMBOLYZER XRC CON ACCESORIOS', fob: 17570.00, ups: 519.48, pc: 616.16, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Coagulación', default_reagent_cost: 0.70 },
-  { id: 13, code: 'YHLO-C6104', name: 'iFLASH 1800A YHLO ANALIZADOR DE INMUNOENSAYO CLIA', fob: 19023.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Inmunoensayo', default_reagent_cost: 1.20 },
-  { id: 14, code: 'LFT-008', name: 'ANALIZADOR HBA1C HPLC H-9 LIFOTRONIC', fob: 8700.00, ups: 519.48, pc: 0.00, impresora: 0.00, control: 0.00, calibrador: 0.00, line: 'HPLC', default_reagent_cost: 0.80 },
-  { id: 15, code: 'LFT-014', name: 'ANALIZADOR HbA1c HPLC H8 LIFOTRONIC', fob: 7350.00, ups: 519.48, pc: 0.00, impresora: 0.00, control: 0.00, calibrador: 0.00, line: 'HPLC', default_reagent_cost: 0.80 },
-  { id: 16, code: 'MND-700-CTO', name: 'CONTADOR HEMATOLOGICO BC-700 (SIN PRECIO)', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Hematología', default_reagent_cost: 0.40 },
-  { id: 17, code: 'BE-018-035', name: 'COAGULOMETRO THROMBOLYZER C3510 / C3100 (SIN PRECIO)', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Coagulación', default_reagent_cost: 0.65 },
-  { id: 18, code: 'YHLO-C1200', name: 'iFLASH 1200 YHLO ANALIZADOR DE INMUNOENSAYO CLIA (SIN PRECIO)', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Inmunoensayo', default_reagent_cost: 1.10 },
-  { id: 19, code: 'MND-BS240', name: 'BS-240 ANALIZADOR DE QUÍMICA CLÍNICA', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química Clínica', default_reagent_cost: 0.25 },
-  { id: 20, code: 'MND-BS430', name: 'BS-430 ANALIZADOR DE QUÍMICA CLÍNICA', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química Clínica', default_reagent_cost: 0.25 },
-  { id: 21, code: 'MND-GE50', name: 'ANALIZADOR DE GASES Y ELECTROLITOS', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Gases y Electrolitos', default_reagent_cost: 0.50 }
+  // Hematología
+  { id: 1, code: 'KT-6610', name: 'KT 6610', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Hematología', default_reagent_cost: 0.35 },
+  { id: 2, code: 'KT-8000', name: 'KT 8000', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Hematología', default_reagent_cost: 0.40 },
+  { id: 3, code: 'F-560', name: 'F560', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Hematología', default_reagent_cost: 0.45 },
+  { id: 4, code: 'F-810', name: 'F810', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Hematología', default_reagent_cost: 0.50 },
+  { id: 5, code: 'MND-3008B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-20S', fob: 2111.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 52.98, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.35 },
+  { id: 6, code: 'MND-3008B-CTO-S02', name: 'CONTADOR HEMATOLOGICO BC-30S', fob: 3297.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 52.98, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.35 },
+  { id: 7, code: 'MND-3107B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-5000', fob: 4401.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.45 },
+  { id: 8, code: 'MND-3107B-CTO-S02', name: 'CONTADOR HEMATOLOGICO BC-5150', fob: 6259.00, ups: 87.40, pc: 0.00, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.45 },
+  { id: 9, code: 'MND-3101B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-5300', fob: 7500.00, ups: 662.57, pc: 616.16, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.50 },
+  { id: 10, code: 'MND-3102B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-5380', fob: 8064.00, ups: 662.57, pc: 616.16, impresora: 272.32, control: 50.57, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.50 },
+  { id: 11, code: 'MND-3206B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-6000', fob: 15000.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.60 },
+  { id: 12, code: 'MND-3206B-CTO-S02', name: 'CONTADOR HEMATOLOGICO BC-6200', fob: 19000.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.60 },
+  { id: 13, code: 'MND-3201B-CTO-S01', name: 'CONTADOR HEMATOLOGICO BC-6800', fob: 25000.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.65 },
+  { id: 14, code: 'MND-3205B-PA00010', name: 'CONTADOR HEMATOLOGICO BC-6800PLUS', fob: 23250.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 150.89, calibrador: 100.30, line: 'Hematología', default_reagent_cost: 0.65 },
+
+  // Química
+  { id: 15, code: 'TC-M160', name: 'TECO MATRIX 160', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química', default_reagent_cost: 0.25 },
+  { id: 16, code: 'TC-M240', name: 'TECO MATRIX 240', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química', default_reagent_cost: 0.25 },
+  { id: 17, code: 'TC-M480', name: 'TECO MATRIX 480', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química', default_reagent_cost: 0.25 },
+  { id: 18, code: 'MND-BS240', name: 'BS-240 ANALIZADOR DE QUÍMICA CLÍNICA', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química', default_reagent_cost: 0.25 },
+  { id: 19, code: 'MND-BS430', name: 'BS-430 ANALIZADOR DE QUÍMICA CLÍNICA', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Química', default_reagent_cost: 0.25 },
+
+  // Inmunología
+  { id: 20, code: 'LFT-E8000', name: 'LIFOTRONIC ECLIA 8000', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Inmunología', default_reagent_cost: 1.10 },
+  { id: 21, code: 'LFT-E8600', name: 'LIFOTRONIC ECLIA 8600', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Inmunología', default_reagent_cost: 1.10 },
+  { id: 22, code: 'LFT-E9000', name: 'LIFOTRONIC ECLIA 9000', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Inmunología', default_reagent_cost: 1.10 },
+  { id: 23, code: 'YHLO-C6104', name: 'iFLASH 1800A YHLO ANALIZADOR DE INMUNOENSAYO CLIA', fob: 19023.00, ups: 746.33, pc: 559.54, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Inmunología', default_reagent_cost: 1.20 },
+
+  // Gasometría
+  { id: 24, code: 'EDAN-GAS', name: 'Edan', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Gasometría', default_reagent_cost: 0.80 },
+  { id: 25, code: 'SEAMATY-GAS', name: 'Seamaty', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Gasometría', default_reagent_cost: 0.80 },
+
+  // Electrolitos
+  { id: 26, code: 'HRN-H900', name: 'HORRON H900', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Electrolitos', default_reagent_cost: 0.50 },
+  { id: 27, code: 'BSN-BE900', name: 'BIOSENS BE900', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Electrolitos', default_reagent_cost: 0.50 },
+
+  // Uroanálisis
+  { id: 28, code: 'MND-EU5300P', name: 'MINDRAY EU-5300 PRO', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Uroanálisis', default_reagent_cost: 0.30 },
+  { id: 29, code: 'MND-EU5600P', name: 'MINDRAY EU-5600 PRO', fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0, line: 'Uroanálisis', default_reagent_cost: 0.30 },
+
+  // Coagulación
+  { id: 30, code: 'BE-018-016', name: 'COAGULOMETRO THROMBOLYZER COMPACT X AUTO.', fob: 10988.00, ups: 519.48, pc: 616.16, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Coagulación', default_reagent_cost: 0.70 },
+  { id: 31, code: 'BE-018-028', name: 'COAGULOMETRO THROMBOLYZER XRC CON ACCESORIOS', fob: 17570.00, ups: 519.48, pc: 616.16, impresora: 272.32, control: 0.00, calibrador: 0.00, line: 'Coagulación', default_reagent_cost: 0.70 },
+
+  // HPLC
+  { id: 32, code: 'LFT-008', name: 'ANALIZADOR HBA1C HPLC H-9 LIFOTRONIC', fob: 8700.00, ups: 519.48, pc: 0.00, impresora: 0.00, control: 0.00, calibrador: 0.00, line: 'HPLC', default_reagent_cost: 0.80 },
+  { id: 33, code: 'LFT-014', name: 'ANALIZADOR HbA1c HPLC H8 LIFOTRONIC', fob: 7350.00, ups: 519.48, pc: 0.00, impresora: 0.00, control: 0.00, calibrador: 0.00, line: 'HPLC', default_reagent_cost: 0.80 }
 ];
 
 // Helper to read saved simulations

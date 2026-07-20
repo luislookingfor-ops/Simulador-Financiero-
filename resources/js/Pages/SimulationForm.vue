@@ -629,10 +629,16 @@ export default {
     getLineClass(equipmentId) {
       if (!equipmentId) return 'none';
       const eq = this.getSelectedEquipment(equipmentId);
-      if (eq.line === 'Hematología') return 'hematology';
-      if (eq.line === 'Coagulación') return 'coagulation';
-      if (eq.line === 'Inmunoensayo') return 'immuno';
-      if (eq.line === 'HPLC') return 'hplc';
+      if (!eq || !eq.line) return 'default';
+      const line = eq.line.toLowerCase();
+      if (line.includes('hematolog')) return 'hematology';
+      if (line.includes('coagulac')) return 'coagulation';
+      if (line.includes('inmuno')) return 'immuno';
+      if (line.includes('hplc')) return 'hplc';
+      if (line.includes('químic') || line.includes('quimic')) return 'chemistry';
+      if (line.includes('gas')) return 'gases';
+      if (line.includes('electrolit')) return 'electrolytes';
+      if (line.includes('uroanál') || line.includes('uroanal')) return 'urinalysis';
       return 'default';
     },
     getProfitMarginClass(netPercent) {
@@ -949,8 +955,26 @@ body {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1400px) {
+  .settings-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Inputs & Form Controls */
@@ -1162,6 +1186,30 @@ body {
 .line-theme-hplc .column-badge {
   color: var(--success);
 }
+
+.line-theme-chemistry {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #a855f7;
+}
+.line-theme-chemistry .column-badge { color: #a855f7; }
+
+.line-theme-gases {
+  background: linear-gradient(90deg, rgba(14, 165, 233, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #0ea5e9;
+}
+.line-theme-gases .column-badge { color: #0ea5e9; }
+
+.line-theme-electrolytes {
+  background: linear-gradient(90deg, rgba(234, 179, 8, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #eab308;
+}
+.line-theme-electrolytes .column-badge { color: #eab308; }
+
+.line-theme-urinalysis {
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #ec4899;
+}
+.line-theme-urinalysis .column-badge { color: #ec4899; }
 
 .column-body {
   padding: 20px;
