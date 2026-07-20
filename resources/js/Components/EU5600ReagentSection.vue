@@ -21,23 +21,23 @@
     <!-- SHEET 1: EU-5600Pro -->
     <div v-if="activeSheet === 'EU-5600Pro'" class="excel-sheet-box">
       <div class="sheet-title-header">
-        Tabla de consumo de reactivos para EU-5600 Pro (100 T/H para sedimentos; 160 T/H para química seca)
+        Reagent Consumption Table for EU-5600 Pro (100 T/H for Sediment; 160 T/H for Dry chemistry)
       </div>
 
       <!-- Top Summary Grid (Yellow Inputs) -->
       <table class="excel-grid-table mb-4">
         <thead>
           <tr class="excel-header-row">
-            <th style="width: 35%;">VOLUMEN DE PRUEBAS POR TIPO</th>
-            <th style="width: 20%;">NÚMERO</th>
-            <th style="width: 15%;">DÍAS DE OPERACIÓN AL MES</th>
-            <th style="width: 15%;">DÍAS DE OPERACIÓN AL AÑO</th>
-            <th style="width: 15%;">Costo/prueba (USD/EUR)</th>
+            <th style="width: 35%;">TEST VOLUME PER TYPE</th>
+            <th style="width: 20%;">NUMBER</th>
+            <th style="width: 15%;">OPERATING DAY PER MONTH</th>
+            <th style="width: 15%;">OPERATING DAY PER YEAR</th>
+            <th style="width: 15%;">Cost/test(USD/EUR)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="excel-cell-lbl">Química seca (Pruebas al día)</td>
+            <td class="excel-cell-lbl">Dry chemistry (Test per day)</td>
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.dryChemistryDaily" class="excel-yellow-input" />
             </td>
@@ -52,13 +52,13 @@
             </td>
           </tr>
           <tr>
-            <td class="excel-cell-lbl">Sedimentos (Pruebas al día)</td>
+            <td class="excel-cell-lbl">Sediment (Test per day)</td>
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.sedimentDaily" class="excel-yellow-input" />
             </td>
           </tr>
           <tr>
-            <td class="excel-cell-lbl">Química seca y sedimentos (Pruebas al día)</td>
+            <td class="excel-cell-lbl">Dry chemistry & sediment (Test per day)</td>
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.comboDaily" class="excel-yellow-input" />
             </td>
@@ -67,21 +67,21 @@
       </table>
 
       <div class="excel-yellow-banner mb-4">
-        ¡¡¡SOLO INTRODUZCA LOS NÚMEROS DE LA TABLA AMARILLA!!!
+        ONLY INPUT NUMBER IN YELLOW TABLE !!!!
       </div>
 
       <!-- Bottom Reagent Packaging Table -->
       <table class="excel-grid-table mb-4">
         <thead>
           <tr class="excel-header-row">
-            <th style="width: 22%;">ENVASE DE REACTIVOS</th>
+            <th style="width: 22%;">REAGENT PACKAGE</th>
             <th style="width: 18%;">PART NUMBER</th>
-            <th style="width: 12%;" class="excel-th-yellow">Precio (USD/EUR)</th>
-            <th style="width: 14%;">Especificación</th>
-            <th style="width: 10%;">Botella/mes</th>
-            <th style="width: 10%;">Botella/año (solo cálculo)</th>
-            <th style="width: 10%;">Botella/año (Incluye fecha de caducidad)</th>
-            <th style="width: 8%;">Envase /año</th>
+            <th style="width: 12%;" class="excel-th-yellow">Price (USD/EUR)</th>
+            <th style="width: 14%;">Specification</th>
+            <th style="width: 10%;">Bottle/month</th>
+            <th style="width: 10%;">Bottle/year (calculation only)</th>
+            <th style="width: 10%;">Bottle/year (Including Expiration)</th>
+            <th style="width: 8%;">Package/year</th>
           </tr>
         </thead>
         <tbody>
@@ -144,17 +144,17 @@
       </table>
 
       <div class="excel-yellow-banner mb-3">
-        SOLO INTRODUZCA LOS NÚMEROS DE LA TABLA AMARILLA!!!
+        ONLY INPUT NUMBER IN YELLOW TABLE !!!!
       </div>
 
       <!-- Footer Yellow Notes -->
       <div class="excel-notes-box">
         <p class="font-bold mb-1">Note:</p>
-        <p class="yellow-highlight">Al calcular el costo, seleccione solo un tipo de tiras y establezca el otro como "0".</p>
-        <p class="yellow-highlight">EU-50, vida útil: 2 años, fecha de caducidad: 90 días una vez abierto.</p>
-        <p>Cleanser debe ser preparado por el usuario final. El costo del limpiador no está incluido.</p>
-        <p>El costo por prueba incluye el arranque, el apagado y el tiempo de inactividad. No incluye el tiempo de espera ni otros mantenimientos.</p>
-        <p>En la práctica de laboratorio, la cantidad de reactivos necesarios puede ser ligeramente mayor debido al consumo de tiempo de espera y otros mantenimientos.</p>
+        <p class="yellow-highlight">Please choose only 1 type of strips when calculate the cost, and then set up the other one as "0"</p>
+        <p class="yellow-highlight">EU-50, Shelf life 2 years, open Expiry date 90 day.</p>
+        <p>Cleanser should be prepared by end-users. The cost of Cleanser is not included in cost.</p>
+        <p>The cost per test includes start up, shut down, dead volume. Standby and the other maintenances are not included.</p>
+        <p>In lab's practice, the needed packages of reagents should be a little bit more because of the consumption of standby and other maintenances.</p>
       </div>
     </div>
 
@@ -169,17 +169,17 @@
           <tr class="excel-header-row">
             <th>REACTIVO</th>
             <th>Items</th>
-            <th>Pruebas/día</th>
-            <th>Prueba/muestra (ml/strip)</th>
+            <th class="excel-th-yellow">Pruebas/día</th>
+            <th class="excel-th-yellow">Prueba/muestra (ml/strip)</th>
             <th>Dias laborables al mes</th>
             <th>Dias laborables al año</th>
             <th>Consumo/día (ml/strip)</th>
             <th>Consumo/mes (ml/strip)</th>
             <th>Consumo/año (ml/strip)</th>
-            <th>Volumen muerto</th>
-            <th>Start up (ml)</th>
-            <th>Shut down (ml)</th>
-            <th>Especificación del frasco (ml/strip)</th>
+            <th class="excel-th-yellow">Volumen muerto</th>
+            <th class="excel-th-yellow">Start up (ml)</th>
+            <th class="excel-th-yellow">Shut down (ml)</th>
+            <th class="excel-th-yellow">Especificación del frasco (ml/strip)</th>
             <th class="excel-th-yellow">Frasco/mes</th>
             <th class="excel-th-yellow">Frasco/año</th>
           </tr>
@@ -189,32 +189,54 @@
           <tr>
             <td rowspan="3" class="excel-cell-bold text-center align-middle">EU-50</td>
             <td>Química seca</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.eu50.dry.dia }}</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.eu50.dry.ml_sample }}</td>
-            <td rowspan="3" class="text-center bg-gray-300 font-bold align-middle text-base">{{ calcData.tabla2.dias_mes }}</td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.dryChemistryDaily" class="excel-yellow-input" />
+            </td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.dryMlPerSample" class="excel-yellow-input" />
+            </td>
+            <td rowspan="3" class="text-center bg-gray-300 font-bold align-middle text-base">
+              <input type="number" v-model.number="inputs.operatingDaysMonth" class="excel-gray-input text-center font-bold" />
+            </td>
             <td rowspan="3" class="text-center bg-gray-300 font-bold align-middle text-base">{{ calcData.tabla2.dias_ano }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.dry.cons_dia }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.dry.cons_mes }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.dry.cons_ano }}</td>
-            <td rowspan="3" class="text-center align-middle font-semibold">{{ calcData.tabla2.eu50.volumen_muerto }}</td>
-            <td rowspan="3" class="text-center align-middle font-semibold">{{ calcData.tabla2.eu50.start_up }}</td>
-            <td rowspan="3" class="text-center align-middle font-semibold">{{ calcData.tabla2.eu50.shut_down }}</td>
-            <td rowspan="3" class="text-center align-middle font-semibold">{{ calcData.tabla2.eu50.especificacion_frasco }}</td>
+            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-semibold">
+              <input type="number" step="0.01" v-model.number="inputs.eu50DeadVolumeRatio" class="excel-yellow-input" style="width: 50px;" />
+            </td>
+            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-semibold">
+              <input type="number" v-model.number="inputs.eu50StartUp" class="excel-yellow-input" style="width: 50px;" />
+            </td>
+            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-semibold">
+              <input type="number" v-model.number="inputs.eu50ShutDown" class="excel-yellow-input" style="width: 50px;" />
+            </td>
+            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-semibold">
+              <input type="number" v-model.number="inputs.eu50BottleSpec" class="excel-yellow-input" style="width: 60px;" />
+            </td>
             <td rowspan="3" class="excel-cell-yellow text-center align-middle font-bold text-base">{{ calcData.tabla2.eu50.frasco_mes }}</td>
             <td rowspan="3" class="excel-cell-yellow text-center align-middle font-bold text-base">{{ calcData.tabla2.eu50.frasco_ano }}</td>
           </tr>
           <tr>
             <td>Sedimento</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.eu50.sed.dia }}</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.eu50.sed.ml_sample }}</td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.sedimentDaily" class="excel-yellow-input" />
+            </td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.sedMlPerSample" class="excel-yellow-input" />
+            </td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.sed.cons_dia }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.sed.cons_mes }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.sed.cons_ano }}</td>
           </tr>
           <tr>
             <td>Química seca + Sedimento</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.eu50.combo.dia }}</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.eu50.combo.ml_sample }}</td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.comboDaily" class="excel-yellow-input" />
+            </td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.comboMlPerSample" class="excel-yellow-input" />
+            </td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.combo.cons_dia }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.combo.cons_mes }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.eu50.combo.cons_ano }}</td>
@@ -224,17 +246,21 @@
           <tr>
             <td class="excel-cell-bold text-center">Strips</td>
             <td class="text-center">/</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.strips.dia }}</td>
-            <td class="text-center bg-gray-100 font-semibold">{{ calcData.tabla2.strips.ml_sample }}</td>
+            <td class="text-center bg-gray-100 font-bold">{{ calcData.tabla2.strips.dia }}</td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.stripsMlPerSample" class="excel-yellow-input" />
+            </td>
             <td class="text-center bg-gray-300"></td>
             <td class="text-center bg-gray-300"></td>
             <td class="text-center font-semibold">{{ calcData.tabla2.strips.cons_dia }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.strips.cons_mes }}</td>
             <td class="text-center font-semibold">{{ calcData.tabla2.strips.cons_ano }}</td>
-            <td class="text-center font-semibold">{{ calcData.tabla2.strips.volumen_muerto }}</td>
-            <td class="text-center font-semibold">{{ calcData.tabla2.strips.start_up }}</td>
-            <td class="text-center font-semibold">{{ calcData.tabla2.strips.shut_down }}</td>
-            <td class="text-center font-semibold">{{ calcData.tabla2.strips.especificacion_frasco }}</td>
+            <td class="text-center font-semibold">0%</td>
+            <td class="text-center font-semibold">0</td>
+            <td class="text-center font-semibold">0</td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.stripsCanSpec" class="excel-yellow-input" style="width: 60px;" />
+            </td>
             <td class="excel-cell-yellow text-center font-bold text-base">{{ calcData.tabla2.strips.frasco_mes }}</td>
             <td class="excel-cell-yellow text-center font-bold text-base">{{ calcData.tabla2.strips.frasco_ano }}</td>
           </tr>
@@ -252,7 +278,9 @@
             <td class="text-center"></td>
             <td class="text-center"></td>
             <td class="text-center"></td>
-            <td class="text-center font-semibold">{{ calcData.tabla2.cleanser.shut_down }}</td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.cleanserShutDown" class="excel-yellow-input" style="width: 50px;" />
+            </td>
             <td class="text-center"></td>
             <td class="excel-cell-yellow text-center"></td>
             <td class="excel-cell-yellow text-center"></td>
@@ -298,12 +326,21 @@ export default {
         dryChemistryDaily: 100,
         sedimentDaily: 100,
         comboDaily: 100,
-        operatingDaysMonth: 24,
+        dryMlPerSample: 4,
+        sedMlPerSample: 16,
+        comboMlPerSample: 16,
+        operatingDaysMonth: 36,
+        eu50DeadVolumeRatio: 0.05,
+        eu50StartUp: 54,
+        eu50ShutDown: 70,
+        eu50BottleSpec: 5000,
+        stripsMlPerSample: 1,
+        stripsCanSpec: 100,
+        cleanserShutDown: 6,
         priceEu50: 105,
         priceStrips11: 90,
         priceStrips14: 108,
-        priceCleanser: 0,
-        activeStripType: 'strips11'
+        priceCleanser: 0
       }
     };
   },
@@ -325,25 +362,25 @@ export default {
 
 <style scoped>
 .excel-standalone-wrapper {
-  background: #ffffff;
-  border: 2px solid #555555;
-  border-radius: 6px;
+  background: #ffffff !important;
+  border: 2px solid #333333 !important;
+  border-radius: 4px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #000000;
+  color: #000000 !important;
   margin-bottom: 20px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .excel-top-nav-bar {
-  background: #2e7d32;
+  background: #1b5e20;
   padding: 8px 12px;
   display: flex;
   gap: 10px;
 }
 
 .excel-tab-btn {
-  background: #1b5e20;
+  background: #2e7d32;
   color: #ffffff;
   border: none;
   padding: 6px 14px;
@@ -351,7 +388,6 @@ export default {
   font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .excel-tab-btn.active-tab {
@@ -362,7 +398,7 @@ export default {
 
 .excel-sheet-box {
   padding: 16px;
-  background: #ffffff;
+  background: #ffffff !important;
   overflow-x: auto;
 }
 
@@ -371,38 +407,38 @@ export default {
   font-weight: bold;
   text-align: center;
   margin-bottom: 12px;
-  color: #000000;
+  color: #000000 !important;
 }
 
 .sheet-title-header-dark {
   font-size: 18px;
   font-weight: bold;
   text-align: center;
-  background: #757575;
+  background: #616161;
   color: #ffffff;
   padding: 6px 12px;
   margin-bottom: 14px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
-/* Explicit Excel Table Grid Rules */
+/* Explicit Table Grid Lines */
 .excel-grid-table {
   width: 100%;
   border-collapse: collapse !important;
-  border: 2px solid #333333 !important;
+  border: 2px solid #222222 !important;
   font-size: 12px;
-  background: #ffffff;
+  background: #ffffff !important;
 }
 
 .excel-grid-table th,
 .excel-grid-table td {
-  border: 1px solid #555555 !important;
+  border: 1px solid #444444 !important;
   padding: 6px 8px;
-  color: #000000;
+  color: #000000 !important;
 }
 
 .excel-header-row th {
-  background: #d6d6d6 !important;
+  background: #cccccc !important;
   color: #000000 !important;
   font-weight: bold;
   text-align: center;
@@ -415,7 +451,7 @@ export default {
 
 .excel-cell-lbl {
   font-weight: bold;
-  background: #ffffff;
+  background: #ffffff !important;
 }
 
 .excel-cell-yellow {
@@ -432,8 +468,20 @@ export default {
   text-align: center;
   font-weight: bold;
   font-size: 13px;
-  color: #000000;
+  color: #000000 !important;
   padding: 6px 0;
+}
+
+.excel-gray-input {
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #000000 !important;
 }
 
 .excel-yellow-input.text-blue {
@@ -441,11 +489,11 @@ export default {
 }
 
 .excel-cell-gray {
-  background: #e0e0e0 !important;
+  background: #d6d6d6 !important;
 }
 
 .excel-cell-cost {
-  background: #e0e0e0 !important;
+  background: #d6d6d6 !important;
   color: #000000 !important;
 }
 
@@ -467,7 +515,7 @@ export default {
 
 .excel-cell-bold {
   font-weight: bold;
-  color: #000000;
+  color: #000000 !important;
 }
 
 .bg-light-blue {
@@ -475,9 +523,9 @@ export default {
 }
 
 .excel-yellow-banner {
-  background: #ffff00;
-  border: 1px solid #333333;
-  color: #000000;
+  background: #ffff00 !important;
+  border: 1px solid #222222 !important;
+  color: #000000 !important;
   font-weight: 800;
   text-align: center;
   padding: 4px 10px;
@@ -485,16 +533,16 @@ export default {
 }
 
 .excel-notes-box {
-  background: #ffffff;
-  border: 1px solid #555555;
+  background: #ffffff !important;
+  border: 1px solid #444444 !important;
   padding: 10px 12px;
   font-size: 11px;
   line-height: 1.5;
-  color: #000000;
+  color: #000000 !important;
 }
 
 .yellow-highlight {
-  background: #ffff00;
+  background: #ffff00 !important;
   display: inline-block;
   padding: 1px 4px;
   font-weight: bold;
@@ -503,13 +551,13 @@ export default {
 .sheet-footer-note {
   font-size: 11px;
   font-weight: bold;
-  color: #333333;
+  color: #333333 !important;
   padding: 6px 0;
 }
 
 .excel-bottom-tabs {
-  background: #e0e0e0;
-  border-top: 2px solid #555555;
+  background: #cccccc;
+  border-top: 2px solid #333333;
   padding: 6px 12px;
   display: flex;
   align-items: center;
@@ -519,13 +567,13 @@ export default {
 .excel-tabs-lbl {
   font-size: 11px;
   font-weight: bold;
-  color: #333333;
+  color: #000000 !important;
 }
 
 .excel-tab-pill {
-  background: #cccccc;
-  color: #333333;
-  border: 1px solid #888888;
+  background: #bbbbbb;
+  color: #000000;
+  border: 1px solid #666666;
   padding: 4px 12px;
   font-size: 11px;
   font-weight: bold;
@@ -534,9 +582,9 @@ export default {
 }
 
 .excel-tab-pill.active-pill {
-  background: #ffffff;
-  color: #1b5e20;
-  border-bottom: 2px solid #ffffff;
+  background: #ffffff !important;
+  color: #1b5e20 !important;
+  border-bottom: 2px solid #ffffff !important;
   margin-bottom: -7px;
 }
 </style>
