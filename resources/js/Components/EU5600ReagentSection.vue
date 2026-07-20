@@ -343,26 +343,18 @@ export default {
       type: Number,
       default: 24
     },
-    initialDryTests: {
-      type: Number,
-      default: 100
-    },
-    initialSedTests: {
-      type: Number,
-      default: 100
-    },
     initialComboTests: {
       type: Number,
-      default: 100
+      default: null
     }
   },
   data() {
     return {
       activeSheet: 'EU-5600Pro',
       inputs: {
-        dryChemistryDaily: this.initialDryTests || 100,
-        sedimentDaily: this.initialSedTests || 100,
-        comboDaily: this.initialComboTests || 100,
+        dryChemistryDaily: 0,
+        sedimentDaily: 0,
+        comboDaily: this.initialComboTests !== null && this.initialComboTests !== undefined ? this.initialComboTests : 100,
         dryMlPerSample: 4,
         sedMlPerSample: 16,
         comboMlPerSample: 16,
@@ -389,7 +381,7 @@ export default {
       handler(newMonths) {
         if (newMonths && newMonths > 0) {
           this.inputs.cleanserMonths = newMonths;
-          this.inputs.cleanserTotalQuantity = newMonths; // 1 frasco por mes
+          this.inputs.cleanserTotalQuantity = newMonths;
         }
       }
     },
@@ -401,14 +393,15 @@ export default {
         }
       }
     },
-    initialDryTests(newVal) {
-      if (newVal !== undefined) this.inputs.dryChemistryDaily = newVal;
-    },
-    initialSedTests(newVal) {
-      if (newVal !== undefined) this.inputs.sedimentDaily = newVal;
-    },
-    initialComboTests(newVal) {
-      if (newVal !== undefined) this.inputs.comboDaily = newVal;
+    initialComboTests: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal !== undefined && newVal !== null && newVal > 0) {
+          this.inputs.comboDaily = Number(newVal);
+          this.inputs.dryChemistryDaily = 0;
+          this.inputs.sedimentDaily = 0;
+        }
+      }
     }
   },
   computed: {

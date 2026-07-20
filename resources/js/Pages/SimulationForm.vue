@@ -427,6 +427,7 @@
                       <EU5600ReagentSection 
                         :contract-months="globalSettings.contract_months" 
                         :operating-days-default="reagentOperatingDays"
+                        :initial-combo-tests="equipmentConfigs[colIndex].daily_tests"
                       />
                     </div>
                   </div>
@@ -450,6 +451,7 @@
         <EU5600ReagentSection 
           :contract-months="globalSettings.contract_months" 
           :operating-days-default="reagentOperatingDays"
+          :initial-combo-tests="equipmentConfigs[0].daily_tests"
         />
       </div>
     </main>
