@@ -492,9 +492,9 @@
                           </tr>
                           <tr class="huc-dark-red-row font-bold">
                             <td class="huc-lbl text-danger font-extrabold">Utilidad Neta USD</td>
-                            <td class="text-right text-danger font-extrabold">-${{ formatMoney(Math.abs(calculations[colIndex].matrix.fob_net_profit_usd)) }}</td>
-                            <td class="text-right text-danger font-extrabold">-${{ formatMoney(Math.abs(calculations[colIndex].matrix.landed_teorico_net_profit_usd)) }}</td>
-                            <td class="text-right text-danger font-extrabold">-${{ formatMoney(Math.abs(calculations[colIndex].matrix.landed_real_net_profit_usd)) }}</td>
+                            <td class="text-right text-danger font-extrabold">-${{ formatMoneyAbs(calculations[colIndex].matrix.fob_net_profit_usd) }}</td>
+                            <td class="text-right text-danger font-extrabold">-${{ formatMoneyAbs(calculations[colIndex].matrix.landed_teorico_net_profit_usd) }}</td>
+                            <td class="text-right text-danger font-extrabold">-${{ formatMoneyAbs(calculations[colIndex].matrix.landed_real_net_profit_usd) }}</td>
                           </tr>
                           <tr class="huc-dark-red-header-row font-bold">
                             <td class="huc-lbl text-white">Utilidad Neta %</td>
@@ -1022,6 +1022,13 @@ export default {
     formatMoney(val) {
       if (isNaN(val) || val === null) return '0.00';
       return Number(val).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    },
+    formatMoneyAbs(val) {
+      if (isNaN(val) || val === null) return '0.00';
+      return Number(Math.abs(val)).toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
