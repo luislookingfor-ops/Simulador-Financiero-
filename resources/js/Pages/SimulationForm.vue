@@ -7,9 +7,23 @@
       </div>
 
       <nav class="nav-menu">
-        <a href="#" class="nav-item active">
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'simulator' }"
+          @click.prevent="activeNavTab = 'simulator'"
+        >
           <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z"/></svg>
           Simulador HUC
+        </a>
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'reagents' }"
+          @click.prevent="activeNavTab = 'reagents'"
+        >
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19.5 9.5c-1.03 0-1.9.71-2.15 1.68-.86-.23-1.83-.24-2.85.14-.99.37-1.83 1.05-2.4 1.96-.53-.25-1.14-.38-1.8-.34C9.17 13.06 8.3 13.9 8.05 15c-.23-.05-.47-.08-.72-.08-1.78 0-3.23 1.45-3.23 3.23s1.45 3.23 3.23 3.23h12.17c1.93 0 3.5-1.57 3.5-3.5 0-1.79-1.35-3.26-3.08-3.46.05-.29.08-.59.08-.9 0-2.21-1.79-4-4-4z"/></svg>
+          Volumen Consumo Reactivos
         </a>
         <a href="#" class="nav-item" @click.prevent="showToast('Módulo Maestro de Equipos en desarrollo', 'info')">
           <svg class="icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
@@ -54,8 +68,8 @@
         </div>
       </header>
 
-      <!-- Dashboard Grid -->
-      <div class="dashboard-grid">
+      <!-- Dashboard Grid: Tab 1 - Simulador HUC -->
+      <div v-if="activeNavTab === 'simulator'" class="dashboard-grid">
         <!-- Global Settings Card -->
         <section class="card global-settings-card">
           <div class="card-header">
@@ -399,6 +413,21 @@
                     </div>
                   </div>
 
+                  <!-- Collapsible Reagent Volume Section (EU-5600 Pro) -->
+                  <div class="mt-4 pt-3 border-top">
+                    <button 
+                      @click="equipmentConfigs[colIndex].showReagentVolume = !equipmentConfigs[colIndex].showReagentVolume" 
+                      class="btn-toggle-reagents"
+                      style="background: #fff8e1; border: 1px solid #ffe082; padding: 10px 14px; border-radius: 6px; width: 100%; display: flex; justify-content: space-between; font-weight: bold; cursor: pointer; color: #795548;"
+                    >
+                      <span>🧪 {{ equipmentConfigs[colIndex].showReagentVolume ? 'Ocultar' : 'Desplegar' }} Sección Volumen Consumo Reactivos (EU-5600 Pro)</span>
+                      <span>{{ equipmentConfigs[colIndex].showReagentVolume ? '▲' : '▼' }}</span>
+                    </button>
+                    <div v-if="equipmentConfigs[colIndex].showReagentVolume" class="mt-3">
+                      <EU5600ReagentSection />
+                    </div>
+                  </div>
+
                 </div>
 
                 <!-- Empty State Column -->
@@ -413,6 +442,11 @@
         </div>
       </section>
       </div>
+
+      <!-- Dashboard Grid: Tab 2 - Volumen Consumo Reactivos -->
+      <div v-else-if="activeNavTab === 'reagents'" class="dashboard-grid single-view">
+        <EU5600ReagentSection />
+      </div>
     </main>
 
     <!-- Toast Notification -->
@@ -423,7 +457,12 @@
 </template>
 
 <script>
+import EU5600ReagentSection from '../Components/EU5600ReagentSection.vue';
+
 export default {
+  components: {
+    EU5600ReagentSection
+  },
   props: {
     equipments: {
       type: Array,
@@ -436,6 +475,7 @@ export default {
   },
   data() {
     return {
+      activeNavTab: 'simulator', // 'simulator' | 'reagents'
       activeProposalTab: 0, // 0 = Equipo 1, 1 = Equipo 2, 2 = Equipo 3, 'all' = Vista comparativa
       scenarioName: '',
       saving: false,
@@ -607,7 +647,8 @@ export default {
         need_controls: 'Sí',
         daily_tests: 30,
         pvp_per_test: 1.10,
-        reagent_cost_per_test: 0.35
+        reagent_cost_per_test: 0.35,
+        showReagentVolume: false
       };
     },
     getEmptyCalculation() {
