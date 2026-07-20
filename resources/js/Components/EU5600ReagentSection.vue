@@ -134,11 +134,19 @@
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.priceCleanser" class="excel-yellow-input text-blue" />
             </td>
-            <td class="excel-cell-blue text-center"></td>
-            <td class="excel-cell-blue text-center"></td>
-            <td class="excel-cell-blue text-center"></td>
-            <td class="excel-cell-blue text-center"></td>
-            <td class="excel-cell-blue text-center bg-light-blue"></td>
+            <td class="excel-cell-blue text-center">
+              <span class="text-xs font-semibold text-gray-700">Periodo Contrato: {{ inputs.cleanserMonths }} meses</span>
+            </td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.cleanserBottleMonth" class="excel-yellow-input text-blue" placeholder="1" />
+            </td>
+            <td class="excel-cell-blue text-center font-bold">
+              {{ formatSpanishDecimal(inputs.cleanserBottleMonth * 12, 1) }}
+            </td>
+            <td class="excel-cell-blue text-center">/</td>
+            <td class="excel-cell-yellow">
+              <input type="number" v-model.number="inputs.cleanserTotalQuantity" class="excel-yellow-input text-blue font-bold text-sm" />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -282,8 +290,12 @@
               <input type="number" v-model.number="inputs.cleanserShutDown" class="excel-yellow-input" style="width: 50px;" />
             </td>
             <td class="text-center"></td>
-            <td class="excel-cell-yellow text-center"></td>
-            <td class="excel-cell-yellow text-center"></td>
+            <td class="excel-cell-yellow text-center font-bold">
+              <input type="number" v-model.number="inputs.cleanserBottleMonth" class="excel-yellow-input font-bold" />
+            </td>
+            <td class="excel-cell-yellow text-center font-bold text-base">
+              <input type="number" v-model.number="inputs.cleanserTotalQuantity" class="excel-yellow-input font-bold text-base" />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -319,6 +331,12 @@ import { calculateEU5600ReagentConsumption } from '../Utils/eu5600ReagentCalcula
 
 export default {
   name: 'EU5600ReagentSection',
+  props: {
+    contractMonths: {
+      type: Number,
+      default: 60
+    }
+  },
   data() {
     return {
       activeSheet: 'EU-5600Pro',
@@ -337,12 +355,31 @@ export default {
         stripsMlPerSample: 1,
         stripsCanSpec: 100,
         cleanserShutDown: 6,
+        cleanserMonths: 60,
+        cleanserBottleMonth: 1,
+        cleanserTotalQuantity: 60,
         priceEu50: 105,
         priceStrips11: 90,
         priceStrips14: 108,
         priceCleanser: 0
       }
     };
+  },
+  watch: {
+    contractMonths: {
+      immediate: true,
+      handler(newMonths) {
+        if (newMonths && newMonths > 0) {
+          this.inputs.cleanserMonths = newMonths;
+          this.inputs.cleanserTotalQuantity = Math.round(newMonths * this.inputs.cleanserBottleMonth);
+        }
+      }
+    },
+    'inputs.cleanserBottleMonth'(newVal) {
+      if (newVal !== undefined && this.inputs.cleanserMonths) {
+        this.inputs.cleanserTotalQuantity = Math.round(newVal * this.inputs.cleanserMonths);
+      }
+    }
   },
   computed: {
     calcData() {

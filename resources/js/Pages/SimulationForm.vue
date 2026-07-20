@@ -424,7 +424,7 @@
                       <span>{{ equipmentConfigs[colIndex].showReagentVolume ? '▲' : '▼' }}</span>
                     </button>
                     <div v-if="equipmentConfigs[colIndex].showReagentVolume" class="mt-3">
-                      <EU5600ReagentSection />
+                      <EU5600ReagentSection :contract-months="globalSettings.contract_months" />
                     </div>
                   </div>
 
@@ -444,7 +444,7 @@
 
       <!-- Dashboard Grid: Tab 2 - Volumen Consumo Reactivos -->
       <div v-else-if="activeNavTab === 'reagents'" class="dashboard-grid single-view">
-        <EU5600ReagentSection />
+        <EU5600ReagentSection :contract-months="globalSettings.contract_months" />
       </div>
     </main>
 
