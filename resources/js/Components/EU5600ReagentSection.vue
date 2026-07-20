@@ -330,7 +330,7 @@ export default {
         sedMlPerSample: 16,
         comboMlPerSample: 16,
         operatingDaysMonth: 24,
-        eu50DeadVolumeRatio: 0.05,
+        eu50DeadVolumeRatio: 0.052,
         eu50StartUp: 54,
         eu50ShutDown: 70,
         eu50BottleSpec: 5000,
