@@ -132,17 +132,13 @@
             <td class="excel-cell-item">Cleanser</td>
             <td class="excel-cell-code">/</td>
             <td class="excel-cell-yellow">
-              <input type="number" v-model.number="inputs.priceCleanser" class="excel-yellow-input text-blue" />
+              <input type="number" v-model.number="inputs.priceCleanser" class="excel-yellow-input text-blue" placeholder="0" />
             </td>
             <td class="excel-cell-blue text-center">
-              <span class="text-xs font-semibold text-gray-700">Periodo Contrato: {{ inputs.cleanserMonths }} meses</span>
+              <span class="text-xs font-semibold text-gray-700">1 frasco / mes</span>
             </td>
-            <td class="excel-cell-yellow">
-              <input type="number" v-model.number="inputs.cleanserBottleMonth" class="excel-yellow-input text-blue" placeholder="1" />
-            </td>
-            <td class="excel-cell-blue text-center font-bold">
-              {{ formatSpanishDecimal(inputs.cleanserBottleMonth * 12, 1) }}
-            </td>
+            <td class="excel-cell-blue text-center">1,0</td>
+            <td class="excel-cell-blue text-center">12,0</td>
             <td class="excel-cell-blue text-center">/</td>
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.cleanserTotalQuantity" class="excel-yellow-input text-blue font-bold text-sm" />
@@ -150,6 +146,15 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Cleanser Total Cost Calculation Box (Outside Main Table) -->
+      <div v-if="inputs.priceCleanser > 0" class="cleanser-summary-box mb-4">
+        <div class="cleanser-summary-content">
+          <span class="summary-lbl">Costo Total Cleanser (Contrato {{ inputs.cleanserMonths }} meses):</span>
+          <span class="summary-val">${{ formatSpanishDecimal(cleanserTotalCost, 2) }} USD</span>
+          <span class="summary-sub">({{ inputs.cleanserTotalQuantity }} frascos × ${{ inputs.priceCleanser }} USD)</span>
+        </div>
+      </div>
 
       <div class="excel-yellow-banner mb-3">
         SOLO INTRODUZCA LOS NÚMEROS DE LA TABLA AMARILLA!!!
@@ -290,9 +295,7 @@
               <input type="number" v-model.number="inputs.cleanserShutDown" class="excel-yellow-input" style="width: 50px;" />
             </td>
             <td class="text-center"></td>
-            <td class="excel-cell-yellow text-center font-bold">
-              <input type="number" v-model.number="inputs.cleanserBottleMonth" class="excel-yellow-input font-bold" />
-            </td>
+            <td class="excel-cell-yellow text-center font-bold">1,0</td>
             <td class="excel-cell-yellow text-center font-bold text-base">
               <input type="number" v-model.number="inputs.cleanserTotalQuantity" class="excel-yellow-input font-bold text-base" />
             </td>
@@ -335,19 +338,35 @@ export default {
     contractMonths: {
       type: Number,
       default: 60
+    },
+    operatingDaysDefault: {
+      type: Number,
+      default: 24
+    },
+    initialDryTests: {
+      type: Number,
+      default: 100
+    },
+    initialSedTests: {
+      type: Number,
+      default: 100
+    },
+    initialComboTests: {
+      type: Number,
+      default: 100
     }
   },
   data() {
     return {
       activeSheet: 'EU-5600Pro',
       inputs: {
-        dryChemistryDaily: 100,
-        sedimentDaily: 100,
-        comboDaily: 100,
+        dryChemistryDaily: this.initialDryTests || 100,
+        sedimentDaily: this.initialSedTests || 100,
+        comboDaily: this.initialComboTests || 100,
         dryMlPerSample: 4,
         sedMlPerSample: 16,
         comboMlPerSample: 16,
-        operatingDaysMonth: 24,
+        operatingDaysMonth: this.operatingDaysDefault || 24,
         eu50DeadVolumeRatio: 0.052,
         eu50StartUp: 54,
         eu50ShutDown: 70,
@@ -355,9 +374,8 @@ export default {
         stripsMlPerSample: 1,
         stripsCanSpec: 100,
         cleanserShutDown: 6,
-        cleanserMonths: 60,
-        cleanserBottleMonth: 1,
-        cleanserTotalQuantity: 60,
+        cleanserMonths: this.contractMonths || 60,
+        cleanserTotalQuantity: this.contractMonths || 60,
         priceEu50: 105,
         priceStrips11: 90,
         priceStrips14: 108,
@@ -371,19 +389,36 @@ export default {
       handler(newMonths) {
         if (newMonths && newMonths > 0) {
           this.inputs.cleanserMonths = newMonths;
-          this.inputs.cleanserTotalQuantity = Math.round(newMonths * this.inputs.cleanserBottleMonth);
+          this.inputs.cleanserTotalQuantity = newMonths; // 1 frasco por mes
         }
       }
     },
-    'inputs.cleanserBottleMonth'(newVal) {
-      if (newVal !== undefined && this.inputs.cleanserMonths) {
-        this.inputs.cleanserTotalQuantity = Math.round(newVal * this.inputs.cleanserMonths);
+    operatingDaysDefault: {
+      immediate: true,
+      handler(newDays) {
+        if (newDays && newDays > 0) {
+          this.inputs.operatingDaysMonth = newDays;
+        }
       }
+    },
+    initialDryTests(newVal) {
+      if (newVal !== undefined) this.inputs.dryChemistryDaily = newVal;
+    },
+    initialSedTests(newVal) {
+      if (newVal !== undefined) this.inputs.sedimentDaily = newVal;
+    },
+    initialComboTests(newVal) {
+      if (newVal !== undefined) this.inputs.comboDaily = newVal;
     }
   },
   computed: {
     calcData() {
       return calculateEU5600ReagentConsumption(this.inputs);
+    },
+    cleanserTotalCost() {
+      const price = Number(this.inputs.priceCleanser || 0);
+      const qty = Number(this.inputs.cleanserTotalQuantity || 0);
+      return price * qty;
     }
   },
   methods: {
@@ -557,6 +592,36 @@ export default {
 
 .bg-light-blue {
   background: #e3f2fd !important;
+}
+
+.cleanser-summary-box {
+  background: #e8f5e9;
+  border: 1.5px solid #2e7d32;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+
+.cleanser-summary-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.summary-lbl {
+  font-weight: bold;
+  color: #1b5e20;
+}
+
+.summary-val {
+  font-weight: 800;
+  color: #2e7d32;
+  font-size: 15px;
+}
+
+.summary-sub {
+  color: #555555;
+  font-size: 12px;
 }
 
 .excel-yellow-banner {

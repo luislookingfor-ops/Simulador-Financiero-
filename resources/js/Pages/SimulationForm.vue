@@ -424,7 +424,10 @@
                       <span>{{ equipmentConfigs[colIndex].showReagentVolume ? '▲' : '▼' }}</span>
                     </button>
                     <div v-if="equipmentConfigs[colIndex].showReagentVolume" class="mt-3">
-                      <EU5600ReagentSection :contract-months="globalSettings.contract_months" />
+                      <EU5600ReagentSection 
+                        :contract-months="globalSettings.contract_months" 
+                        :operating-days-default="reagentOperatingDays"
+                      />
                     </div>
                   </div>
 
@@ -444,7 +447,10 @@
 
       <!-- Dashboard Grid: Tab 2 - Volumen Consumo Reactivos -->
       <div v-else-if="activeNavTab === 'reagents'" class="dashboard-grid single-view">
-        <EU5600ReagentSection :contract-months="globalSettings.contract_months" />
+        <EU5600ReagentSection 
+          :contract-months="globalSettings.contract_months" 
+          :operating-days-default="reagentOperatingDays"
+        />
       </div>
     </main>
 
@@ -492,12 +498,25 @@ export default {
         this.getEmptyConfig(),
         this.getEmptyConfig()
       ],
+      reagentOperatingDays: 24,
       toast: {
         show: false,
         message: '',
         type: 'info'
       }
     };
+  },
+  watch: {
+    'globalSettings.client_type': {
+      immediate: true,
+      handler(newType) {
+        if (newType === 'Público') {
+          this.reagentOperatingDays = 24;
+        } else if (newType === 'Privado') {
+          this.reagentOperatingDays = 30;
+        }
+      }
+    }
   },
   computed: {
     uniqueLines() {
