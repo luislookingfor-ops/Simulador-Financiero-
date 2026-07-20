@@ -140,7 +140,7 @@ class EquipmentSeeder extends Seeder
             [
                 'code' => 'MND-3102B-CTO-S01',
                 'name' => 'CONTADOR HEMATOLOGICO BC-5380',
-                'fob' => 8064.00,
+                'fob' => 8063.95,
                 'ups' => 662.57,
                 'pc' => 616.16,
                 'impresora' => 272.32,

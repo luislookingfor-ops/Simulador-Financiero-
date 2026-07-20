@@ -108,106 +108,173 @@
 
         <!-- Equipment Columns Comparison Workspace -->
         <section class="workspace-section">
-          <div class="workspace-header">
-            <h2>Comparación Horizontal de Propuestas</h2>
-            <p>Configura hasta 3 equipos en paralelo para comparar costes y utilidades comerciales.</p>
+          <div class="workspace-header-bar">
+            <div class="workspace-header-text">
+              <h2>Configuración & Análisis de Propuestas</h2>
+              <p>Edita cantidades, equipos y accesorios directamente en la tabla con cálculo automático en tiempo real.</p>
+            </div>
+            
+            <div class="workspace-tabs-nav">
+              <button 
+                v-for="cIdx in [0, 1, 2]" 
+                :key="cIdx"
+                @click="activeProposalTab = cIdx"
+                class="tab-nav-btn"
+                :class="{ active: activeProposalTab === cIdx }"
+              >
+                📋 EQUIPO {{ cIdx + 1 }}
+              </button>
+              <button 
+                @click="activeProposalTab = 'all'"
+                class="tab-nav-btn tab-nav-btn-alt"
+                :class="{ active: activeProposalTab === 'all' }"
+              >
+                📊 VISTA COMPARATIVA (3 COLUMNAS)
+              </button>
+            </div>
           </div>
 
-          <div class="columns-grid">
-            <!-- Equipment Cards (1 to 3) -->
-            <div v-for="colIndex in [0, 1, 2]" :key="colIndex" class="card equipment-column-card">
-              <div class="excel-card-top-bar">
-                <span class="excel-title">EQUIPO {{ colIndex + 1 }}</span>
-                <button 
-                  v-if="equipmentConfigs[colIndex].equipment_id" 
-                  @click="resetColumn(colIndex)" 
-                  class="btn-reset-excel" 
-                  title="Limpiar propuesta"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div class="column-body">
-                <!-- Excel Top Metadata Grid -->
-                <div class="excel-form-top">
-                  <div class="excel-form-row">
-                    <div class="excel-label">Línea:</div>
-                    <div class="excel-val">
-                      <select v-model="equipmentConfigs[colIndex].lineFilter" class="excel-select font-bold">
-                        <option value="">TODAS LAS LÍNEAS</option>
-                        <option v-for="line in uniqueLines" :key="line" :value="line">{{ line.toUpperCase() }}</option>
-                      </select>
-                    </div>
-                    <div class="excel-label text-right">Cantidad:</div>
-                    <div class="excel-val">
-                      <input type="number" v-model.number="equipmentConfigs[colIndex].quantity" min="1" max="100" class="excel-input text-success font-bold text-center" />
-                    </div>
-                  </div>
-
-                  <div class="excel-form-row">
-                    <div class="excel-label">Equipo:</div>
-                    <div class="excel-val col-span-3">
-                      <select 
-                        v-model="equipmentConfigs[colIndex].equipment_id" 
-                        @change="onEquipmentChange(colIndex)"
-                        class="excel-select font-bold underline-select"
-                      >
-                        <option :value="null">-- SELECCIONAR EQUIPO --</option>
-                        <option 
-                          v-for="eq in filteredEquipments(equipmentConfigs[colIndex].lineFilter)" 
-                          :key="eq.id" 
-                          :value="eq.id"
-                        >
-                          {{ eq.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="excel-form-row" v-if="equipmentConfigs[colIndex].equipment_id">
-                    <div class="excel-label">Tipo:</div>
-                    <div class="excel-val col-span-3">
-                      <select v-model="equipmentConfigs[colIndex].equipment_type" class="excel-select font-bold text-primary">
-                        <option value="EQUIPO NUEVO">EQUIPO NUEVO</option>
-                        <option value="EQUIPO REACONDICIONADO">EQUIPO REACONDICIONADO</option>
-                        <option value="EQUIPO USADO">EQUIPO USADO</option>
-                        <option value="EQUIPO EN COMODATO">EQUIPO EN COMODATO</option>
-                      </select>
-                    </div>
-                  </div>
+          <div class="columns-grid" :class="{ 'single-col-expanded': activeProposalTab !== 'all' }">
+            <template v-for="colIndex in [0, 1, 2]" :key="colIndex">
+              <div 
+                v-if="activeProposalTab === 'all' || activeProposalTab === colIndex" 
+                class="card equipment-column-card"
+              >
+                <div class="excel-card-top-bar">
+                  <span class="excel-title">EQUIPO {{ colIndex + 1 }}</span>
+                  <button 
+                    v-if="equipmentConfigs[colIndex].equipment_id" 
+                    @click="resetColumn(colIndex)" 
+                    class="btn-reset-excel" 
+                    title="Limpiar propuesta"
+                  >
+                    ×
+                  </button>
                 </div>
 
-                <!-- If equipment is selected, show itemized table & calculations -->
-                <div v-if="equipmentConfigs[colIndex].equipment_id" class="results-wrapper">
-                  
-                  <!-- Itemized Table Breakdown -->
-                  <div class="excel-table-wrapper">
-                    <table class="excel-breakdown-table">
-                      <thead>
-                        <tr>
-                          <th style="width: 15%" class="text-center">Cantidad</th>
-                          <th style="width: 45%" class="text-center">Equipos</th>
-                          <th style="width: 20%" class="text-center">Costo Unit FOB</th>
-                          <th style="width: 20%" class="text-center">Costo Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(item, idx) in getItemizedBreakdown(colIndex)" :key="idx">
-                          <td class="text-center font-semibold">{{ item.qty }}</td>
-                          <td class="font-medium">{{ item.name }}</td>
-                          <td class="text-right">${{ formatMoney(item.unitFob) }}</td>
-                          <td class="text-right">${{ formatMoney(item.totalFob) }}</td>
-                        </tr>
-                      </tbody>
-                      <tfoot>
-                        <tr class="dark-red-total-row">
-                          <td colspan="3" class="text-right font-bold text-lg">Total</td>
-                          <td class="text-right font-bold text-lg">${{ formatMoney(calculations[colIndex].fob_selected_sum) }}</td>
-                        </tr>
-                      </tfoot>
-                    </table>
+                <div class="column-body">
+                  <!-- Excel Top Metadata Grid -->
+                  <div class="excel-form-top">
+                    <div class="excel-form-row">
+                      <div class="excel-label">Línea:</div>
+                      <div class="excel-val">
+                        <select v-model="equipmentConfigs[colIndex].lineFilter" class="excel-select font-bold">
+                          <option value="">TODAS LAS LÍNEAS</option>
+                          <option v-for="line in uniqueLines" :key="line" :value="line">{{ line.toUpperCase() }}</option>
+                        </select>
+                      </div>
+                      <div class="excel-label text-right">Cantidad:</div>
+                      <div class="excel-val">
+                        <input type="number" v-model.number="equipmentConfigs[colIndex].quantity" min="1" max="100" class="excel-input text-success font-bold text-center" />
+                      </div>
+                    </div>
+
+                    <div class="excel-form-row">
+                      <div class="excel-label">Equipo:</div>
+                      <div class="excel-val col-span-3">
+                        <select 
+                          v-model="equipmentConfigs[colIndex].equipment_id" 
+                          @change="onEquipmentChange(colIndex)"
+                          class="excel-select font-bold underline-select"
+                        >
+                          <option :value="null">-- SELECCIONAR EQUIPO --</option>
+                          <option 
+                            v-for="eq in filteredEquipments(equipmentConfigs[colIndex].lineFilter)" 
+                            :key="eq.id" 
+                            :value="eq.id"
+                          >
+                            {{ eq.name }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="excel-form-row" v-if="equipmentConfigs[colIndex].equipment_id">
+                      <div class="excel-label">Tipo:</div>
+                      <div class="excel-val col-span-3">
+                        <select v-model="equipmentConfigs[colIndex].equipment_type" class="excel-select font-bold text-primary">
+                          <option value="EQUIPO NUEVO">EQUIPO NUEVO</option>
+                          <option value="EQUIPO REACONDICIONADO">EQUIPO REACONDICIONADO</option>
+                          <option value="EQUIPO USADO">EQUIPO USADO</option>
+                          <option value="EQUIPO EN COMODATO">EQUIPO EN COMODATO</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
+
+                  <!-- If equipment is selected, show itemized table & calculations -->
+                  <div v-if="equipmentConfigs[colIndex].equipment_id" class="results-wrapper">
+                    
+                    <!-- Itemized Interactive Table Breakdown -->
+                    <div class="excel-table-wrapper">
+                      <table class="excel-breakdown-table">
+                        <thead>
+                          <tr>
+                            <th style="width: 85px;" class="text-center">Cantidad</th>
+                            <th style="width: 1fr;" class="text-left">Equipos</th>
+                            <th style="width: 170px;" class="text-right">Costo Unit FOB</th>
+                            <th style="width: 170px;" class="text-right">Costo Total</th>
+                            <th style="width: 50px;" class="text-center">Acción</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="(item, idx) in (equipmentConfigs[colIndex].customItems || [])" :key="idx">
+                            <td class="text-center">
+                              <input 
+                                type="number" 
+                                v-model.number="item.qty" 
+                                min="1" 
+                                class="table-editable-input text-center font-bold" 
+                              />
+                            </td>
+                            <td>
+                              <input 
+                                type="text" 
+                                v-model="item.name" 
+                                class="table-editable-input font-medium" 
+                              />
+                            </td>
+                            <td class="text-right">
+                              <div class="table-money-input">
+                                <span class="prefix">$</span>
+                                <input 
+                                  type="number" 
+                                  v-model.number="item.unitFob" 
+                                  step="0.01" 
+                                  min="0" 
+                                  class="table-editable-input text-right font-semibold" 
+                                />
+                              </div>
+                            </td>
+                            <td class="text-right font-bold text-main">
+                              ${{ formatMoney((Number(item.qty) || 0) * (Number(item.unitFob) || 0)) }}
+                            </td>
+                            <td class="text-center">
+                              <button 
+                                @click="removeItem(colIndex, idx)" 
+                                class="btn-delete-row" 
+                                title="Eliminar este ítem"
+                              >
+                                ✕
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <tfoot>
+                          <tr class="dark-red-total-row">
+                            <td colspan="3" class="text-right font-bold text-lg">Total</td>
+                            <td class="text-right font-bold text-lg">${{ formatMoney(calculations[colIndex].fob_selected_sum) }}</td>
+                            <td></td>
+                          </tr>
+                        </tfoot>
+                      </table>
+
+                      <div class="table-add-bar">
+                        <button @click="addItem(colIndex)" class="btn-add-item">
+                          + Añadir Equipo / Ítem a la Tabla
+                        </button>
+                      </div>
+                    </div>
 
                   <!-- Options Section below table -->
                   <div class="excel-options-section">
@@ -368,6 +435,7 @@ export default {
   },
   data() {
     return {
+      activeProposalTab: 0, // 0 = Equipo 1, 1 = Equipo 2, 2 = Equipo 3, 'all' = Vista comparativa
       scenarioName: '',
       saving: false,
       globalSettings: {
@@ -408,7 +476,7 @@ export default {
 
         const qty = Number(cfg.quantity) || 1;
 
-        // Custom accessories pricing
+        // Custom accessories pricing defaults
         const upsCost = cfg.include_ups ? Number(eq.ups) : 0;
         const pcCost = cfg.include_pc ? Number(eq.pc) : 0;
         const printerBaseCost = cfg.include_printer_base ? Number(eq.impresora) : 0;
@@ -420,8 +488,16 @@ export default {
 
         const importIndex = Number(this.globalSettings.import_index) || 1.15;
 
-        // Landed Teórico: selected equipment + selected accessories
-        const fobTotalSelected = Number(eq.fob) + upsCost + pcCost + printerBaseCost + zebraCost + softwareCost + syringesCost + controlCost + calibratorCost;
+        // Sum FOB from customItems if present, otherwise default fallback
+        let fobTotalSelected = 0;
+        if (cfg.customItems && cfg.customItems.length > 0) {
+          fobTotalSelected = cfg.customItems.reduce((sum, item) => {
+            return sum + (Number(item.qty) || 0) * (Number(item.unitFob) || 0);
+          }, 0);
+        } else {
+          fobTotalSelected = Number(eq.fob) + upsCost + pcCost + printerBaseCost + zebraCost + softwareCost + syringesCost + controlCost + calibratorCost;
+        }
+
         const landedTeoricoUnit = fobTotalSelected * importIndex;
         const landedTeoricoTotal = landedTeoricoUnit * qty;
 
@@ -483,7 +559,7 @@ export default {
         const minMonthlyConsumption = marginRatio > 0 ? (pmt / marginRatio) : 0;
 
         return {
-          fob_selected_sum: fobTotalSelected * qty,
+          fob_selected_sum: fobTotalSelected,
           landed_teorico_unit: landedTeoricoUnit,
           landed_teorico_total: landedTeoricoTotal,
           landed_real_unit: landedRealUnit,
@@ -515,6 +591,7 @@ export default {
         equipment_id: null,
         equipment_type: 'EQUIPO NUEVO',
         quantity: 1,
+        customItems: [],
         include_ups: true,
         include_pc: true,
         include_printer_base: true,
@@ -556,94 +633,64 @@ export default {
         }
       };
     },
-    getItemizedBreakdown(colIndex) {
-      const cfg = this.equipmentConfigs[colIndex];
-      if (!cfg.equipment_id) return [];
-      const eq = this.getSelectedEquipment(cfg.equipment_id);
-      if (!eq) return [];
-
-      const qty = Number(cfg.quantity) || 1;
-      const items = [];
-
-      // 1. Base Equipment
-      items.push({
-        qty: qty,
-        name: eq.name,
-        unitFob: Number(eq.fob),
-        totalFob: Number(eq.fob) * qty
-      });
-
-      // 2. UPS
-      if (cfg.include_ups && Number(eq.ups) > 0) {
-        items.push({
-          qty: qty,
-          name: 'UPS SMART RT 1500VA 120V',
-          unitFob: Number(eq.ups),
-          totalFob: Number(eq.ups) * qty
-        });
+    rebuildCustomItems(colIndex) {
+      const config = this.equipmentConfigs[colIndex];
+      if (!config.equipment_id) {
+        config.customItems = [];
+        return;
       }
+      const eq = this.getSelectedEquipment(config.equipment_id);
+      if (!eq) return;
 
-      // 3. PC
-      if (cfg.include_pc && Number(eq.pc) > 0) {
-        items.push({
-          qty: qty,
-          name: 'COMPUTADOR 19.5"',
-          unitFob: Number(eq.pc),
-          totalFob: Number(eq.pc) * qty
-        });
+      const items = [
+        { qty: 1, name: eq.name, unitFob: Number(eq.fob) }
+      ];
+
+      if (config.include_ups && Number(eq.ups) > 0) {
+        items.push({ qty: 1, name: 'UPS SMART RT 1500VA 120V', unitFob: Number(eq.ups) });
       }
-
-      // 4. Printer Base
-      if (cfg.include_printer_base && Number(eq.impresora) > 0) {
-        items.push({
-          qty: qty,
-          name: 'IMPRESORA TINTA CONTINUA',
-          unitFob: Number(eq.impresora),
-          totalFob: Number(eq.impresora) * qty
-        });
+      if (config.include_pc && Number(eq.pc) > 0) {
+        items.push({ qty: 1, name: 'COMPUTADOR 19.5"', unitFob: Number(eq.pc) });
       }
-
-      // 5. Zebra Printer
-      if (cfg.need_zebra === 'Sí' || cfg.include_zebra) {
-        items.push({
-          qty: qty,
-          name: 'IMPRESORA ZEBRA',
-          unitFob: 330,
-          totalFob: 330 * qty
-        });
+      if (config.include_printer_base && Number(eq.impresora) > 0) {
+        items.push({ qty: 1, name: 'IMPRESORA TINTA CONTINUA', unitFob: Number(eq.impresora) });
       }
-
-      // 6. Software
-      if (cfg.need_software === 'Sí' || cfg.include_software) {
-        const softVal = Number(cfg.software_value) || 2000;
-        items.push({
-          qty: qty,
-          name: 'SOFTWARE',
-          unitFob: softVal,
-          totalFob: softVal * qty
-        });
+      if (config.need_zebra === 'Sí' || config.include_zebra) {
+        items.push({ qty: 1, name: 'IMPRESORA ZEBRA', unitFob: 330 });
       }
-
-      // 7. Controls & Calibrators
-      if (cfg.need_controls === 'Sí' || cfg.include_controls) {
+      if (config.need_software === 'Sí' || config.include_software) {
+        items.push({ qty: 1, name: 'SOFTWARE', unitFob: Number(config.software_value) || 2000 });
+      }
+      if (config.need_controls === 'Sí' || config.include_controls) {
         const ctrlCost = Number(eq.control) + Number(eq.calibrador);
         if (ctrlCost > 0) {
-          items.push({
-            qty: qty,
-            name: 'CONTROLES Y CALIBRADORES',
-            unitFob: ctrlCost,
-            totalFob: ctrlCost * qty
-          });
+          items.push({ qty: 1, name: 'CONTROLES Y CALIBRADORES', unitFob: ctrlCost });
         }
       }
 
-      return items;
+      config.customItems = items;
     },
     syncToggles(colIndex) {
       const cfg = this.equipmentConfigs[colIndex];
       cfg.include_zebra = (cfg.need_zebra === 'Sí');
       cfg.include_software = (cfg.need_software === 'Sí');
       cfg.include_controls = (cfg.need_controls === 'Sí');
+      this.rebuildCustomItems(colIndex);
+    },
+    addItem(colIndex) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (!cfg.customItems) cfg.customItems = [];
+      cfg.customItems.push({
+        qty: 1,
+        name: 'NUEVO EQUIPO / ACCESORIO',
+        unitFob: 0.00
+      });
+    },
+    removeItem(colIndex, itemIdx) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (cfg.customItems && cfg.customItems.length > 0) {
+        cfg.customItems.splice(itemIdx, 1);
+      }
     },
     filteredEquipments(filterLine) {
       if (!filterLine) return this.equipments;
@@ -660,17 +707,14 @@ export default {
       }
       const eq = this.getSelectedEquipment(config.equipment_id);
       
-      // Auto-set accessory defaults based on master database availability
       config.include_ups = eq.ups > 0;
       config.include_pc = eq.pc > 0;
       config.include_printer_base = eq.impresora > 0;
       config.include_controls = (eq.control > 0 || eq.calibrador > 0);
       config.need_controls = config.include_controls ? 'Sí' : 'No';
       
-      // Auto-set default reagent cost
       config.reagent_cost_per_test = Number(eq.default_reagent_cost) || 0.35;
       
-      // Reset some toggles
       config.include_zebra = false;
       config.need_zebra = 'No';
       config.include_software = false;
@@ -678,7 +722,6 @@ export default {
       config.software_value = 2000;
       config.include_syringes = false;
 
-      // Provide standard daily tests depending on equipment size to make it quick
       if (eq.line === 'Inmunología' || eq.line === 'Inmunoensayo') {
         config.daily_tests = 50;
       } else if (eq.line === 'Hematología') {
@@ -686,6 +729,8 @@ export default {
       } else {
         config.daily_tests = 20;
       }
+
+      this.rebuildCustomItems(colIndex);
     },
     resetColumn(index) {
       this.equipmentConfigs[index] = this.getEmptyConfig();
@@ -1946,12 +1991,147 @@ input:checked + .slider:before {
   letter-spacing: 0.5px;
 }
 
-.total-tests-underline {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #0f172a;
-  text-decoration: underline;
-  margin-top: 6px;
-  letter-spacing: 0.5px;
+/* Workspace Nav Tabs & Expandable Layout */
+.workspace-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.workspace-header-text h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.workspace-header-text p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.workspace-tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #e2e8f0;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.tab-nav-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-nav-btn:hover {
+  color: var(--primary);
+}
+
+.tab-nav-btn.active {
+  background-color: #ffffff;
+  color: var(--primary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.tab-nav-btn-alt.active {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.single-col-expanded {
+  grid-template-columns: 1fr !important;
+}
+
+/* Interactive Editable Table Styling */
+.table-editable-input {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+  width: 100%;
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.table-editable-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(27, 54, 93, 0.15);
+}
+
+.table-money-input {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0 8px;
+}
+
+.table-money-input .currency-prefix {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.table-money-input .table-editable-input {
+  border: none;
+  box-shadow: none;
+}
+
+.btn-delete-row {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-delete-row:hover {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+.table-add-bar {
+  background-color: #f8fafc;
+  padding: 8px 12px;
+  border-top: 1px solid #cbd5e1;
+  text-align: left;
+}
+
+.btn-add-item {
+  background-color: #ffffff;
+  color: var(--primary);
+  border: 1px dashed var(--primary);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-item:hover {
+  background-color: rgba(27, 54, 93, 0.05);
+  border-style: solid;
 }
 </style>
