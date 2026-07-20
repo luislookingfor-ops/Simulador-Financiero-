@@ -59,38 +59,49 @@
         <!-- Global Settings Card -->
         <section class="card global-settings-card">
           <div class="card-header">
-            <h3>Parámetros Globales (Configuración General)</h3>
+            <h3>Consideraciones Generales:</h3>
             <span class="badge">Afecta todos los cálculos</span>
           </div>
           <div class="settings-grid">
             <div class="form-group">
-              <label>Tipo de Cliente</label>
-              <select v-model="globalSettings.client_type" class="form-input">
-                <option value="Privado">Cliente Privado</option>
-                <option value="Público">Cliente Público</option>
+              <label>Tipo de cliente</label>
+              <select v-model="globalSettings.client_type" class="form-input text-success font-semibold">
+                <option value="Público">Público</option>
+                <option value="Privado">Privado</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Amortización (Meses)</label>
-              <input type="number" v-model.number="globalSettings.months" class="form-input" min="6" max="120" />
+              <label>Periodo Contrato (Meses)</label>
+              <input type="number" v-model.number="globalSettings.contract_months" class="form-input" min="1" max="120" />
             </div>
             <div class="form-group">
-              <label>Tasa de Interés Anual (%)</label>
+              <label>Amortización Equipos (Meses)</label>
+              <input type="number" v-model.number="globalSettings.amortization_months" class="form-input text-success font-semibold" min="1" max="120" />
+            </div>
+            <div class="form-group">
+              <label>Prueba Reportada</label>
+              <select v-model="globalSettings.reported_test" class="form-input text-danger font-semibold">
+                <option value="No">No</option>
+                <option value="Sí">Sí</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tasa de Interés Anual</label>
               <div class="input-with-suffix">
-                <input type="number" v-model.number="globalSettings.interest_rate" class="form-input" min="0" max="100" step="0.1" />
+                <input type="number" v-model.number="globalSettings.interest_rate" class="form-input text-danger font-semibold" min="0" max="100" step="0.1" />
                 <span class="suffix">%</span>
               </div>
             </div>
             <div class="form-group">
-              <label>Inflación Anual (%)</label>
+              <label>Inflación Anual</label>
               <div class="input-with-suffix">
-                <input type="number" v-model.number="globalSettings.inflation_rate" class="form-input" min="0" max="50" step="0.1" />
+                <input type="number" v-model.number="globalSettings.inflation_rate" class="form-input text-danger font-semibold" min="0" max="50" step="0.1" />
                 <span class="suffix">%</span>
               </div>
             </div>
             <div class="form-group">
-              <label>Índice Importación Base</label>
-              <input type="number" v-model.number="globalSettings.import_index" class="form-input" min="1.0" max="3.0" step="0.01" />
+              <label>Índice de Importación</label>
+              <input type="number" v-model.number="globalSettings.import_index" class="form-input text-danger font-semibold" min="1.0" max="3.0" step="0.01" />
             </div>
           </div>
         </section>
@@ -144,7 +155,7 @@
                         :key="eq.id" 
                         :value="eq.id"
                       >
-                        [{{ eq.code }}] {{ truncateText(eq.name, 35) }}
+                        {{ eq.name }}
                       </option>
                     </select>
                   </div>
@@ -394,11 +405,13 @@ export default {
       scenarioName: '',
       saving: false,
       globalSettings: {
-        client_type: 'Privado',
-        months: 36,
+        client_type: 'Público',
+        contract_months: 36,
+        amortization_months: 36,
         interest_rate: 11,
         inflation_rate: 1,
-        import_index: 1.15
+        import_index: 1.15,
+        reported_test: 'No'
       },
       equipmentConfigs: [
         this.getEmptyConfig(),
@@ -452,10 +465,11 @@ export default {
         const landedRealTotal = landedRealUnit * qty;
 
         // PMT Amortization calculation
-        const months = Number(this.globalSettings.months) || 36;
+        const contractMonths = Number(this.globalSettings.contract_months) || Number(this.globalSettings.months) || 36;
+        const amortizationMonths = Number(this.globalSettings.amortization_months) || Number(this.globalSettings.months) || 36;
         const annualInterest = (Number(this.globalSettings.interest_rate) || 0) / 100;
         const r = annualInterest / 12;
-        const n = months;
+        const n = amortizationMonths;
         let pmt = 0;
 
         if (r > 0) {
@@ -468,7 +482,7 @@ export default {
         const dailyTests = Number(cfg.daily_tests) || 0;
         const monthlyTests = dailyTests * 30 * qty;
         const annualTests = monthlyTests * 12;
-        const totalTests = monthlyTests * months;
+        const totalTests = monthlyTests * contractMonths;
 
         const pvp = Number(cfg.pvp_per_test) || 0;
         const totalRevenue = totalTests * pvp;
@@ -480,7 +494,7 @@ export default {
         let totalReagentCost = 0;
         const monthlyTestsPerEq = dailyTests * 30;
 
-        for (let m = 1; m <= months; m++) {
+        for (let m = 1; m <= contractMonths; m++) {
           const year = Math.floor((m - 1) / 12);
           const inflatedCost = baseReagentCost * Math.pow(1 + annualInflation, year);
           totalReagentCost += (monthlyTestsPerEq * qty) * inflatedCost;
@@ -490,7 +504,7 @@ export default {
         const grossProfitUSD = totalRevenue - totalReagentCost;
         const grossProfitPercent = totalRevenue > 0 ? (grossProfitUSD / totalRevenue) * 100 : 0;
 
-        const totalAmortization = pmt * months;
+        const totalAmortization = pmt * contractMonths;
         const netProfitUSD = grossProfitUSD - totalAmortization;
         const netProfitPercent = totalRevenue > 0 ? (netProfitUSD / totalRevenue) * 100 : 0;
 
@@ -615,10 +629,16 @@ export default {
     getLineClass(equipmentId) {
       if (!equipmentId) return 'none';
       const eq = this.getSelectedEquipment(equipmentId);
-      if (eq.line === 'Hematología') return 'hematology';
-      if (eq.line === 'Coagulación') return 'coagulation';
-      if (eq.line === 'Inmunoensayo') return 'immuno';
-      if (eq.line === 'HPLC') return 'hplc';
+      if (!eq || !eq.line) return 'default';
+      const line = eq.line.toLowerCase();
+      if (line.includes('hematolog')) return 'hematology';
+      if (line.includes('coagulac')) return 'coagulation';
+      if (line.includes('inmuno')) return 'immuno';
+      if (line.includes('hplc')) return 'hplc';
+      if (line.includes('químic') || line.includes('quimic')) return 'chemistry';
+      if (line.includes('gas')) return 'gases';
+      if (line.includes('electrolit')) return 'electrolytes';
+      if (line.includes('uroanál') || line.includes('uroanal')) return 'urinalysis';
       return 'default';
     },
     getProfitMarginClass(netPercent) {
@@ -935,8 +955,38 @@ body {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px 24px;
+}
+
+@media (max-width: 1024px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings-grid .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-grid .form-group label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 34px;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 8px;
+  line-height: 1.25;
 }
 
 /* Inputs & Form Controls */
@@ -1148,6 +1198,30 @@ body {
 .line-theme-hplc .column-badge {
   color: var(--success);
 }
+
+.line-theme-chemistry {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #a855f7;
+}
+.line-theme-chemistry .column-badge { color: #a855f7; }
+
+.line-theme-gases {
+  background: linear-gradient(90deg, rgba(14, 165, 233, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #0ea5e9;
+}
+.line-theme-gases .column-badge { color: #0ea5e9; }
+
+.line-theme-electrolytes {
+  background: linear-gradient(90deg, rgba(234, 179, 8, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #eab308;
+}
+.line-theme-electrolytes .column-badge { color: #eab308; }
+
+.line-theme-urinalysis {
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.06) 0%, rgba(0,0,0,0) 100%);
+  border-bottom: 2px solid #ec4899;
+}
+.line-theme-urinalysis .column-badge { color: #ec4899; }
 
 .column-body {
   padding: 20px;

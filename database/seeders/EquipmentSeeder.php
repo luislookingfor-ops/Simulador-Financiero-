@@ -10,6 +10,63 @@ class EquipmentSeeder extends Seeder
     public function run(): void
     {
         DB::table('equipments')->insert([
+            // Hematología
+            [
+                'code' => 'KT-6610',
+                'name' => 'KT 6610',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.35,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'KT-8000',
+                'name' => 'KT 8000',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.40,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'F-560',
+                'name' => 'F560',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.45,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'F-810',
+                'name' => 'F810',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Hematología',
+                'default_reagent_cost' => 0.50,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
             [
                 'code' => 'MND-3008B-CTO-S01',
                 'name' => 'CONTADOR HEMATOLOGICO BC-20S',
@@ -150,6 +207,228 @@ class EquipmentSeeder extends Seeder
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ],
+
+            // Química
+            [
+                'code' => 'TC-M160',
+                'name' => 'TECO MATRIX 160',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Química',
+                'default_reagent_cost' => 0.25,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'TC-M240',
+                'name' => 'TECO MATRIX 240',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Química',
+                'default_reagent_cost' => 0.25,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'TC-M480',
+                'name' => 'TECO MATRIX 480',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Química',
+                'default_reagent_cost' => 0.25,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-BS240',
+                'name' => 'BS-240 ANALIZADOR DE QUÍMICA CLÍNICA',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Química',
+                'default_reagent_cost' => 0.25,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-BS430',
+                'name' => 'BS-430 ANALIZADOR DE QUÍMICA CLÍNICA',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Química',
+                'default_reagent_cost' => 0.25,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+
+            // Inmunología
+            [
+                'code' => 'LFT-E8000',
+                'name' => 'LIFOTRONIC ECLIA 8000',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Inmunología',
+                'default_reagent_cost' => 1.10,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'LFT-E8600',
+                'name' => 'LIFOTRONIC ECLIA 8600',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Inmunología',
+                'default_reagent_cost' => 1.10,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'LFT-E9000',
+                'name' => 'LIFOTRONIC ECLIA 9000',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Inmunología',
+                'default_reagent_cost' => 1.10,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'YHLO-C6104',
+                'name' => 'iFLASH 1800A YHLO ANALIZADOR DE INMUNOENSAYO CLIA',
+                'fob' => 19023.00,
+                'ups' => 746.33,
+                'pc' => 559.54,
+                'impresora' => 272.32,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Inmunología',
+                'default_reagent_cost' => 1.20,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+
+            // Gasometría
+            [
+                'code' => 'EDAN-GAS',
+                'name' => 'Edan',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Gasometría',
+                'default_reagent_cost' => 0.80,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'SEAMATY-GAS',
+                'name' => 'Seamaty',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Gasometría',
+                'default_reagent_cost' => 0.80,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+
+            // Electrolitos
+            [
+                'code' => 'HRN-H900',
+                'name' => 'HORRON H900',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Electrolitos',
+                'default_reagent_cost' => 0.50,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'BSN-BE900',
+                'name' => 'BIOSENS BE900',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Electrolitos',
+                'default_reagent_cost' => 0.50,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+
+            // Uroanálisis
+            [
+                'code' => 'MND-EU5300P',
+                'name' => 'MINDRAY EU-5300 PRO',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Uroanálisis',
+                'default_reagent_cost' => 0.30,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+            [
+                'code' => 'MND-EU5600P',
+                'name' => 'MINDRAY EU-5600 PRO',
+                'fob' => 0.00,
+                'ups' => 0.00,
+                'pc' => 0.00,
+                'impresora' => 0.00,
+                'control' => 0.00,
+                'calibrador' => 0.00,
+                'line' => 'Uroanálisis',
+                'default_reagent_cost' => 0.30,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ],
+
+            // Coagulación
             [
                 'code' => 'BE-018-016',
                 'name' => 'COAGULOMETRO THROMBOLYZER COMPACT X AUTO.',
@@ -178,20 +457,8 @@ class EquipmentSeeder extends Seeder
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s')
             ],
-            [
-                'code' => 'YHLO-C6104',
-                'name' => 'iFLASH 1800A YHLO ANALIZADOR DE INMUNOENSAYO CLIA',
-                'fob' => 19023.00,
-                'ups' => 746.33,
-                'pc' => 559.54,
-                'impresora' => 272.32,
-                'control' => 0.00,
-                'calibrador' => 0.00,
-                'line' => 'Inmunoensayo',
-                'default_reagent_cost' => 1.20,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ],
+
+            // HPLC
             [
                 'code' => 'LFT-008',
                 'name' => 'ANALIZADOR HBA1C HPLC H-9 LIFOTRONIC',
