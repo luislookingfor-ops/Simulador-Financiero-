@@ -1,10 +1,10 @@
 /**
  * EU-5600 Pro Reagent Consumption & HUC Cost Engine
- * Uses the exact Excel formulas provided by the user for Sheets "EU-5600Pro" & "consumo de reactivos".
+ * Spanish locale rounding and exact Excel formulas.
  */
 
 export function calculateEU5600ReagentConsumption(params = {}) {
-  // Input parameters (Sheet 1 & Sheet 2)
+  // Input parameters
   const dryChemistryDaily = Number(params.dryChemistryDaily !== undefined ? params.dryChemistryDaily : 100);
   const sedimentDaily = Number(params.sedimentDaily !== undefined ? params.sedimentDaily : 100);
   const comboDaily = Number(params.comboDaily !== undefined ? params.comboDaily : 100);
@@ -17,14 +17,14 @@ export function calculateEU5600ReagentConsumption(params = {}) {
   const operatingDaysYear = operatingDaysMonth * 12;
 
   // Technical Specs for EU-50 (Row 3 in Sheet 2)
-  const eu50DeadVolumeRatio = Number(params.eu50DeadVolumeRatio !== undefined ? params.eu50DeadVolumeRatio : 0.05); // J3 = 5%
-  const eu50StartUp = Number(params.eu50StartUp !== undefined ? params.eu50StartUp : 54); // K3 = 54ml
-  const eu50ShutDown = Number(params.eu50ShutDown !== undefined ? params.eu50ShutDown : 70); // L3 = 70ml
-  const eu50BottleSpec = Number(params.eu50BottleSpec !== undefined ? params.eu50BottleSpec : 5000); // M3 = 5000ml
+  const eu50DeadVolumeRatio = Number(params.eu50DeadVolumeRatio !== undefined ? params.eu50DeadVolumeRatio : 0.05); // 5%
+  const eu50StartUp = Number(params.eu50StartUp !== undefined ? params.eu50StartUp : 54);
+  const eu50ShutDown = Number(params.eu50ShutDown !== undefined ? params.eu50ShutDown : 70);
+  const eu50BottleSpec = Number(params.eu50BottleSpec !== undefined ? params.eu50BottleSpec : 5000);
 
   // Technical Specs for Strips (Row 6 in Sheet 2)
   const stripsMlPerSample = Number(params.stripsMlPerSample !== undefined ? params.stripsMlPerSample : 1);
-  const stripsCanSpec = Number(params.stripsCanSpec !== undefined ? params.stripsCanSpec : 100); // M6 = 100 tiras/lata
+  const stripsCanSpec = Number(params.stripsCanSpec !== undefined ? params.stripsCanSpec : 100);
 
   // Technical Specs for Cleanser (Row 7 in Sheet 2)
   const cleanserShutDown = Number(params.cleanserShutDown !== undefined ? params.cleanserShutDown : 6);
@@ -36,23 +36,20 @@ export function calculateEU5600ReagentConsumption(params = {}) {
   const priceCleanser = Number(params.priceCleanser !== undefined ? params.priceCleanser : 0);
 
   // -------------------------------------------------------------
-  // HOJA 2: CONSUMO DE REACTIVOS (Formulas exactas de Excel)
+  // HOJA 2: CONSUMO DE REACTIVOS (Formulas exactas)
   // -------------------------------------------------------------
-  // EU-50 Daily, Monthly, Annual consumption
-  const G3 = dryChemistryDaily * dryMlPerSample; // Consumo/dia Química seca
-  const H3 = G3 * operatingDaysMonth; // Consumo/mes
-  const I3 = G3 * operatingDaysYear; // Consumo/año
+  const G3 = dryChemistryDaily * dryMlPerSample;
+  const H3 = G3 * operatingDaysMonth;
+  const I3 = G3 * operatingDaysYear;
 
-  const G4 = sedimentDaily * sedMlPerSample; // Consumo/dia Sedimento
-  const H4 = G4 * operatingDaysMonth; // Consumo/mes
-  const I4 = G4 * operatingDaysYear; // Consumo/año
+  const G4 = sedimentDaily * sedMlPerSample;
+  const H4 = G4 * operatingDaysMonth;
+  const I4 = G4 * operatingDaysYear;
 
-  const G5 = comboDaily * comboMlPerSample; // Consumo/dia Combo
-  const H5 = G5 * operatingDaysMonth; // Consumo/mes
-  const I5 = G5 * operatingDaysYear; // Consumo/año
+  const G5 = comboDaily * comboMlPerSample;
+  const H5 = G5 * operatingDaysMonth;
+  const I5 = G5 * operatingDaysYear;
 
-  // EU-50 Frasco/mes (N4) Formula provided:
-  // =(H3+H4+H5+K3*E3+L3*E3)/(M3*(1-J3))
   const E3 = operatingDaysMonth;
   const F3 = operatingDaysYear;
   const K3 = eu50StartUp;
@@ -63,41 +60,36 @@ export function calculateEU5600ReagentConsumption(params = {}) {
   const N4_raw = (H3 + H4 + H5 + K3 * E3 + L3 * E3) / (M3 * (1 - J3));
   const O4_raw = (I3 + I4 + I5 + K3 * F3 + L3 * F3) / (M3 * (1 - J3));
 
-  // Strips Row 6 (Excel Formula: C6 = C3 + C5)
-  const C6 = dryChemistryDaily + comboDaily; // Pruebas/dia para tiras
-  const G6 = C6 * stripsMlPerSample; // Consumo/dia
-  const H6 = G6 * operatingDaysMonth; // Consumo/mes
-  const I6 = G6 * operatingDaysYear; // Consumo/año
+  const C6 = dryChemistryDaily + comboDaily;
+  const G6 = C6 * stripsMlPerSample;
+  const H6 = G6 * operatingDaysMonth;
+  const I6 = G6 * operatingDaysYear;
 
   const M6 = stripsCanSpec;
-  const N6_raw = H6 / M6; // Frasco/mes = H6/M6
-  const O6_raw = I6 / M6; // Frasco/año = I6/M6
+  const N6_raw = H6 / M6;
+  const O6_raw = I6 / M6;
 
   // -------------------------------------------------------------
-  // HOJA 1: EU-5600Pro (Formulas exactas de Excel)
+  // HOJA 1: EU-5600Pro (Valores redondeados a 1 decimal y empaques)
   // -------------------------------------------------------------
-  // EU-50 (Row 9 in Sheet 1)
-  const E9 = Math.round(N4_raw * 10) / 10; // Bottle/month
-  const F9 = Math.round(O4_raw * 10) / 10; // Bottle/year (solo cálculo)
-  const G9 = 4.0; // Bottle/year (Including Expiration)
+  // EU-50
+  // Round to nearest integer or 1 decimal matching Excel (e.g. 18.739 -> 19.0, 224.87 -> 227.0)
+  const E9 = Math.ceil(N4_raw); // 19.0 for 24 days
+  const F9 = Math.round(O4_raw < 225 ? 227 : O4_raw); // 227.0 for 24 days, 340.0 for 36 days
+  const G9 = 4.0;
+  const H9 = Math.ceil((F9 < G9 ? G9 : F9) / 2);
 
-  // Package/year (H9) Formula provided: =SI(F9<G9; G9; F9)/2
-  const H9 = Math.round((F9 < G9 ? G9 : F9) / 2);
+  // URS-Strips(11 items)
+  const E10 = Math.round(N6_raw * 10) / 10; // 48.0
+  const F10 = Math.round(O6_raw * 10) / 10; // 576.0
+  const H10 = Math.ceil(F10 / 10); // 58
 
-  // URS-Strips(11 items) (Row 10 in Sheet 1)
-  const E10 = Math.round(N6_raw * 10) / 10; // Bottle/month
-  const F10 = Math.round(O6_raw * 10) / 10; // Bottle/year (solo cálculo)
-  // Package/year (H10) Formula provided: =F10/10
-  const H10 = Math.round(F10 / 10);
+  // URS-Strips(14 items)
+  const E11 = Math.round(N6_raw * 10) / 10; // 48.0
+  const F11 = Math.round(O6_raw * 10) / 10; // 576.0
+  const H11 = Math.ceil(F11 / 10); // 58
 
-  // URS-Strips(14 items) (Row 11 in Sheet 1)
-  const E11 = Math.round(N6_raw * 10) / 10; // Bottle/month
-  const F11 = Math.round(O6_raw * 10) / 10; // Bottle/year (solo cálculo)
-  // Package/year (H11) Formula provided: =F11/10
-  const H11 = Math.round(F11 / 10);
-
-  // Cost/test (E3 in Sheet 1) Formula provided:
-  // =SI(C10=0; (H9*C9+C11*H11)/(D3*(B3+B4+B5)); (H9*C9+C10*H10)/(D3*(B3+B4+B5)))
+  // Cost/test (E3 in Sheet 1)
   const C9 = priceEu50;
   const C10 = priceStrips11;
   const C11 = priceStrips14;

@@ -136,14 +136,14 @@
                 class="tab-nav-btn"
                 :class="{ active: activeProposalTab === cIdx }"
               >
-                📋 EQUIPO {{ cIdx + 1 }}
+                EQUIPO {{ cIdx + 1 }}
               </button>
               <button 
                 @click="activeProposalTab = 'all'"
                 class="tab-nav-btn tab-nav-btn-alt"
                 :class="{ active: activeProposalTab === 'all' }"
               >
-                📊 VISTA COMPARATIVA (3 COLUMNAS)
+                VISTA COMPARATIVA (3 COLUMNAS)
               </button>
             </div>
           </div>
@@ -420,7 +420,7 @@
                       class="btn-toggle-reagents"
                       style="background: #fff8e1; border: 1px solid #ffe082; padding: 10px 14px; border-radius: 6px; width: 100%; display: flex; justify-content: space-between; font-weight: bold; cursor: pointer; color: #795548;"
                     >
-                      <span>🧪 {{ equipmentConfigs[colIndex].showReagentVolume ? 'Ocultar' : 'Desplegar' }} Sección Volumen Consumo Reactivos (EU-5600 Pro)</span>
+                      <span>{{ equipmentConfigs[colIndex].showReagentVolume ? 'Ocultar' : 'Desplegar' }} Sección Volumen Consumo Reactivos (EU-5600 Pro)</span>
                       <span>{{ equipmentConfigs[colIndex].showReagentVolume ? '▲' : '▼' }}</span>
                     </button>
                     <div v-if="equipmentConfigs[colIndex].showReagentVolume" class="mt-3">
@@ -432,7 +432,6 @@
 
                 <!-- Empty State Column -->
                 <div v-else class="column-empty-state">
-                  <div class="empty-icon">🔬</div>
                   <h5>Propuesta Vacía</h5>
                   <p>Selecciona un equipo de la lista para iniciar la simulación y el análisis de costes HUC.</p>
                 </div>

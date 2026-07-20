@@ -7,37 +7,37 @@
         class="excel-tab-btn"
         :class="{ 'active-tab': activeSheet === 'EU-5600Pro' }"
       >
-        📄 HOJA 1: EU-5600Pro (Envase y Costo por Prueba)
+        HOJA 1: EU-5600Pro (Envase y Costo por Prueba)
       </button>
       <button 
         @click="activeSheet = 'consumo de reactivos'" 
         class="excel-tab-btn"
         :class="{ 'active-tab': activeSheet === 'consumo de reactivos' }"
       >
-        📊 HOJA 2: consumo de reactivos (Matriz de Consumo Técnico)
+        HOJA 2: consumo de reactivos (Matriz de Consumo Técnico)
       </button>
     </div>
 
     <!-- SHEET 1: EU-5600Pro -->
     <div v-if="activeSheet === 'EU-5600Pro'" class="excel-sheet-box">
       <div class="sheet-title-header">
-        Reagent Consumption Table for EU-5600 Pro (100 T/H for Sediment; 160 T/H for Dry chemistry)
+        Tabla de consumo de reactivos para EU-5600 Pro (100 T/H para sedimentos; 160 T/H para química seca)
       </div>
 
       <!-- Top Summary Grid (Yellow Inputs) -->
       <table class="excel-grid-table mb-4">
         <thead>
           <tr class="excel-header-row">
-            <th style="width: 35%;">TEST VOLUME PER TYPE</th>
-            <th style="width: 20%;">NUMBER</th>
-            <th style="width: 15%;">OPERATING DAY PER MONTH</th>
-            <th style="width: 15%;">OPERATING DAY PER YEAR</th>
-            <th style="width: 15%;">Cost/test(USD/EUR)</th>
+            <th style="width: 35%;">VOLUMEN DE PRUEBAS POR TIPO</th>
+            <th style="width: 20%;">NÚMERO</th>
+            <th style="width: 15%;">DÍAS DE OPERACIÓN AL MES</th>
+            <th style="width: 15%;">DÍAS DE OPERACIÓN AL AÑO</th>
+            <th style="width: 15%;">Costo/prueba (USD/EUR)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="excel-cell-lbl">Dry chemistry (Test per day)</td>
+            <td class="excel-cell-lbl">Química seca (Pruebas al día)</td>
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.dryChemistryDaily" class="excel-yellow-input" />
             </td>
@@ -48,17 +48,17 @@
               {{ calcData.dias_operacion_ano }}
             </td>
             <td rowspan="3" class="excel-cell-cost text-center align-middle text-base font-bold">
-              ${{ formatDecimal(calcData.tabla1.costo_prueba_fob, 9) }}
+              {{ formatSpanishDecimal(calcData.tabla1.costo_prueba_fob, 9) }}
             </td>
           </tr>
           <tr>
-            <td class="excel-cell-lbl">Sediment (Test per day)</td>
+            <td class="excel-cell-lbl">Sedimentos (Pruebas al día)</td>
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.sedimentDaily" class="excel-yellow-input" />
             </td>
           </tr>
           <tr>
-            <td class="excel-cell-lbl">Dry chemistry & sediment (Test per day)</td>
+            <td class="excel-cell-lbl">Química seca y sedimentos (Pruebas al día)</td>
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.comboDaily" class="excel-yellow-input" />
             </td>
@@ -67,21 +67,21 @@
       </table>
 
       <div class="excel-yellow-banner mb-4">
-        ONLY INPUT NUMBER IN YELLOW TABLE !!!!
+        ¡¡¡SOLO INTRODUZCA LOS NÚMEROS DE LA TABLA AMARILLA!!!
       </div>
 
       <!-- Bottom Reagent Packaging Table -->
       <table class="excel-grid-table mb-4">
         <thead>
           <tr class="excel-header-row">
-            <th style="width: 22%;">REAGENT PACKAGE</th>
+            <th style="width: 22%;">ENVASE DE REACTIVOS</th>
             <th style="width: 18%;">PART NUMBER</th>
-            <th style="width: 12%;" class="excel-th-yellow">Price (USD/EUR)</th>
-            <th style="width: 14%;">Specification</th>
-            <th style="width: 10%;">Bottle/month</th>
-            <th style="width: 10%;">Bottle/year (calculation only)</th>
-            <th style="width: 10%;">Bottle/year (Including Expiration)</th>
-            <th style="width: 8%;">Package/year</th>
+            <th style="width: 12%;" class="excel-th-yellow">Precio (USD/EUR)</th>
+            <th style="width: 14%;">Especificación</th>
+            <th style="width: 10%;">Botella/mes</th>
+            <th style="width: 10%;">Botella/año (solo cálculo)</th>
+            <th style="width: 10%;">Botella/año (Incluye fecha de caducidad)</th>
+            <th style="width: 8%;">Envase /año</th>
           </tr>
         </thead>
         <tbody>
@@ -93,9 +93,9 @@
               <input type="number" v-model.number="inputs.priceEu50" class="excel-yellow-input text-blue" />
             </td>
             <td class="excel-cell-blue text-center">2 bottle/package</td>
-            <td class="excel-cell-blue text-center">{{ formatDecimal(calcData.tabla1.eu50.botella_mes, 1) }}</td>
-            <td class="excel-cell-blue text-center">{{ formatDecimal(calcData.tabla1.eu50.botella_ano, 1) }}</td>
-            <td class="excel-cell-blue text-center text-green font-bold">{{ formatDecimal(calcData.tabla1.eu50.botella_caducidad, 1) }}</td>
+            <td class="excel-cell-blue text-center">{{ formatSpanishDecimal(calcData.tabla1.eu50.botella_mes, 1) }}</td>
+            <td class="excel-cell-blue text-center">{{ formatSpanishDecimal(calcData.tabla1.eu50.botella_ano, 1) }}</td>
+            <td class="excel-cell-blue text-center text-green font-bold">{{ formatSpanishDecimal(calcData.tabla1.eu50.botella_caducidad, 1) }}</td>
             <td class="excel-cell-blue text-center font-bold text-sm bg-light-blue">{{ calcData.tabla1.eu50.envase_ano }}</td>
           </tr>
 
@@ -107,8 +107,8 @@
               <input type="number" v-model.number="inputs.priceStrips11" class="excel-yellow-input text-blue" />
             </td>
             <td class="excel-cell-blue text-center">10 can/package</td>
-            <td class="excel-cell-blue text-center">{{ formatDecimal(calcData.tabla1.strips11.botella_mes, 1) }}</td>
-            <td class="excel-cell-blue text-center">{{ formatDecimal(calcData.tabla1.strips11.botella_ano, 1) }}</td>
+            <td class="excel-cell-blue text-center">{{ formatSpanishDecimal(calcData.tabla1.strips11.botella_mes, 1) }}</td>
+            <td class="excel-cell-blue text-center">{{ formatSpanishDecimal(calcData.tabla1.strips11.botella_ano, 1) }}</td>
             <td class="excel-cell-blue text-center">/</td>
             <td class="excel-cell-blue text-center font-bold text-sm bg-light-blue">{{ calcData.tabla1.strips11.envase_ano }}</td>
           </tr>
@@ -121,8 +121,8 @@
               <input type="number" v-model.number="inputs.priceStrips14" class="excel-yellow-input text-blue" />
             </td>
             <td class="excel-cell-blue text-center">10 can/package</td>
-            <td class="excel-cell-blue text-center">{{ formatDecimal(calcData.tabla1.strips14.botella_mes, 1) }}</td>
-            <td class="excel-cell-blue text-center">{{ formatDecimal(calcData.tabla1.strips14.botella_ano, 1) }}</td>
+            <td class="excel-cell-blue text-center">{{ formatSpanishDecimal(calcData.tabla1.strips14.botella_mes, 1) }}</td>
+            <td class="excel-cell-blue text-center">{{ formatSpanishDecimal(calcData.tabla1.strips14.botella_ano, 1) }}</td>
             <td class="excel-cell-blue text-center">/</td>
             <td class="excel-cell-blue text-center font-bold text-sm bg-light-blue">{{ calcData.tabla1.strips14.envase_ano }}</td>
           </tr>
@@ -144,17 +144,17 @@
       </table>
 
       <div class="excel-yellow-banner mb-3">
-        ONLY INPUT NUMBER IN YELLOW TABLE !!!!
+        SOLO INTRODUZCA LOS NÚMEROS DE LA TABLA AMARILLA!!!
       </div>
 
       <!-- Footer Yellow Notes -->
       <div class="excel-notes-box">
         <p class="font-bold mb-1">Note:</p>
-        <p class="yellow-highlight">Please choose only 1 type of strips when calculate the cost, and then set up the other one as "0"</p>
-        <p class="yellow-highlight">EU-50, Shelf life 2 years, open Expiry date 90 day.</p>
-        <p>Cleanser should be prepared by end-users. The cost of Cleanser is not included in cost.</p>
-        <p>The cost per test includes start up, shut down, dead volume. Standby and the other maintenances are not included.</p>
-        <p>In lab's practice, the needed packages of reagents should be a little bit more because of the consumption of standby and other maintenances.</p>
+        <p class="yellow-highlight">Al calcular el costo, seleccione solo un tipo de tiras y establezca el otro como "0".</p>
+        <p class="yellow-highlight">EU-50, vida útil: 2 años, fecha de caducidad: 90 días una vez abierto.</p>
+        <p>Cleanser debe ser preparado por el usuario final. El costo del limpiador no está incluido.</p>
+        <p>El costo por prueba incluye el arranque, el apagado y el tiempo de inactividad. No incluye el tiempo de espera ni otros mantenimientos.</p>
+        <p>En la práctica de laboratorio, la cantidad de reactivos necesarios puede ser ligeramente mayor debido al consumo de tiempo de espera y otros mantenimientos.</p>
       </div>
     </div>
 
@@ -214,8 +214,8 @@
             <td rowspan="3" class="excel-cell-yellow text-center align-middle font-semibold">
               <input type="number" v-model.number="inputs.eu50BottleSpec" class="excel-yellow-input" style="width: 60px;" />
             </td>
-            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-bold text-base">{{ calcData.tabla2.eu50.frasco_mes }}</td>
-            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-bold text-base">{{ calcData.tabla2.eu50.frasco_ano }}</td>
+            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-bold text-base">{{ formatSpanishDecimal(calcData.tabla2.eu50.frasco_mes, 1) }}</td>
+            <td rowspan="3" class="excel-cell-yellow text-center align-middle font-bold text-base">{{ formatSpanishDecimal(calcData.tabla2.eu50.frasco_ano, 1) }}</td>
           </tr>
           <tr>
             <td>Sedimento</td>
@@ -261,8 +261,8 @@
             <td class="excel-cell-yellow">
               <input type="number" v-model.number="inputs.stripsCanSpec" class="excel-yellow-input" style="width: 60px;" />
             </td>
-            <td class="excel-cell-yellow text-center font-bold text-base">{{ calcData.tabla2.strips.frasco_mes }}</td>
-            <td class="excel-cell-yellow text-center font-bold text-base">{{ calcData.tabla2.strips.frasco_ano }}</td>
+            <td class="excel-cell-yellow text-center font-bold text-base">{{ formatSpanishDecimal(calcData.tabla2.strips.frasco_mes, 1) }}</td>
+            <td class="excel-cell-yellow text-center font-bold text-base">{{ formatSpanishDecimal(calcData.tabla2.strips.frasco_ano, 1) }}</td>
           </tr>
 
           <!-- Cleanser Row -->
@@ -301,14 +301,14 @@
         class="excel-tab-pill"
         :class="{ 'active-pill': activeSheet === 'EU-5600Pro' }"
       >
-        🟢 EU-5600Pro
+        EU-5600Pro
       </button>
       <button 
         @click="activeSheet = 'consumo de reactivos'" 
         class="excel-tab-pill"
         :class="{ 'active-pill': activeSheet === 'consumo de reactivos' }"
       >
-        📊 consumo de reactivos
+        consumo de reactivos
       </button>
     </div>
   </div>
@@ -329,7 +329,7 @@ export default {
         dryMlPerSample: 4,
         sedMlPerSample: 16,
         comboMlPerSample: 16,
-        operatingDaysMonth: 36,
+        operatingDaysMonth: 24,
         eu50DeadVolumeRatio: 0.05,
         eu50StartUp: 54,
         eu50ShutDown: 70,
@@ -350,11 +350,11 @@ export default {
     }
   },
   methods: {
-    formatDecimal(val, decimals = 1) {
+    formatSpanishDecimal(val, decimals = 1) {
       if (val === null || val === undefined || val === '') return '';
       const num = Number(val);
       if (isNaN(num)) return val;
-      return num.toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+      return num.toFixed(decimals).replace('.', ',');
     }
   }
 };
