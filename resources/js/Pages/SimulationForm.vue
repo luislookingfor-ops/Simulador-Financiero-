@@ -165,7 +165,7 @@
                       </div>
                       <div class="excel-label text-right">Cantidad:</div>
                       <div class="excel-val">
-                        <input type="number" v-model.number="equipmentConfigs[colIndex].quantity" min="1" max="100" class="excel-input text-success font-bold text-center" />
+                        <input type="number" v-model.number="equipmentConfigs[colIndex].quantity" @input="onQuantityChange(colIndex)" @change="onQuantityChange(colIndex)" min="1" max="100" class="excel-input text-success font-bold text-center" />
                       </div>
                     </div>
 
@@ -635,6 +635,13 @@ export default {
         }
       };
     },
+    onQuantityChange(colIndex) {
+      const config = this.equipmentConfigs[colIndex];
+      const q = Number(config.quantity) || 1;
+      if (config.customItems && config.customItems.length > 0) {
+        config.customItems[0].qty = q;
+      }
+    },
     rebuildCustomItems(colIndex) {
       const config = this.equipmentConfigs[colIndex];
       if (!config.equipment_id) {
@@ -644,8 +651,9 @@ export default {
       const eq = this.getSelectedEquipment(config.equipment_id);
       if (!eq) return;
 
+      const q = Number(config.quantity) || 1;
       const items = [
-        { qty: 1, name: eq.name, unitFob: Number(eq.fob) }
+        { qty: q, name: eq.name, unitFob: Number(eq.fob) }
       ];
 
       if (config.include_ups && Number(eq.ups) > 0) {
