@@ -123,8 +123,8 @@ class SimulationController extends Controller
             $fobTotalBase = $eq->fob + (float) $eq->ups + (float) $eq->pc + (float) $eq->impresora + (float) $eq->control + (float) $eq->calibrador;
             $landedReal = $fobTotalBase * $importIndex;
 
-            // AMORTIZACIÓN (PMT)
-            $pv = $landedTeorico * $qty;
+            // AMORTIZACIÓN (PMT): PV is Total FOB sum
+            $pv = $fobTotalSelected * $qty;
             $r = $annualInterest / 12;
             $n = $amortizationMonths;
 
