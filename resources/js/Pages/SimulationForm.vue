@@ -639,7 +639,9 @@ export default {
       const config = this.equipmentConfigs[colIndex];
       const q = Number(config.quantity) || 1;
       if (config.customItems && config.customItems.length > 0) {
-        config.customItems[0].qty = q;
+        config.customItems.forEach(item => {
+          item.qty = q;
+        });
       }
     },
     rebuildCustomItems(colIndex) {
@@ -657,24 +659,24 @@ export default {
       ];
 
       if (config.include_ups && Number(eq.ups) > 0) {
-        items.push({ qty: 1, name: 'UPS SMART RT 1500VA 120V', unitFob: Number(eq.ups) });
+        items.push({ qty: q, name: 'UPS SMART RT 1500VA 120V', unitFob: Number(eq.ups) });
       }
       if (config.include_pc && Number(eq.pc) > 0) {
-        items.push({ qty: 1, name: 'COMPUTADOR 19.5"', unitFob: Number(eq.pc) });
+        items.push({ qty: q, name: 'COMPUTADOR 19.5"', unitFob: Number(eq.pc) });
       }
       if (config.include_printer_base && Number(eq.impresora) > 0) {
-        items.push({ qty: 1, name: 'IMPRESORA TINTA CONTINUA', unitFob: Number(eq.impresora) });
+        items.push({ qty: q, name: 'IMPRESORA TINTA CONTINUA', unitFob: Number(eq.impresora) });
       }
       if (config.need_zebra === 'Sí' || config.include_zebra) {
-        items.push({ qty: 1, name: 'IMPRESORA ZEBRA', unitFob: 330 });
+        items.push({ qty: q, name: 'IMPRESORA ZEBRA', unitFob: 330 });
       }
       if (config.need_software === 'Sí' || config.include_software) {
-        items.push({ qty: 1, name: 'SOFTWARE', unitFob: Number(config.software_value) || 2000 });
+        items.push({ qty: q, name: 'SOFTWARE', unitFob: Number(config.software_value) || 2000 });
       }
       if (config.need_controls === 'Sí' || config.include_controls) {
         const ctrlCost = Number(eq.control) + Number(eq.calibrador);
         if (ctrlCost > 0) {
-          items.push({ qty: 1, name: 'CONTROLES Y CALIBRADORES', unitFob: ctrlCost });
+          items.push({ qty: q, name: 'CONTROLES Y CALIBRADORES', unitFob: ctrlCost });
         }
       }
 
