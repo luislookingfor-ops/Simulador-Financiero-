@@ -75,8 +75,15 @@
               <input type="number" v-model.number="globalSettings.contract_months" class="form-input" min="1" max="120" />
             </div>
             <div class="form-group">
-              <label>Periodo Amortizacion Equipos (Meses)</label>
+              <label>Amortización Equipos (Meses)</label>
               <input type="number" v-model.number="globalSettings.amortization_months" class="form-input text-success font-semibold" min="1" max="120" />
+            </div>
+            <div class="form-group">
+              <label>Prueba Reportada</label>
+              <select v-model="globalSettings.reported_test" class="form-input text-danger font-semibold">
+                <option value="No">No</option>
+                <option value="Sí">Sí</option>
+              </select>
             </div>
             <div class="form-group">
               <label>Tasa de Interés Anual</label>
@@ -93,15 +100,8 @@
               </div>
             </div>
             <div class="form-group">
-              <label>Indice de Importación</label>
+              <label>Índice de Importación</label>
               <input type="number" v-model.number="globalSettings.import_index" class="form-input text-danger font-semibold" min="1.0" max="3.0" step="0.01" />
-            </div>
-            <div class="form-group">
-              <label>Prueba Reportada</label>
-              <select v-model="globalSettings.reported_test" class="form-input text-danger font-semibold">
-                <option value="No">No</option>
-                <option value="Sí">Sí</option>
-              </select>
             </div>
           </div>
         </section>
@@ -955,17 +955,11 @@ body {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px 24px;
 }
 
-@media (max-width: 1400px) {
-  .settings-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .settings-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -975,6 +969,24 @@ body {
   .settings-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.settings-grid .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-grid .form-group label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 34px;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 8px;
+  line-height: 1.25;
 }
 
 /* Inputs & Form Controls */
