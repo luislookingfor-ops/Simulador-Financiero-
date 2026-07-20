@@ -579,6 +579,32 @@
 <script>
 import EU5600ReagentSection from '../Components/EU5600ReagentSection.vue';
 
+function createEmptyConfig() {
+  return {
+    lineFilter: '',
+    equipment_id: null,
+    equipment_type: 'EQUIPO NUEVO',
+    depreciation_percent: 100,
+    quantity: 1,
+    customItems: [],
+    include_ups: true,
+    include_pc: true,
+    include_printer_base: true,
+    include_zebra: false,
+    need_zebra: 'No',
+    include_software: false,
+    need_software: 'No',
+    software_value: 2000,
+    include_syringes: false,
+    include_controls: true,
+    need_controls: 'Sí',
+    daily_tests: 30,
+    pvp_per_test: 1.10,
+    reagent_cost_per_test: 0.35,
+    showReagentVolume: false
+  };
+}
+
 export default {
   components: {
     EU5600ReagentSection
@@ -609,9 +635,9 @@ export default {
         reported_test: 'No'
       },
       equipmentConfigs: [
-        this.getEmptyConfig(),
-        this.getEmptyConfig(),
-        this.getEmptyConfig()
+        createEmptyConfig(),
+        createEmptyConfig(),
+        createEmptyConfig()
       ],
       reagentOperatingDays: 24,
       toast: {
@@ -832,29 +858,7 @@ export default {
       });
     },
     getEmptyConfig() {
-      return {
-        lineFilter: '',
-        equipment_id: null,
-        equipment_type: 'EQUIPO NUEVO',
-        depreciation_percent: 100,
-        quantity: 1,
-        customItems: [],
-        include_ups: true,
-        include_pc: true,
-        include_printer_base: true,
-        include_zebra: false,
-        need_zebra: 'No',
-        include_software: false,
-        need_software: 'No',
-        software_value: 2000,
-        include_syringes: false,
-        include_controls: true,
-        need_controls: 'Sí',
-        daily_tests: 30,
-        pvp_per_test: 1.10,
-        reagent_cost_per_test: 0.35,
-        showReagentVolume: false
-      };
+      return createEmptyConfig();
     },
     getEmptyCalculation() {
       return {
