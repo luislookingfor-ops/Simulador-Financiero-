@@ -1,27 +1,28 @@
 /**
  * EU-5600 Pro Reagent Consumption & HUC Cost Engine
- * Matches Excel Sheets "EU-5600Pro" and "consumo de reactivos" exactly.
+ * Dynamic reactive calculator for both Excel Sheets ("EU-5600Pro" & "consumo de reactivos").
  */
 
 export function calculateEU5600ReagentConsumption(params = {}) {
-  const {
-    dryChemistryDaily = 100,
-    sedimentDaily = 100,
-    comboDaily = 100,
-    operatingDaysMonth = 24,
-    priceEu50 = 105,
-    priceStrips11 = 90,
-    priceStrips14 = 0,
-    priceCleanser = 0,
-    importIndex = 1.15
-  } = params;
+  const dryChemistryDaily = Number(params.dryChemistryDaily) || 0;
+  const sedimentDaily = Number(params.sedimentDaily) || 0;
+  const comboDaily = Number(params.comboDaily) || 0;
+  const operatingDaysMonth = Number(params.operatingDaysMonth) || 24;
 
+  const priceEu50 = Number(params.priceEu50 !== undefined ? params.priceEu50 : 105);
+  const priceStrips11 = Number(params.priceStrips11 !== undefined ? params.priceStrips11 : 90);
+  const priceStrips14 = Number(params.priceStrips14 !== undefined ? params.priceStrips14 : 108);
+  const priceCleanser = Number(params.priceCleanser !== undefined ? params.priceCleanser : 0);
+
+  const activeStripType = params.activeStripType || 'strips11'; // 'strips11' or 'strips14'
+
+  // Operating Days Year
   const operatingDaysYear = operatingDaysMonth * 12;
 
   // -------------------------------------------------------------
   // TABLA 2: MATRIZ DE CONSUMO TÉCNICO (consumo de reactivos)
   // -------------------------------------------------------------
-  // EU-50 Breakdown
+  // EU-50 Consumption Breakdown
   const eu50DryConsDay = dryChemistryDaily * 4;
   const eu50DryConsMonth = eu50DryConsDay * operatingDaysMonth;
   const eu50DryConsYear = eu50DryConsDay * operatingDaysYear;
@@ -34,55 +35,64 @@ export function calculateEU5600ReagentConsumption(params = {}) {
   const eu50ComboConsMonth = eu50ComboConsDay * operatingDaysMonth;
   const eu50ComboConsYear = eu50ComboConsDay * operatingDaysYear;
 
-  // EU-50 Total Calculations
-  // Total ml per month = (dry_month + sed_month + combo_month) * 1.05 (vol muerto 5%) + (54 + 70)*operatingDaysMonth
-  // Excel formula for Frasco/mes:
-  // EU-50 Frasco/mes = ( (100*4 + 100*16 + 100*16)*24*1.05 + (54+70)*24 ) / 5000 = (90720 + 2976) / 5000 = 18.7392 -> rounded in sheet 2 as 18.9
-  // Or in Sheet 1 Botella/mes = 19.0
-  const eu50TotalMlMonth = ((eu50DryConsMonth + eu50SedConsMonth + eu50ComboConsMonth) * 1.05) + ((54 + 70) * operatingDaysMonth);
-  const eu50TotalMlYear = eu50TotalMlMonth * 12;
+  const eu50BaseDay = eu50DryConsDay + eu50SedConsDay + eu50ComboConsDay;
+  const eu50DeadVolDay = eu50BaseDay * 0.05;
+  const eu50StartUpDay = 54;
+  const eu50ShutDownDay = 70;
 
-  const eu50FrascoMesTecnico = eu50TotalMlMonth / 5000; // 18.7392 -> ~18.9
-  const eu50FrascoAnoTecnico = eu50TotalMlYear / 5000; // 224.87 -> ~226.3
+  const eu50TotalDayMl = eu50BaseDay + eu50DeadVolDay + eu50StartUpDay + eu50ShutDownDay;
+  const eu50TotalMonthMl = eu50TotalDayMl * operatingDaysMonth;
+  const eu50TotalYearMl = eu50TotalDayMl * operatingDaysYear;
 
-  // Strips Breakdown
-  const stripsDaily = dryChemistryDaily + comboDaily;
+  // Frasco/mes and Frasco/año (Sheet 2)
+  const eu50FrascoMesTecnico = eu50TotalMonthMl / 5000;
+  const eu50FrascoAnoTecnico = eu50TotalYearMl / 5000;
+
+  // Strips Consumption (Used in Dry Chem + Sediments + Combo)
+  const stripsDaily = dryChemistryDaily + sedimentDaily + comboDaily;
   const stripsMonth = stripsDaily * operatingDaysMonth;
   const stripsYear = stripsDaily * operatingDaysYear;
 
-  const stripsFrascoMes = stripsMonth / 100; // 48.0
-  const stripsFrascoAno = stripsYear / 100; // 576.0
+  const stripsFrascoMesTecnico = stripsMonth / 100;
+  const stripsFrascoAnoTecnico = stripsYear / 100;
+
+  // Cleanser
+  const cleanserShutDownDay = 6;
 
   // -------------------------------------------------------------
   // TABLA 1: ENVASE DE REACTIVOS (EU-5600Pro)
   // -------------------------------------------------------------
-  // Sheet 1 Botella/mes & Botella/año
-  const eu50BotellaMesTabla1 = 19.0;
-  const eu50BotellaAnoTabla1 = 227.0;
-  const eu50CaducidadAnoTabla1 = 4.0;
-  const eu50EnvaseAnoTabla1 = Math.ceil(eu50BotellaAnoTabla1 / 2); // 114
+  // EU-50
+  const eu50BotellaMesTabla1 = Number(eu50FrascoMesTecnico.toFixed(1));
+  const eu50BotellaAnoTabla1 = Number(eu50FrascoAnoTecnico.toFixed(1));
+  const eu50CaducidadAnoTabla1 = 4.0; // Min bottles for 90-day open stability
+  const eu50BotellaAnoFinal = Math.max(eu50BotellaAnoTabla1, eu50CaducidadAnoTabla1);
+  const eu50EnvaseAnoTabla1 = Math.ceil(eu50BotellaAnoFinal / 2);
 
-  const strips11BotellaMesTabla1 = 48.0;
-  const strips11BotellaAnoTabla1 = 576.0;
-  const strips11EnvaseAnoTabla1 = Math.ceil(strips11BotellaAnoTabla1 / 10); // 58
+  // URS-Strips(11 items)
+  const strips11BotellaMesTabla1 = Number(stripsFrascoMesTecnico.toFixed(1));
+  const strips11BotellaAnoTabla1 = Number(stripsFrascoAnoTecnico.toFixed(1));
+  const strips11EnvaseAnoTabla1 = Math.ceil(strips11BotellaAnoTabla1 / 10);
 
-  const strips14BotellaMesTabla1 = 48.0;
-  const strips14BotellaAnoTabla1 = 576.0;
-  const strips14EnvaseAnoTabla1 = priceStrips14 > 0 ? Math.ceil(strips14BotellaAnoTabla1 / 10) : 58;
+  // URS-Strips(14 items)
+  const strips14BotellaMesTabla1 = Number(stripsFrascoMesTecnico.toFixed(1));
+  const strips14BotellaAnoTabla1 = Number(stripsFrascoAnoTecnico.toFixed(1));
+  const strips14EnvaseAnoTabla1 = Math.ceil(strips14BotellaAnoTabla1 / 10);
 
-  // Costo por Prueba (USD)
-  // Total Cost FOB = (114 * priceEu50) + (58 * priceStrips11) + (priceStrips14 > 0 ? 58 * priceStrips14 : 0)
-  const totalCostFobEU50 = eu50EnvaseAnoTabla1 * Number(priceEu50);
-  const totalCostFobStrips11 = strips11EnvaseAnoTabla1 * Number(priceStrips11);
-  const totalCostFobStrips14 = (Number(priceStrips14) > 0) ? (strips14EnvaseAnoTabla1 * Number(priceStrips14)) : 0;
+  // Cost calculations
+  const costFobEu50 = eu50EnvaseAnoTabla1 * priceEu50;
+  const costFobStrips11 = strips11EnvaseAnoTabla1 * priceStrips11;
+  const costFobStrips14 = strips14EnvaseAnoTabla1 * priceStrips14;
 
-  const totalCostFobYear = totalCostFobEU50 + totalCostFobStrips11 + totalCostFobStrips14;
+  const activeStripsCostFob = activeStripType === 'strips14' ? costFobStrips14 : costFobStrips11;
+  const totalCostFobYear = costFobEu50 + activeStripsCostFob;
+
   const totalTestsYear = (dryChemistryDaily + sedimentDaily + comboDaily) * operatingDaysYear;
-
-  // Costo/prueba exact = 17190 / 86400 = 0.198958 or 0.197934028 (with exact Excel formula)
-  const costPerTestFob = totalTestsYear > 0 ? (totalCostFobYear / totalTestsYear) : 0.197934028;
+  const costPerTestFob = totalTestsYear > 0 ? (totalCostFobYear / totalTestsYear) : 0;
 
   return {
+    dias_operacion_mes: operatingDaysMonth,
+    dias_operacion_ano: operatingDaysYear,
     tabla1: {
       quimica_seca_dia: dryChemistryDaily,
       sedimentos_dia: sedimentDaily,
@@ -90,135 +100,65 @@ export function calculateEU5600ReagentConsumption(params = {}) {
       dias_mes: operatingDaysMonth,
       dias_ano: operatingDaysYear,
       costo_prueba_fob: costPerTestFob,
-      items: [
-        {
-          nombre: "EU-50",
-          part_number: "105-039227-A0",
-          precio: Number(priceEu50),
-          especificacion: "2 bottle/package",
-          botella_mes: eu50BotellaMesTabla1,
-          botella_ano_calculo: eu50BotellaAnoTabla1,
-          botella_ano_caducidad: eu50CaducidadAnoTabla1,
-          envase_ano: eu50EnvaseAnoTabla1
-        },
-        {
-          nombre: "URS-Strips(11 items)",
-          part_number: "105-035331-00",
-          precio: Number(priceStrips11),
-          especificacion: "10 can/package",
-          botella_mes: strips11BotellaMesTabla1,
-          botella_ano_calculo: strips11BotellaAnoTabla1,
-          botella_ano_caducidad: "/",
-          envase_ano: strips11EnvaseAnoTabla1
-        },
-        {
-          nombre: "URS-Strips(14 items)",
-          part_number: "105-035297-00",
-          precio: Number(priceStrips14),
-          especificacion: "10 can/package",
-          botella_mes: strips14BotellaMesTabla1,
-          botella_ano_calculo: strips14BotellaAnoTabla1,
-          botella_ano_caducidad: "/",
-          envase_ano: priceStrips14 > 0 ? strips14EnvaseAnoTabla1 : 58
-        },
-        {
-          nombre: "Cleanser",
-          part_number: "/",
-          precio: Number(priceCleanser),
-          especificacion: "",
-          botella_mes: "",
-          botella_ano_calculo: "",
-          botella_ano_caducidad: "",
-          envase_ano: ""
-        }
-      ]
+      eu50: {
+        precio: priceEu50,
+        botella_mes: eu50BotellaMesTabla1,
+        botella_ano: eu50BotellaAnoTabla1,
+        botella_caducidad: eu50CaducidadAnoTabla1,
+        envase_ano: eu50EnvaseAnoTabla1
+      },
+      strips11: {
+        precio: priceStrips11,
+        botella_mes: strips11BotellaMesTabla1,
+        botella_ano: strips11BotellaAnoTabla1,
+        botella_caducidad: "/",
+        envase_ano: strips11EnvaseAnoTabla1
+      },
+      strips14: {
+        precio: priceStrips14,
+        botella_mes: strips14BotellaMesTabla1,
+        botella_ano: strips14BotellaAnoTabla1,
+        botella_caducidad: "/",
+        envase_ano: strips14EnvaseAnoTabla1
+      },
+      cleanser: {
+        precio: priceCleanser,
+        botella_mes: "",
+        botella_ano: "",
+        botella_caducidad: "",
+        envase_ano: ""
+      }
     },
     tabla2: {
-      items: [
-        {
-          reactivo: "EU-50",
-          subitems: [
-            {
-              tipo: "Química seca",
-              pruebas_dia: dryChemistryDaily,
-              prueba_muestra: 4,
-              dias_mes: operatingDaysMonth,
-              dias_ano: operatingDaysYear,
-              consumo_dia: eu50DryConsDay,
-              consumo_mes: eu50DryConsMonth,
-              consumo_ano: eu50DryConsYear
-            },
-            {
-              tipo: "Sedimento",
-              pruebas_dia: sedimentDaily,
-              prueba_muestra: 16,
-              dias_mes: operatingDaysMonth,
-              dias_ano: operatingDaysYear,
-              consumo_dia: eu50SedConsDay,
-              consumo_mes: eu50SedConsMonth,
-              consumo_ano: eu50SedConsYear
-            },
-            {
-              tipo: "Química seca + Sedimento",
-              pruebas_dia: comboDaily,
-              prueba_muestra: 16,
-              dias_mes: operatingDaysMonth,
-              dias_ano: operatingDaysYear,
-              consumo_dia: eu50ComboConsDay,
-              consumo_mes: eu50ComboConsMonth,
-              consumo_ano: eu50ComboConsYear
-            }
-          ],
-          volumen_muerto: "5%",
-          start_up: 54,
-          shut_down: 70,
-          especificacion_frasco: 5000,
-          frasco_mes: 18.9,
-          frasco_ano: 226.3
-        },
-        {
-          reactivo: "Strips",
-          subitems: [
-            {
-              tipo: "/",
-              pruebas_dia: stripsDaily,
-              prueba_muestra: 1,
-              dias_mes: operatingDaysMonth,
-              dias_ano: operatingDaysYear,
-              consumo_dia: stripsDaily,
-              consumo_mes: stripsMonth,
-              consumo_ano: stripsYear
-            }
-          ],
-          volumen_muerto: "0%",
-          start_up: 0,
-          shut_down: 0,
-          especificacion_frasco: 100,
-          frasco_mes: 48.0,
-          frasco_ano: 576.0
-        },
-        {
-          reactivo: "Cleanser",
-          subitems: [
-            {
-              tipo: "/",
-              pruebas_dia: "",
-              prueba_muestra: 1,
-              dias_mes: "",
-              dias_ano: "",
-              consumo_dia: "",
-              consumo_mes: "",
-              consumo_ano: ""
-            }
-          ],
-          volumen_muerto: "",
-          start_up: "",
-          shut_down: 6,
-          especificacion_frasco: "",
-          frasco_mes: "",
-          frasco_ano: ""
-        }
-      ]
+      dias_mes: operatingDaysMonth,
+      dias_ano: operatingDaysYear,
+      eu50: {
+        dry: { dia: dryChemistryDaily, ml_sample: 4, cons_dia: eu50DryConsDay, cons_mes: eu50DryConsMonth, cons_ano: eu50DryConsYear },
+        sed: { dia: sedimentDaily, ml_sample: 16, cons_dia: eu50SedConsDay, cons_mes: eu50SedConsMonth, cons_ano: eu50SedConsYear },
+        combo: { dia: comboDaily, ml_sample: 16, cons_dia: eu50ComboConsDay, cons_mes: eu50ComboConsMonth, cons_ano: eu50ComboConsYear },
+        volumen_muerto: "5%",
+        start_up: 54,
+        shut_down: 70,
+        especificacion_frasco: 5000,
+        frasco_mes: eu50FrascoMesTecnico.toFixed(1),
+        frasco_ano: eu50FrascoAnoTecnico.toFixed(1)
+      },
+      strips: {
+        dia: stripsDaily,
+        ml_sample: 1,
+        cons_dia: stripsDaily,
+        cons_mes: stripsMonth,
+        cons_ano: stripsYear,
+        volumen_muerto: "0%",
+        start_up: 0,
+        shut_down: 0,
+        especificacion_frasco: 100,
+        frasco_mes: stripsFrascoMesTecnico.toFixed(1),
+        frasco_ano: stripsFrascoAnoTecnico.toFixed(1)
+      },
+      cleanser: {
+        shut_down: 6
+      }
     }
   };
 }
