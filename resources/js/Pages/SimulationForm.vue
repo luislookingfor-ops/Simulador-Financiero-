@@ -408,10 +408,10 @@
                   <p>Selecciona un equipo de la lista para iniciar la simulación y el análisis de costes HUC.</p>
                 </div>
               </div>
-            </template>
-          </div>
-          </div>
-        </section>
+            </div>
+          </template>
+        </div>
+      </section>
       </div>
     </main>
 
