@@ -7,9 +7,23 @@
       </div>
 
       <nav class="nav-menu">
-        <a href="#" class="nav-item active">
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'simulator' }"
+          @click.prevent="activeNavTab = 'simulator'"
+        >
           <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z"/></svg>
           Simulador HUC
+        </a>
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'reagents' }"
+          @click.prevent="activeNavTab = 'reagents'"
+        >
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19.5 9.5c-1.03 0-1.9.71-2.15 1.68-.86-.23-1.83-.24-2.85.14-.99.37-1.83 1.05-2.4 1.96-.53-.25-1.14-.38-1.8-.34C9.17 13.06 8.3 13.9 8.05 15c-.23-.05-.47-.08-.72-.08-1.78 0-3.23 1.45-3.23 3.23s1.45 3.23 3.23 3.23h12.17c1.93 0 3.5-1.57 3.5-3.5 0-1.79-1.35-3.26-3.08-3.46.05-.29.08-.59.08-.9 0-2.21-1.79-4-4-4z"/></svg>
+          Volumen Consumo Reactivos
         </a>
         <a href="#" class="nav-item" @click.prevent="showToast('Módulo Maestro de Equipos en desarrollo', 'info')">
           <svg class="icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
@@ -54,8 +68,8 @@
         </div>
       </header>
 
-      <!-- Dashboard Grid -->
-      <div class="dashboard-grid">
+      <!-- Dashboard Grid: Tab 1 - Simulador HUC -->
+      <div v-if="activeNavTab === 'simulator'" class="dashboard-grid">
         <!-- Global Settings Card -->
         <section class="card global-settings-card">
           <div class="card-header">
@@ -122,14 +136,14 @@
                 class="tab-nav-btn"
                 :class="{ active: activeProposalTab === cIdx }"
               >
-                📋 EQUIPO {{ cIdx + 1 }}
+                EQUIPO {{ cIdx + 1 }}
               </button>
               <button 
                 @click="activeProposalTab = 'all'"
                 class="tab-nav-btn tab-nav-btn-alt"
                 :class="{ active: activeProposalTab === 'all' }"
               >
-                📊 VISTA COMPARATIVA (3 COLUMNAS)
+                VISTA COMPARATIVA (3 COLUMNAS)
               </button>
             </div>
           </div>
@@ -194,9 +208,28 @@
                       <div class="excel-val col-span-3">
                         <select v-model="equipmentConfigs[colIndex].equipment_type" class="excel-select font-bold text-primary">
                           <option value="EQUIPO NUEVO">EQUIPO NUEVO</option>
+                          <option value="EQUIPO REPOTENCIADO">EQUIPO REPOTENCIADO</option>
                           <option value="EQUIPO REACONDICIONADO">EQUIPO REACONDICIONADO</option>
                           <option value="EQUIPO USADO">EQUIPO USADO</option>
                           <option value="EQUIPO EN COMODATO">EQUIPO EN COMODATO</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="excel-form-row" v-if="equipmentConfigs[colIndex].equipment_type === 'EQUIPO REPOTENCIADO'">
+                      <div class="excel-label">Depreciación:</div>
+                      <div class="excel-val col-span-3">
+                        <select v-model.number="equipmentConfigs[colIndex].depreciation_percent" class="excel-select font-bold text-amber-700 bg-amber-50">
+                          <option :value="10">10% del Costo Total</option>
+                          <option :value="20">20% del Costo Total</option>
+                          <option :value="30">30% del Costo Total</option>
+                          <option :value="40">40% del Costo Total</option>
+                          <option :value="50">50% del Costo Total</option>
+                          <option :value="60">60% del Costo Total</option>
+                          <option :value="70">70% del Costo Total</option>
+                          <option :value="80">80% del Costo Total</option>
+                          <option :value="90">90% del Costo Total</option>
+                          <option :value="100">100% (Sin Descuento)</option>
                         </select>
                       </div>
                     </div>
@@ -345,57 +378,170 @@
                     </div>
                   </div>
 
-                  <!-- Commercial P&L & Margin Analysis Section -->
+                  <!-- Commercial P&L & Margin Analysis Section (Matriz HUC 3 Columnas) -->
                   <div class="form-section mt-4">
-                    <h4>Análisis de Rentabilidad Comercial</h4>
+                    <h4>Análisis de Rentabilidad Comercial HUC</h4>
 
-                    <div class="pricing-grid mb-3">
-                      <div class="form-group">
-                        <label>Precio Venta Prueba (PVP)</label>
-                        <div class="input-with-prefix">
+                    <div class="huc-financial-matrix-box mt-3 mb-4">
+                      <!-- Top Table: Cost per Test -->
+                      <table class="huc-excel-matrix-table mb-3">
+                        <thead>
+                          <tr class="huc-header-row">
+                            <th style="width: 43%;"></th>
+                            <th style="width: 19%;">FOB</th>
+                            <th style="width: 19%;">Landed Teórico</th>
+                            <th style="width: 19%;">Landed Real</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="huc-lbl">Reactivos por Prueba</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].fob_reagent_cost, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_teorico_reagent_cost, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_real_reagent_cost, 2) }}</td>
+                          </tr>
+                          <tr>
+                            <td class="huc-lbl">Controles por Prueba</td>
+                            <td class="text-right">$0,00</td>
+                            <td class="text-right">$0,00</td>
+                            <td class="text-right">$0,00</td>
+                          </tr>
+                          <tr class="border-top font-semibold">
+                            <td class="huc-lbl">Costo por Prueba</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].fob_reagent_cost, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_teorico_reagent_cost, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_real_reagent_cost, 2) }}</td>
+                          </tr>
+                          <tr>
+                            <td class="huc-lbl">Costo con inflación {{ globalSettings.inflation_rate || 1 }}% Anual</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].fob_inflated_reagent_cost, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_teorico_inflated_reagent_cost, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_real_inflated_reagent_cost, 2) }}</td>
+                          </tr>
+                          <tr>
+                            <td class="huc-lbl">Costo Equipos por Prueba</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].fob_equipment_cost_per_test, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_teorico_equipment_cost_per_test, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_real_equipment_cost_per_test, 2) }}</td>
+                          </tr>
+                          <tr class="huc-yellow-highlight-row font-bold">
+                            <td class="huc-lbl">Costo Final por Prueba</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].fob_final_cost_per_test, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_teorico_final_cost_per_test, 2) }}</td>
+                            <td class="text-right">${{ formatSpanishDecimal(calculations[colIndex].landed_real_final_cost_per_test, 2) }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <!-- Interactive PVP Price Input Row -->
+                      <div class="huc-pvp-input-bar my-3">
+                        <span class="huc-red-input-lbl font-bold text-danger">Ingrese Precio para Prueba</span>
+                        <div class="huc-green-pvp-box">
                           <span class="prefix">$</span>
-                          <input type="number" v-model.number="equipmentConfigs[colIndex].pvp_per_test" class="form-input font-bold" min="0.01" step="0.01" />
+                          <input 
+                            type="number" 
+                            v-model.number="equipmentConfigs[colIndex].pvp_per_test" 
+                            class="huc-pvp-input text-success font-bold text-base" 
+                            min="0.01" 
+                            step="0.01" 
+                          />
                         </div>
+                        <span class="huc-green-sub-lbl font-bold text-success">Costo por Prueba al PVP</span>
                       </div>
 
-                      <div class="form-group">
-                        <label>Costo Reactivo Prueba</label>
-                        <div class="input-with-prefix">
-                          <span class="prefix">$</span>
-                          <input type="number" v-model.number="equipmentConfigs[colIndex].reagent_cost_per_test" class="form-input font-bold" min="0" step="0.01" />
-                        </div>
+                      <!-- Bottom Table: P&L Matrix -->
+                      <table class="huc-excel-matrix-table mb-2">
+                        <thead>
+                          <tr class="huc-header-row">
+                            <th style="width: 43%;"></th>
+                            <th style="width: 19%;">FOB</th>
+                            <th style="width: 19%;">Landed Teórico</th>
+                            <th style="width: 19%;">Landed Real</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="huc-lbl">Ingresos Totales</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].p_and_l.total_revenue) }}</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].p_and_l.total_revenue) }}</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].p_and_l.total_revenue) }}</td>
+                          </tr>
+                          <tr>
+                            <td class="huc-lbl">(-) Costo de Ventas</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].matrix.fob_cogs) }}</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].matrix.landed_teorico_cogs) }}</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].matrix.landed_real_cogs) }}</td>
+                          </tr>
+                          <tr class="border-top font-semibold">
+                            <td class="huc-lbl">Utilidad Bruta USD</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].matrix.fob_gross_profit_usd) }}</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].matrix.landed_teorico_gross_profit_usd) }}</td>
+                            <td class="text-right">${{ formatMoney(calculations[colIndex].matrix.landed_real_gross_profit_usd) }}</td>
+                          </tr>
+                          <tr class="huc-yellow-highlight-row font-bold">
+                            <td class="huc-lbl">Utilidad Bruta %</td>
+                            <td class="text-right">{{ formatSpanishDecimal(calculations[colIndex].matrix.fob_gross_profit_percent, 1) }}%</td>
+                            <td class="text-right">{{ formatSpanishDecimal(calculations[colIndex].matrix.landed_teorico_gross_profit_percent, 1) }}%</td>
+                            <td class="text-right">{{ formatSpanishDecimal(calculations[colIndex].matrix.landed_real_gross_profit_percent, 1) }}%</td>
+                          </tr>
+                          <tr>
+                            <td class="huc-lbl">(-) Costo de Equipos</td>
+                            <td class="text-right text-danger">-${{ formatMoney(calculations[colIndex].fob_selected_sum * equipmentConfigs[colIndex].quantity) }}</td>
+                            <td class="text-right text-danger">-${{ formatMoney(calculations[colIndex].landed_teorico_total) }}</td>
+                            <td class="text-right text-danger">-${{ formatMoney(calculations[colIndex].landed_real_total) }}</td>
+                          </tr>
+                          <tr class="huc-dark-red-row font-bold">
+                            <td class="huc-lbl text-danger font-extrabold">Utilidad Neta USD</td>
+                            <td class="text-right text-danger font-extrabold">-${{ formatMoneyAbs(calculations[colIndex].matrix.fob_net_profit_usd) }}</td>
+                            <td class="text-right text-danger font-extrabold">-${{ formatMoneyAbs(calculations[colIndex].matrix.landed_teorico_net_profit_usd) }}</td>
+                            <td class="text-right text-danger font-extrabold">-${{ formatMoneyAbs(calculations[colIndex].matrix.landed_real_net_profit_usd) }}</td>
+                          </tr>
+                          <tr class="huc-dark-red-header-row font-bold">
+                            <td class="huc-lbl text-white">Utilidad Neta %</td>
+                            <td class="text-right text-white">{{ formatSpanishDecimal(calculations[colIndex].matrix.fob_net_profit_percent, 1) }}%</td>
+                            <td class="text-right text-white">{{ formatSpanishDecimal(calculations[colIndex].matrix.landed_teorico_net_profit_percent, 1) }}%</td>
+                            <td class="text-right text-white">{{ formatSpanishDecimal(calculations[colIndex].matrix.landed_real_net_profit_percent, 1) }}%</td>
+                          </tr>
+                          <tr class="huc-light-green-row font-bold">
+                            <td class="huc-lbl">Consumo Mínimo Mensual</td>
+                            <td colspan="3" class="text-center text-success text-base font-bold">
+                              ${{ formatSpanishDecimal(calculations[colIndex].p_and_l.min_monthly_consumption, 2) }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <!-- Bottom Import Index Row -->
+                      <div class="huc-import-index-bar mt-2 text-right">
+                        <span class="lbl font-bold mr-2">Índice de Importación</span>
+                        <input 
+                          type="number" 
+                          v-model.number="globalSettings.import_index" 
+                          class="huc-yellow-import-input font-bold text-center" 
+                          step="0.01" 
+                          min="1.0" 
+                          max="3.0" 
+                        />
                       </div>
                     </div>
+                  </div>
 
-                    <div 
-                      class="pl-card" 
-                      :class="getProfitMarginClass(calculations[colIndex].p_and_l.net_profit_percent)"
+                  <!-- Collapsible Reagent Volume Section (EU-5600 Pro) -->
+                  <div class="mt-4 pt-3 border-top">
+                    <button 
+                      @click="equipmentConfigs[colIndex].showReagentVolume = !equipmentConfigs[colIndex].showReagentVolume" 
+                      class="btn-toggle-reagents"
+                      style="background: #fff8e1; border: 1px solid #ffe082; padding: 10px 14px; border-radius: 6px; width: 100%; display: flex; justify-content: space-between; font-weight: bold; cursor: pointer; color: #795548;"
                     >
-                      <div class="pl-item">
-                        <span>Ingresos Totales</span>
-                        <strong>${{ formatMoney(calculations[colIndex].p_and_l.total_revenue) }}</strong>
-                      </div>
-
-                      <div class="pl-item">
-                        <span>Utilidad Bruta</span>
-                        <div class="pl-val">
-                          <strong>${{ formatMoney(calculations[colIndex].p_and_l.gross_profit_usd) }}</strong>
-                          <span class="percent-badge">{{ formatNumber(calculations[colIndex].p_and_l.gross_profit_percent) }}%</span>
-                        </div>
-                      </div>
-
-                      <div class="pl-item border-top pt-2 mt-2">
-                        <span class="highlight-lbl">Utilidad Neta</span>
-                        <div class="pl-val">
-                          <strong class="highlight-val">${{ formatMoney(calculations[colIndex].p_and_l.net_profit_usd) }}</strong>
-                          <span class="percent-badge net-badge">{{ formatNumber(calculations[colIndex].p_and_l.net_profit_percent) }}% Net</span>
-                        </div>
-                      </div>
-
-                      <div class="pl-warning-indicator mt-3">
-                        <span class="lbl">Consumo Mínimo Mensual Requerido:</span>
-                        <strong class="val">${{ formatMoney(calculations[colIndex].p_and_l.min_monthly_consumption) }} / mes</strong>
-                      </div>
+                      <span>{{ equipmentConfigs[colIndex].showReagentVolume ? 'Ocultar' : 'Desplegar' }} Sección Volumen Consumo Reactivos (EU-5600 Pro)</span>
+                      <span>{{ equipmentConfigs[colIndex].showReagentVolume ? '▲' : '▼' }}</span>
+                    </button>
+                    <div v-if="equipmentConfigs[colIndex].showReagentVolume" class="mt-3">
+                      <EU5600ReagentSection 
+                        :contract-months="globalSettings.contract_months" 
+                        :operating-days-default="reagentOperatingDays"
+                        :initial-combo-tests="equipmentConfigs[colIndex].daily_tests"
+                      />
                     </div>
                   </div>
 
@@ -403,7 +549,6 @@
 
                 <!-- Empty State Column -->
                 <div v-else class="column-empty-state">
-                  <div class="empty-icon">🔬</div>
                   <h5>Propuesta Vacía</h5>
                   <p>Selecciona un equipo de la lista para iniciar la simulación y el análisis de costes HUC.</p>
                 </div>
@@ -412,6 +557,15 @@
           </template>
         </div>
       </section>
+      </div>
+
+      <!-- Dashboard Grid: Tab 2 - Volumen Consumo Reactivos -->
+      <div v-else-if="activeNavTab === 'reagents'" class="dashboard-grid single-view">
+        <EU5600ReagentSection 
+          :contract-months="globalSettings.contract_months" 
+          :operating-days-default="reagentOperatingDays"
+          :initial-combo-tests="equipmentConfigs[0].daily_tests"
+        />
       </div>
     </main>
 
@@ -423,7 +577,38 @@
 </template>
 
 <script>
+import EU5600ReagentSection from '../Components/EU5600ReagentSection.vue';
+
+function createEmptyConfig() {
+  return {
+    lineFilter: '',
+    equipment_id: null,
+    equipment_type: 'EQUIPO NUEVO',
+    depreciation_percent: 100,
+    quantity: 1,
+    customItems: [],
+    include_ups: true,
+    include_pc: true,
+    include_printer_base: true,
+    include_zebra: false,
+    need_zebra: 'No',
+    include_software: false,
+    need_software: 'No',
+    software_value: 2000,
+    include_syringes: false,
+    include_controls: true,
+    need_controls: 'Sí',
+    daily_tests: 30,
+    pvp_per_test: 1.10,
+    reagent_cost_per_test: 0.35,
+    showReagentVolume: false
+  };
+}
+
 export default {
+  components: {
+    EU5600ReagentSection
+  },
   props: {
     equipments: {
       type: Array,
@@ -436,6 +621,7 @@ export default {
   },
   data() {
     return {
+      activeNavTab: 'simulator', // 'simulator' | 'reagents'
       activeProposalTab: 0, // 0 = Equipo 1, 1 = Equipo 2, 2 = Equipo 3, 'all' = Vista comparativa
       scenarioName: '',
       saving: false,
@@ -449,16 +635,29 @@ export default {
         reported_test: 'No'
       },
       equipmentConfigs: [
-        this.getEmptyConfig(),
-        this.getEmptyConfig(),
-        this.getEmptyConfig()
+        createEmptyConfig(),
+        createEmptyConfig(),
+        createEmptyConfig()
       ],
+      reagentOperatingDays: 24,
       toast: {
         show: false,
         message: '',
         type: 'info'
       }
     };
+  },
+  watch: {
+    'globalSettings.client_type': {
+      immediate: true,
+      handler(newType) {
+        if (newType === 'Público') {
+          this.reagentOperatingDays = 30;
+        } else if (newType === 'Privado') {
+          this.reagentOperatingDays = 24;
+        }
+      }
+    }
   },
   computed: {
     uniqueLines() {
@@ -497,6 +696,12 @@ export default {
           }, 0);
         } else {
           fobTotalSelected = Number(eq.fob) + upsCost + pcCost + printerBaseCost + zebraCost + softwareCost + syringesCost + controlCost + calibratorCost;
+        }
+
+        // Apply depreciation factor for EQUIPO REPOTENCIADO (10% to 100%)
+        if (cfg.equipment_type === 'EQUIPO REPOTENCIADO') {
+          const depPercent = Number(cfg.depreciation_percent) || 100;
+          fobTotalSelected = fobTotalSelected * (depPercent / 100);
         }
 
         const landedTeoricoUnit = fobTotalSelected * importIndex;
@@ -560,6 +765,44 @@ export default {
         const marginRatio = pvp > 0 ? (1 - (avgReagentCost / pvp)) : 0;
         const minMonthlyConsumption = marginRatio > 0 ? (pmt / marginRatio) : 0;
 
+        // 3-Column Matrix Calculations (FOB, Landed Teórico, Landed Real)
+        const fobReagentCost = baseReagentCost;
+        const landedTeoricoReagentCost = baseReagentCost * importIndex;
+        const landedRealReagentCost = baseReagentCost * importIndex;
+
+        const fobInflatedReagentCost = fobReagentCost * (1 + annualInflation);
+        const landedTeoricoInflatedReagentCost = landedTeoricoReagentCost * (1 + annualInflation);
+        const landedRealInflatedReagentCost = landedRealReagentCost * (1 + annualInflation);
+
+        const fobEquipmentCostPerTest = monthlyTests > 0 ? (pmt / monthlyTests) : 0;
+        const landedTeoricoEquipmentCostPerTest = (monthlyTests > 0 && contractMonths > 0) ? ((landedTeoricoTotal / contractMonths) / monthlyTests) : 0;
+        const landedRealEquipmentCostPerTest = (monthlyTests > 0 && contractMonths > 0) ? ((landedRealTotal / contractMonths) / monthlyTests) : 0;
+
+        const fobFinalCostPerTest = fobInflatedReagentCost + fobEquipmentCostPerTest;
+        const landedTeoricoFinalCostPerTest = landedTeoricoInflatedReagentCost + landedTeoricoEquipmentCostPerTest;
+        const landedRealFinalCostPerTest = landedRealInflatedReagentCost + landedRealEquipmentCostPerTest;
+
+        const fobCogs = totalTests * fobInflatedReagentCost;
+        const landedTeoricoCogs = totalTests * landedTeoricoInflatedReagentCost;
+        const landedRealCogs = totalTests * landedRealInflatedReagentCost;
+
+        const fobGrossProfitUSD = totalRevenue - fobCogs;
+        const landedTeoricoGrossProfitUSD = totalRevenue - landedTeoricoCogs;
+        const landedRealGrossProfitUSD = totalRevenue - landedRealCogs;
+
+        const fobGrossProfitPercent = totalRevenue > 0 ? (fobGrossProfitUSD / totalRevenue) * 100 : 0;
+        const landedTeoricoGrossProfitPercent = totalRevenue > 0 ? (landedTeoricoGrossProfitUSD / totalRevenue) * 100 : 0;
+        const landedRealGrossProfitPercent = totalRevenue > 0 ? (landedRealGrossProfitUSD / totalRevenue) * 100 : 0;
+
+        const fobEquipmentInvestment = fobTotalSelected * qty;
+        const fobNetProfitUSD = fobGrossProfitUSD - fobEquipmentInvestment;
+        const landedTeoricoNetProfitUSD = landedTeoricoGrossProfitUSD - landedTeoricoTotal;
+        const landedRealNetProfitUSD = landedRealGrossProfitUSD - landedRealTotal;
+
+        const fobNetProfitPercent = totalRevenue > 0 ? (fobNetProfitUSD / totalRevenue) * 100 : 0;
+        const landedTeoricoNetProfitPercent = totalRevenue > 0 ? (landedTeoricoNetProfitUSD / totalRevenue) * 100 : 0;
+        const landedRealNetProfitPercent = totalRevenue > 0 ? (landedRealNetProfitUSD / totalRevenue) * 100 : 0;
+
         return {
           fob_selected_sum: fobTotalSelected,
           landed_teorico_unit: landedTeoricoUnit,
@@ -569,10 +812,39 @@ export default {
           monthly_amortization: pmt,
           total_amortization: totalAmortization,
           cost_per_test: costPerTest,
+          fob_reagent_cost: fobReagentCost,
+          landed_teorico_reagent_cost: landedTeoricoReagentCost,
+          landed_real_reagent_cost: landedRealReagentCost,
+          fob_inflated_reagent_cost: fobInflatedReagentCost,
+          landed_teorico_inflated_reagent_cost: landedTeoricoInflatedReagentCost,
+          landed_real_inflated_reagent_cost: landedRealInflatedReagentCost,
+          fob_equipment_cost_per_test: fobEquipmentCostPerTest,
+          landed_teorico_equipment_cost_per_test: landedTeoricoEquipmentCostPerTest,
+          landed_real_equipment_cost_per_test: landedRealEquipmentCostPerTest,
+          fob_final_cost_per_test: fobFinalCostPerTest,
+          landed_teorico_final_cost_per_test: landedTeoricoFinalCostPerTest,
+          landed_real_final_cost_per_test: landedRealFinalCostPerTest,
           volumetrics: {
             monthly_tests: monthlyTests,
             annual_tests: annualTests,
             total_tests: totalTests
+          },
+          matrix: {
+            fob_cogs: fobCogs,
+            landed_teorico_cogs: landedTeoricoCogs,
+            landed_real_cogs: landedRealCogs,
+            fob_gross_profit_usd: fobGrossProfitUSD,
+            landed_teorico_gross_profit_usd: landedTeoricoGrossProfitUSD,
+            landed_real_gross_profit_usd: landedRealGrossProfitUSD,
+            fob_gross_profit_percent: fobGrossProfitPercent,
+            landed_teorico_gross_profit_percent: landedTeoricoGrossProfitPercent,
+            landed_real_gross_profit_percent: landedRealGrossProfitPercent,
+            fob_net_profit_usd: fobNetProfitUSD,
+            landed_teorico_net_profit_usd: landedTeoricoNetProfitUSD,
+            landed_real_net_profit_usd: landedRealNetProfitUSD,
+            fob_net_profit_percent: fobNetProfitPercent,
+            landed_teorico_net_profit_percent: landedTeoricoNetProfitPercent,
+            landed_real_net_profit_percent: landedRealNetProfitPercent
           },
           p_and_l: {
             total_revenue: totalRevenue,
@@ -588,27 +860,7 @@ export default {
   },
   methods: {
     getEmptyConfig() {
-      return {
-        lineFilter: '',
-        equipment_id: null,
-        equipment_type: 'EQUIPO NUEVO',
-        quantity: 1,
-        customItems: [],
-        include_ups: true,
-        include_pc: true,
-        include_printer_base: true,
-        include_zebra: false,
-        need_zebra: 'No',
-        include_software: false,
-        need_software: 'No',
-        software_value: 2000,
-        include_syringes: false,
-        include_controls: true,
-        need_controls: 'Sí',
-        daily_tests: 30,
-        pvp_per_test: 1.10,
-        reagent_cost_per_test: 0.35
-      };
+      return createEmptyConfig();
     },
     getEmptyCalculation() {
       return {
@@ -767,9 +1019,22 @@ export default {
       if (netPercent >= 15) return 'pl-warning';
       return 'pl-danger';
     },
+    formatSpanishDecimal(val, decimals = 1) {
+      if (val === null || val === undefined || val === '') return '0,00';
+      const num = Number(val);
+      if (isNaN(num)) return val;
+      return num.toFixed(decimals).replace('.', ',');
+    },
     formatMoney(val) {
       if (isNaN(val) || val === null) return '0.00';
       return Number(val).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    },
+    formatMoneyAbs(val) {
+      if (isNaN(val) || val === null) return '0.00';
+      return Number(Math.abs(val)).toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
@@ -859,6 +1124,94 @@ export default {
 </script>
 
 <style>
+/* HUC Financial Matrix Table Styling (Matching Photo) */
+.huc-financial-matrix-box {
+  background: #ffffff !important;
+  border: 1px solid #cccccc !important;
+  border-radius: 4px;
+  padding: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #000000 !important;
+}
+
+.huc-excel-matrix-table {
+  width: 100%;
+  border-collapse: collapse !important;
+  border: 1px solid #666666 !important;
+  font-size: 11.5px;
+  background: #ffffff !important;
+}
+
+.huc-excel-matrix-table th,
+.huc-excel-matrix-table td {
+  border: 1px solid #777777 !important;
+  padding: 5px 8px;
+  color: #000000 !important;
+}
+
+.huc-header-row th {
+  background: #800000 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+  text-align: center;
+}
+
+.huc-lbl {
+  color: #333333 !important;
+  font-weight: 500;
+}
+
+.huc-yellow-highlight-row td {
+  background: #fffde7 !important;
+  color: #000000 !important;
+}
+
+.huc-dark-red-row td {
+  background: #ffffff !important;
+}
+
+.huc-dark-red-header-row td {
+  background: #800000 !important;
+  color: #ffffff !important;
+}
+
+.huc-light-green-row td {
+  background: #f1f8e9 !important;
+}
+
+.huc-pvp-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  padding: 6px 0;
+}
+
+.huc-green-pvp-box {
+  display: flex;
+  align-items: center;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.huc-pvp-input {
+  border: none !important;
+  background: transparent !important;
+  width: 80px;
+  outline: none !important;
+}
+
+.huc-yellow-import-input {
+  background: #ffff00 !important;
+  border: 1px solid #666666 !important;
+  width: 80px;
+  padding: 2px 4px;
+  font-size: 12px;
+  outline: none !important;
+}
+
 /* Reset & Theme Variable Setup */
 :root {
   --bg-app: #f4f6fa;
