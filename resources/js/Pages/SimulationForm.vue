@@ -368,6 +368,13 @@
                           <option value="Sí">Sí</option>
                         </select>
                       </div>
+                      <div class="vol-item-row mt-1">
+                        <span class="vol-lbl">Seleccionar URS-Strips</span>
+                        <select v-model="equipmentConfigs[colIndex].strip_type" class="excel-mini-select font-bold text-primary">
+                          <option value="11">URS-Strips(11 items) $90</option>
+                          <option value="14">URS-Strips(14 items) $90</option>
+                        </select>
+                      </div>
                     </div>
 
                     <div class="vol-right-col text-center">
@@ -541,6 +548,7 @@
                         :contract-months="globalSettings.contract_months" 
                         :operating-days-default="reagentOperatingDays"
                         :initial-combo-tests="equipmentConfigs[colIndex].daily_tests"
+                        :strip-type="equipmentConfigs[colIndex].strip_type"
                       />
                     </div>
                   </div>
@@ -565,6 +573,7 @@
           :contract-months="globalSettings.contract_months" 
           :operating-days-default="reagentOperatingDays"
           :initial-combo-tests="equipmentConfigs[0].daily_tests"
+          :strip-type="equipmentConfigs[0].strip_type"
         />
       </div>
     </main>
@@ -598,6 +607,7 @@ function createEmptyConfig() {
     include_syringes: false,
     include_controls: true,
     need_controls: 'Sí',
+    strip_type: '11',
     daily_tests: 30,
     pvp_per_test: 1.10,
     reagent_cost_per_test: 0.35,
