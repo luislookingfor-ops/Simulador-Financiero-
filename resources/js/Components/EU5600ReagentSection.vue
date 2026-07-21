@@ -346,6 +346,10 @@ export default {
     initialComboTests: {
       type: Number,
       default: null
+    },
+    stripType: {
+      type: String,
+      default: '11'
     }
   },
   data() {
@@ -369,13 +373,25 @@ export default {
         cleanserMonths: this.contractMonths || 60,
         cleanserTotalQuantity: this.contractMonths || 60,
         priceEu50: 105,
-        priceStrips11: 90,
-        priceStrips14: 108,
+        priceStrips11: this.stripType === '14' ? 0 : 90,
+        priceStrips14: this.stripType === '14' ? 90 : 0,
         priceCleanser: 0
       }
     };
   },
   watch: {
+    stripType: {
+      immediate: true,
+      handler(newType) {
+        if (newType === '14') {
+          this.inputs.priceStrips11 = 0;
+          this.inputs.priceStrips14 = 90;
+        } else {
+          this.inputs.priceStrips11 = 90;
+          this.inputs.priceStrips14 = 0;
+        }
+      }
+    },
     contractMonths: {
       immediate: true,
       handler(newMonths) {
