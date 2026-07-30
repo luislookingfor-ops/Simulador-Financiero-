@@ -595,17 +595,27 @@
               <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0;">Maestro de Equipos Ingelab</h2>
               <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Lista completa de equipos médicos homologados y sus costos asociados</p>
             </div>
-            <div style="position: relative; width: 320px; max-width: 100%;">
-              <input 
-                type="text" 
-                v-model="equipmentSearchQuery" 
-                placeholder="Buscar por código, nombre o línea..." 
-                class="excel-input"
-                style="width: 100%; padding: 8px 12px 8px 36px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box;"
-              />
-              <span style="position: absolute; left: 12px; top: 10px; color: #94a3b8; display: flex; align-items: center;">
-                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              </span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <button 
+                @click="openCreateEquipmentModal" 
+                class="btn btn-primary" 
+                style="padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; cursor: pointer;"
+              >
+                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Agregar Producto
+              </button>
+              <div style="position: relative; width: 280px; max-width: 100%;">
+                <input 
+                  type="text" 
+                  v-model="equipmentSearchQuery" 
+                  placeholder="Buscar por código, nombre o línea..." 
+                  class="excel-input"
+                  style="width: 100%; padding: 8px 12px 8px 36px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box;"
+                />
+                <span style="position: absolute; left: 12px; top: 10px; color: #94a3b8; display: flex; align-items: center;">
+                  <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+              </div>
             </div>
           </div>
 
@@ -622,7 +632,8 @@
                   <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Impresora</th>
                   <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Control</th>
                   <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Calibrador</th>
-                  <th style="padding: 12px 10px; text-align: right;">Costo Reactivo/Prueba</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo Reactivo/Prueba</th>
+                  <th style="padding: 12px 10px; text-align: center; width: 110px;">Acciones</th>
                 </tr>
               </thead>
               <tbody style="color: #334155;">
@@ -636,10 +647,28 @@
                   <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.impresora, 2) }}</td>
                   <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.control, 2) }}</td>
                   <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.calibrador, 2) }}</td>
-                  <td style="padding: 10px; text-align: right; font-weight: 700; color: #1d4ed8; background: rgba(29, 78, 216, 0.02);">${{ formatSpanishDecimal(eq.default_reagent_cost, 2) }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #1d4ed8; background: rgba(29, 78, 216, 0.02);">${{ formatSpanishDecimal(eq.default_reagent_cost, 2) }}</td>
+                  <td style="padding: 10px; text-align: center;">
+                    <div style="display: flex; gap: 6px; justify-content: center;">
+                      <button 
+                        @click="openEditEquipmentModal(eq)" 
+                        title="Editar Equipo"
+                        style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;"
+                      >
+                        Editar
+                      </button>
+                      <button 
+                        @click="deleteEquipment(eq)" 
+                        title="Eliminar Equipo"
+                        style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr v-if="filteredMasterEquipments.length === 0">
-                  <td colspan="10" style="padding: 24px; text-align: center; color: #94a3b8; font-style: italic;">No se encontraron equipos que coincidan con la búsqueda.</td>
+                  <td colspan="11" style="padding: 24px; text-align: center; color: #94a3b8; font-style: italic;">No se encontraron equipos que coincidan con la búsqueda.</td>
                 </tr>
               </tbody>
             </table>
@@ -712,6 +741,83 @@
         </div>
       </div>
     </main>
+
+    <!-- Equipment Create/Edit Modal -->
+    <div v-if="showEquipmentModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
+      <div class="card" style="width: 100%; max-width: 600px; background: white; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden; box-sizing: border-box; border: 1px solid #cbd5e1;">
+        <div style="background: var(--primary); padding: 16px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: white;">
+            {{ isEditingEquipment ? 'Editar Producto / Equipo' : 'Agregar Nuevo Producto / Equipo' }}
+          </h3>
+          <button type="button" @click="showEquipmentModal = false" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">&times;</button>
+        </div>
+        
+        <form @submit.prevent="submitEquipmentForm" style="padding: 24px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; margin: 0;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Código de Referencia *</label>
+              <input type="text" v-model="equipmentForm.code" required placeholder="Ej: MND-BS240" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Nombre del Equipo *</label>
+              <input type="text" v-model="equipmentForm.name" required placeholder="Ej: BS-240 Analizador" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Línea de Diagnóstico *</label>
+              <select v-model="equipmentForm.line" required class="excel-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; height: 36px; box-sizing: border-box; background: white; color: black;">
+                <option v-for="ln in uniqueLines" :key="ln" :value="ln">{{ ln }}</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Costo FOB Base ($) *</label>
+              <input type="number" step="0.01" min="0" v-model.number="equipmentForm.fob" required class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 16px;">
+            <span style="display: block; font-size: 0.8rem; font-weight: 800; color: var(--primary); margin-bottom: 12px; text-align: left;">Accesorios & Costos Adicionales Homologados</span>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo UPS ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.ups" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo PC ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.pc" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo Impresora ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.impresora" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo Control ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.control" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo Calibrador ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.calibrador" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Reactivo Base/Prueba ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.default_reagent_cost" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" @click="showEquipmentModal = false" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
+              {{ isEditingEquipment ? 'Guardar Cambios' : 'Crear Producto' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- Toast Notification -->
     <div v-if="toast.show" class="toast" :class="'toast-' + toast.type">
@@ -786,6 +892,21 @@ export default {
       ],
       reagentOperatingDays: 24,
       equipmentSearchQuery: '',
+      showEquipmentModal: false,
+      isEditingEquipment: false,
+      currentEquipmentId: null,
+      equipmentForm: {
+        code: '',
+        name: '',
+        line: 'Hematología',
+        fob: 0,
+        ups: 0,
+        pc: 0,
+        impresora: 0,
+        control: 0,
+        calibrador: 0,
+        default_reagent_cost: 0
+      },
       toast: {
         show: false,
         message: '',
@@ -1347,6 +1468,145 @@ export default {
       
       this.activeNavTab = 'simulator';
       this.showToast(`Escenario "${sim.name}" cargado exitosamente.`, 'success');
+    },
+    openCreateEquipmentModal() {
+      this.isEditingEquipment = false;
+      this.currentEquipmentId = null;
+      this.equipmentForm = {
+        code: '',
+        name: '',
+        line: this.uniqueLines[0] || 'Hematología',
+        fob: 0,
+        ups: 0,
+        pc: 0,
+        impresora: 0,
+        control: 0,
+        calibrador: 0,
+        default_reagent_cost: 0
+      };
+      this.showEquipmentModal = true;
+    },
+    openEditEquipmentModal(eq) {
+      this.isEditingEquipment = true;
+      this.currentEquipmentId = eq.id;
+      this.equipmentForm = {
+        code: eq.code || '',
+        name: eq.name || '',
+        line: eq.line || 'Hematología',
+        fob: Number(eq.fob) || 0,
+        ups: Number(eq.ups) || 0,
+        pc: Number(eq.pc) || 0,
+        impresora: Number(eq.impresora) || 0,
+        control: Number(eq.control) || 0,
+        calibrador: Number(eq.calibrador) || 0,
+        default_reagent_cost: Number(eq.default_reagent_cost) || 0
+      };
+      this.showEquipmentModal = true;
+    },
+    async submitEquipmentForm() {
+      if (!this.equipmentForm.code || !this.equipmentForm.name || !this.equipmentForm.line) {
+        this.showToast('Código, Nombre y Línea son requeridos.', 'warning');
+        return;
+      }
+
+      const payload = { ...this.equipmentForm };
+      const isEdit = this.isEditingEquipment;
+      const url = isEdit ? `/equipments/${this.currentEquipmentId}` : '/equipments';
+      
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          const method = isEdit ? 'put' : 'post';
+          client[method](url, payload, {
+            onSuccess: () => {
+              this.showToast(isEdit ? 'Equipo actualizado correctamente.' : 'Equipo creado correctamente.', 'success');
+              this.showEquipmentModal = false;
+            },
+            onError: (errors) => {
+              const errMsg = Object.values(errors).join(' ');
+              this.showToast(errMsg || 'Error al guardar el equipo.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+          });
+          
+          if (response.ok) {
+            this.showToast(isEdit ? 'Equipo actualizado correctamente.' : 'Equipo creado correctamente.', 'success');
+            // Mock local update if running offline Node server
+            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+              if (isEdit) {
+                const idx = this.equipments.findIndex(e => e.id === this.currentEquipmentId);
+                if (idx !== -1) {
+                  this.equipments[idx] = { ...this.equipments[idx], ...payload };
+                }
+              } else {
+                const newId = this.equipments.length ? Math.max(...this.equipments.map(e => e.id)) + 1 : 1;
+                this.equipments.push({ id: newId, ...payload });
+              }
+            }
+            this.showEquipmentModal = false;
+          } else {
+            this.showToast('Error al conectar con la base de datos.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al guardar el equipo.', 'danger');
+      }
+    },
+    async deleteEquipment(eq) {
+      if (!confirm(`¿Estás seguro de que deseas eliminar el equipo "${eq.name}"?`)) {
+        return;
+      }
+
+      const url = `/equipments/${eq.id}`;
+      
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          client.delete(url, {
+            onSuccess: () => {
+              this.showToast('Equipo eliminado correctamente.', 'success');
+            },
+            onError: () => {
+              this.showToast('No se pudo eliminar el equipo.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          
+          if (response.ok) {
+            this.showToast('Equipo eliminado correctamente.', 'success');
+            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+              const idx = this.equipments.findIndex(e => e.id === eq.id);
+              if (idx !== -1) {
+                this.equipments.splice(idx, 1);
+              }
+            }
+          } else {
+            this.showToast('Error al eliminar de la base de datos.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al eliminar el equipo.', 'danger');
+      }
     }
   }
 };

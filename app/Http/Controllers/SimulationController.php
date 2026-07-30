@@ -250,4 +250,65 @@ class SimulationController extends Controller
             ['id' => 33, 'code' => 'LFT-014', 'name' => 'ANALIZADOR HbA1c HPLC H8 LIFOTRONIC', 'fob' => 7350, 'ups' => 519.48, 'pc' => 0, 'impresora' => 0, 'control' => 0, 'calibrador' => 0, 'line' => 'HPLC', 'default_reagent_cost' => 0.80]
         ];
     }
+
+    public function storeEquipment(Request $request)
+    {
+        $validated = $request->validate([
+            'code' => 'required|string|unique:equipments,code|max:255',
+            'name' => 'required|string|max:255',
+            'line' => 'required|string|max:255',
+            'fob' => 'required|numeric|min:0',
+            'ups' => 'nullable|numeric|min:0',
+            'pc' => 'nullable|numeric|min:0',
+            'impresora' => 'nullable|numeric|min:0',
+            'control' => 'nullable|numeric|min:0',
+            'calibrador' => 'nullable|numeric|min:0',
+            'default_reagent_cost' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            Equipment::create($validated);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al crear equipo: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Equipo creado correctamente.');
+    }
+
+    public function updateEquipment(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'code' => 'required|string|max:255|unique:equipments,code,' . $id,
+            'name' => 'required|string|max:255',
+            'line' => 'required|string|max:255',
+            'fob' => 'required|numeric|min:0',
+            'ups' => 'nullable|numeric|min:0',
+            'pc' => 'nullable|numeric|min:0',
+            'impresora' => 'nullable|numeric|min:0',
+            'control' => 'nullable|numeric|min:0',
+            'calibrador' => 'nullable|numeric|min:0',
+            'default_reagent_cost' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            $eq = Equipment::findOrFail($id);
+            $eq->update($validated);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al actualizar equipo: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Equipo actualizado correctamente.');
+    }
+
+    public function destroyEquipment($id)
+    {
+        try {
+            $eq = Equipment::findOrFail($id);
+            $eq->delete();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al eliminar equipo: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Equipo eliminado correctamente.');
+    }
 }

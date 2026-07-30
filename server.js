@@ -278,6 +278,74 @@ app.post('/simulations/calculate', (req, res) => {
   res.json(results);
 });
 
+// Route: POST /equipments (Create equipment)
+app.post('/equipments', (req, res) => {
+  const { code, name, line, fob, ups, pc, impresora, control, calibrador, default_reagent_cost } = req.body;
+  const newEq = {
+    id: EQUIPMENTS.length ? Math.max(...EQUIPMENTS.map(e => e.id)) + 1 : 1,
+    code,
+    name,
+    line,
+    fob: Number(fob) || 0,
+    ups: Number(ups) || 0,
+    pc: Number(pc) || 0,
+    impresora: Number(impresora) || 0,
+    control: Number(control) || 0,
+    calibrador: Number(calibrador) || 0,
+    default_reagent_cost: Number(default_reagent_cost) || 0
+  };
+  EQUIPMENTS.push(newEq);
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    res.setHeader('X-Inertia-Location', '/');
+    return res.status(303).json({});
+  }
+  res.redirect(303, '/');
+});
+
+// Route: PUT /equipments/:id (Update equipment)
+app.put('/equipments/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const { code, name, line, fob, ups, pc, impresora, control, calibrador, default_reagent_cost } = req.body;
+  const idx = EQUIPMENTS.findIndex(e => e.id === id);
+  if (idx !== -1) {
+    EQUIPMENTS[idx] = {
+      ...EQUIPMENTS[idx],
+      code,
+      name,
+      line,
+      fob: Number(fob) || 0,
+      ups: Number(ups) || 0,
+      pc: Number(pc) || 0,
+      impresora: Number(impresora) || 0,
+      control: Number(control) || 0,
+      calibrador: Number(calibrador) || 0,
+      default_reagent_cost: Number(default_reagent_cost) || 0
+    };
+  }
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    res.setHeader('X-Inertia-Location', '/');
+    return res.status(303).json({});
+  }
+  res.redirect(303, '/');
+});
+
+// Route: DELETE /equipments/:id (Delete equipment)
+app.delete('/equipments/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const idx = EQUIPMENTS.findIndex(e => e.id === id);
+  if (idx !== -1) {
+    EQUIPMENTS.splice(idx, 1);
+  }
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    res.setHeader('X-Inertia-Location', '/');
+    return res.status(303).json({});
+  }
+  res.redirect(303, '/');
+});
+
 app.listen(PORT, () => {
   console.log(`\n🚀 Ingelab Mock Laravel + Inertia Server running at: http://localhost:${PORT}`);
   console.log(`👉 Make sure to run the Vite dev server with: npm run dev\n`);
