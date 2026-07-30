@@ -8,3 +8,6 @@
 .phpunit.result.cache
 simulations.json
 package-lock.json
+/vendor
+/storage
+/database/database.sqlite
