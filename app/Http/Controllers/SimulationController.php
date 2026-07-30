@@ -311,4 +311,16 @@ class SimulationController extends Controller
 
         return redirect()->back()->with('success', 'Equipo eliminado correctamente.');
     }
+
+    public function destroySimulation($id)
+    {
+        try {
+            $sim = Simulation::findOrFail($id);
+            $sim->delete();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al eliminar escenario: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Escenario eliminado correctamente.');
+    }
 }

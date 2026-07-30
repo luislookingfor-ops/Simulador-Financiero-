@@ -729,7 +729,15 @@
                   <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                   Cargar en Simulador
                 </span>
-                <span style="font-size: 0.7rem; color: #94a3b8;">ID: #{{ sim.id }}</span>
+                <button 
+                  type="button" 
+                  @click="deleteSimulation(sim, $event)" 
+                  style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; font-weight: 700; cursor: pointer; transition: background 0.15s;"
+                  onmouseover="this.style.background='#fee2e2'"
+                  onmouseout="this.style.background='#fef2f2'"
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
             <div v-if="simulationsList.length === 0" style="grid-column: 1 / -1; border: 2px dashed #e2e8f0; border-radius: 12px; padding: 32px; text-align: center; color: #94a3b8;">
@@ -1606,6 +1614,55 @@ export default {
       } catch (err) {
         console.error(err);
         this.showToast('Error de red al eliminar el equipo.', 'danger');
+      }
+    },
+    async deleteSimulation(sim, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      if (!confirm(`¿Estás seguro de que deseas eliminar la simulación "${sim.name}"?`)) {
+        return;
+      }
+
+      const url = `/simulations/${sim.id}`;
+      
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          client.delete(url, {
+            onSuccess: () => {
+              this.showToast('Escenario eliminado correctamente.', 'success');
+            },
+            onError: () => {
+              this.showToast('No se pudo eliminar el escenario.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          
+          if (response.ok) {
+            this.showToast('Escenario eliminado correctamente.', 'success');
+            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+              const idx = this.simulationsList.findIndex(s => s.id === sim.id);
+              if (idx !== -1) {
+                this.simulationsList.splice(idx, 1);
+              }
+            }
+          } else {
+            this.showToast('Error al eliminar el escenario.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al eliminar el escenario.', 'danger');
       }
     }
   }

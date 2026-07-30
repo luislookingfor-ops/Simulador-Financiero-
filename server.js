@@ -159,6 +159,23 @@ app.post('/simulations', (req, res) => {
   res.redirect(303, '/');
 });
 
+// Route: DELETE /simulations/:id (Delete scenario)
+app.delete('/simulations/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const sims = getSimulations();
+  const idx = sims.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    sims.splice(idx, 1);
+    fs.writeFileSync(SIMULATIONS_FILE, JSON.stringify(sims, null, 2), 'utf8');
+  }
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    res.setHeader('X-Inertia-Location', '/');
+    return res.status(303).json({});
+  }
+  res.redirect(303, '/');
+});
+
 // Route: POST /simulations/calculate
 app.post('/simulations/calculate', (req, res) => {
   // Calculations are replicated from Laravel SimulationController.php
