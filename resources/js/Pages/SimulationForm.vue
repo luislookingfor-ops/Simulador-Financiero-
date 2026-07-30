@@ -25,11 +25,21 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M19.5 9.5c-1.03 0-1.9.71-2.15 1.68-.86-.23-1.83-.24-2.85.14-.99.37-1.83 1.05-2.4 1.96-.53-.25-1.14-.38-1.8-.34C9.17 13.06 8.3 13.9 8.05 15c-.23-.05-.47-.08-.72-.08-1.78 0-3.23 1.45-3.23 3.23s1.45 3.23 3.23 3.23h12.17c1.93 0 3.5-1.57 3.5-3.5 0-1.79-1.35-3.26-3.08-3.46.05-.29.08-.59.08-.9 0-2.21-1.79-4-4-4z"/></svg>
           Volumen Consumo Reactivos
         </a>
-        <a href="#" class="nav-item" @click.prevent="showToast('Módulo Maestro de Equipos en desarrollo', 'info')">
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'equipments' }"
+          @click.prevent="activeNavTab = 'equipments'"
+        >
           <svg class="icon" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
           Maestro Equipos
         </a>
-        <a href="#" class="nav-item" @click.prevent="showToast('Historial comercial en desarrollo', 'info')">
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'history' }"
+          @click.prevent="activeNavTab = 'history'"
+        >
           <svg class="icon" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
           Historial Escenarios
         </a>
@@ -39,7 +49,7 @@
         <div class="user-profile">
           <div class="avatar">C</div>
           <div class="user-info">
-            <strong>Asesor Ingelab</strong>
+            <strong>Gerente Comercial</strong>
             <span>Vendedor Senior</span>
           </div>
         </div>
@@ -576,7 +586,246 @@
           :strip-type="equipmentConfigs[0].strip_type"
         />
       </div>
+
+      <!-- Dashboard Grid: Tab 3 - Maestro Equipos -->
+      <div v-else-if="activeNavTab === 'equipments'" class="dashboard-grid single-view">
+        <div class="card p-6 bg-white rounded-xl border border-gray-200 shadow-sm" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0;">Maestro de Equipos Ingelab</h2>
+              <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Lista completa de equipos médicos homologados y sus costos asociados</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <button 
+                @click="openCreateEquipmentModal" 
+                class="btn btn-primary" 
+                style="padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; cursor: pointer;"
+              >
+                <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Agregar Producto
+              </button>
+              <div style="position: relative; width: 280px; max-width: 100%;">
+                <input 
+                  type="text" 
+                  v-model="equipmentSearchQuery" 
+                  placeholder="Buscar por código, nombre o línea..." 
+                  class="excel-input"
+                  style="width: 100%; padding: 8px 12px 8px 36px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box;"
+                />
+                <span style="position: absolute; left: 12px; top: 10px; color: #94a3b8; display: flex; align-items: center;">
+                  <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto; width: 100%;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Línea</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Código</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Equipo</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo FOB</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">UPS</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">PC</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Impresora</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Control</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Calibrador</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo Reactivo/Prueba</th>
+                  <th style="padding: 12px 10px; text-align: center; width: 110px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody style="color: #334155;">
+                <tr v-for="eq in filteredMasterEquipments" :key="eq.id" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-weight: 600; color: var(--primary);">{{ eq.line }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-family: monospace; color: #475569;">{{ eq.code }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">{{ eq.name }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #15803d; background: rgba(21, 128, 61, 0.03);">${{ formatSpanishDecimal(eq.fob, 2) }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.ups, 2) }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.pc, 2) }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.impresora, 2) }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.control, 2) }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.calibrador, 2) }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #1d4ed8; background: rgba(29, 78, 216, 0.02);">${{ formatSpanishDecimal(eq.default_reagent_cost, 2) }}</td>
+                  <td style="padding: 10px; text-align: center;">
+                    <div style="display: flex; gap: 6px; justify-content: center;">
+                      <button 
+                        @click="openEditEquipmentModal(eq)" 
+                        title="Editar Equipo"
+                        style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;"
+                      >
+                        Editar
+                      </button>
+                      <button 
+                        @click="deleteEquipment(eq)" 
+                        title="Eliminar Equipo"
+                        style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-if="filteredMasterEquipments.length === 0">
+                  <td colspan="11" style="padding: 24px; text-align: center; color: #94a3b8; font-style: italic;">No se encontraron equipos que coincidan con la búsqueda.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard Grid: Tab 4 - Historial Escenarios -->
+      <div v-else-if="activeNavTab === 'history'" class="dashboard-grid single-view">
+        <div class="card p-6 bg-white rounded-xl border border-gray-200 shadow-sm" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0;">Historial de Escenarios Guardados</h2>
+              <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Carga simulaciones previas directamente para editarlas o compararlas</p>
+            </div>
+            <div style="font-size: 0.75rem; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 9999px; border: 1px solid #e2e8f0; font-weight: 600;">
+              Total: {{ simulationsList.length }} escenarios
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+            <div 
+              v-for="sim in simulationsList" 
+              :key="sim.id" 
+              style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; transition: all 0.2s ease; cursor: pointer; background: white; position: relative; display: flex; flex-direction: column; justify-content: space-between;"
+              onmouseover="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';"
+              onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
+              @click="loadSavedSimulation(sim)"
+            >
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                  <h3 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">{{ sim.name }}</h3>
+                  <span style="font-size: 0.7rem; color: #94a3b8;">{{ formatDate(sim.created_at) }}</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; color: #64748b; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Cliente:</span>
+                    <strong style="color: #334155;">{{ sim.global_settings?.client_type || 'Público' }}</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Contrato / Amortización:</span>
+                    <strong style="color: #334155;">{{ sim.global_settings?.contract_months }} meses</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Interés / Inflación:</span>
+                    <strong style="color: #334155;">{{ sim.global_settings?.interest_rate }}% / {{ sim.global_settings?.inflation_rate }}%</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px dashed #e2e8f0; margin-top: 8px;">
+                    <span>Equipos Configurados:</span>
+                    <span style="background: rgba(27, 54, 93, 0.08); color: var(--primary); font-weight: 700; padding: 2px 8px; border-radius: 9999px; font-size: 0.7rem;">
+                      {{ getActiveEquipmentsCount(sim) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #f1f5f9;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 4px;">
+                  <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                  Cargar en Simulador
+                </span>
+                <button 
+                  type="button" 
+                  @click="deleteSimulation(sim, $event)" 
+                  style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; font-weight: 700; cursor: pointer; transition: background 0.15s;"
+                  onmouseover="this.style.background='#fee2e2'"
+                  onmouseout="this.style.background='#fef2f2'"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+            <div v-if="simulationsList.length === 0" style="grid-column: 1 / -1; border: 2px dashed #e2e8f0; border-radius: 12px; padding: 32px; text-align: center; color: #94a3b8;">
+              <svg style="width: 40px; height: 40px; margin: 0 auto 8px auto; color: #cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <h4 style="font-weight: 700; color: #475569; margin: 0 0 4px 0;">No hay escenarios guardados</h4>
+              <p style="font-size: 0.75rem; margin: 0;">Configura una propuesta en el Simulador HUC y haz clic en "Guardar Escenario".</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
+
+    <!-- Equipment Create/Edit Modal -->
+    <div v-if="showEquipmentModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
+      <div class="card" style="width: 100%; max-width: 600px; background: white; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden; box-sizing: border-box; border: 1px solid #cbd5e1;">
+        <div style="background: var(--primary); padding: 16px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: white;">
+            {{ isEditingEquipment ? 'Editar Producto / Equipo' : 'Agregar Nuevo Producto / Equipo' }}
+          </h3>
+          <button type="button" @click="showEquipmentModal = false" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">&times;</button>
+        </div>
+        
+        <form @submit.prevent="submitEquipmentForm" style="padding: 24px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; margin: 0;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Código de Referencia *</label>
+              <input type="text" v-model="equipmentForm.code" required placeholder="Ej: MND-BS240" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Nombre del Equipo *</label>
+              <input type="text" v-model="equipmentForm.name" required placeholder="Ej: BS-240 Analizador" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Línea de Diagnóstico *</label>
+              <select v-model="equipmentForm.line" required class="excel-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; height: 36px; box-sizing: border-box; background: white; color: black;">
+                <option v-for="ln in uniqueLines" :key="ln" :value="ln">{{ ln }}</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Costo FOB Base ($) *</label>
+              <input type="number" step="0.01" min="0" v-model.number="equipmentForm.fob" required class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 16px;">
+            <span style="display: block; font-size: 0.8rem; font-weight: 800; color: var(--primary); margin-bottom: 12px; text-align: left;">Accesorios & Costos Adicionales Homologados</span>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo UPS ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.ups" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo PC ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.pc" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo Impresora ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.impresora" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo Control ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.control" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Costo Calibrador ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.calibrador" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-align: left;">Reactivo Base/Prueba ($)</label>
+                <input type="number" step="0.01" min="0" v-model.number="equipmentForm.default_reagent_cost" class="excel-input" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" @click="showEquipmentModal = false" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
+              {{ isEditingEquipment ? 'Guardar Cambios' : 'Crear Producto' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- Toast Notification -->
     <div v-if="toast.show" class="toast" :class="'toast-' + toast.type">
@@ -650,6 +899,22 @@ export default {
         createEmptyConfig()
       ],
       reagentOperatingDays: 24,
+      equipmentSearchQuery: '',
+      showEquipmentModal: false,
+      isEditingEquipment: false,
+      currentEquipmentId: null,
+      equipmentForm: {
+        code: '',
+        name: '',
+        line: 'Hematología',
+        fob: 0,
+        ups: 0,
+        pc: 0,
+        impresora: 0,
+        control: 0,
+        calibrador: 0,
+        default_reagent_cost: 0
+      },
       toast: {
         show: false,
         message: '',
@@ -673,6 +938,20 @@ export default {
     uniqueLines() {
       const lines = this.equipments.map(eq => eq.line);
       return [...new Set(lines)];
+    },
+    filteredMasterEquipments() {
+      if (!this.equipmentSearchQuery) {
+        return this.equipments;
+      }
+      const q = this.equipmentSearchQuery.toLowerCase();
+      return this.equipments.filter(eq => 
+        (eq.name && eq.name.toLowerCase().includes(q)) || 
+        (eq.code && eq.code.toLowerCase().includes(q)) ||
+        (eq.line && eq.line.toLowerCase().includes(q))
+      );
+    },
+    simulationsList() {
+      return this.simulations || [];
     },
     // Real-time client-side calculation engine
     calculations() {
@@ -1127,6 +1406,263 @@ export default {
         console.error(err);
         this.showToast('Error de red al guardar el escenario.', 'danger');
         this.saving = false;
+      }
+    },
+    getActiveEquipmentsCount(sim) {
+      if (!sim.equipment_settings) return 0;
+      return sim.equipment_settings.filter(e => e.equipment_id !== null).length;
+    },
+    formatDate(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    },
+    loadSavedSimulation(sim) {
+      if (!sim) return;
+      this.scenarioName = sim.name;
+      if (sim.global_settings) {
+        this.globalSettings = { ...sim.global_settings };
+      }
+      if (sim.equipment_settings) {
+        let eqSettings = sim.equipment_settings;
+        if (typeof eqSettings === 'string') {
+          try {
+            eqSettings = JSON.parse(eqSettings);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        this.equipmentConfigs = eqSettings.map(c => {
+          return {
+            lineFilter: c.lineFilter || '',
+            equipment_id: c.equipment_id || null,
+            equipment_type: c.equipment_type || 'EQUIPO NUEVO',
+            depreciation_percent: c.depreciation_percent !== undefined ? c.depreciation_percent : 100,
+            quantity: c.quantity !== undefined ? c.quantity : 1,
+            customItems: c.customItems || [],
+            include_ups: c.include_ups !== undefined ? c.include_ups : true,
+            include_pc: c.include_pc !== undefined ? c.include_pc : true,
+            include_printer_base: c.include_printer_base !== undefined ? c.include_printer_base : true,
+            include_zebra: c.include_zebra !== undefined ? c.include_zebra : false,
+            need_zebra: c.need_zebra || 'No',
+            include_software: c.include_software !== undefined ? c.include_software : false,
+            need_software: c.need_software || 'No',
+            software_value: c.software_value !== undefined ? c.software_value : 2000,
+            include_syringes: c.include_syringes !== undefined ? c.include_syringes : false,
+            include_controls: c.include_controls !== undefined ? c.include_controls : true,
+            need_controls: c.need_controls || 'Sí',
+            strip_type: c.strip_type || '11',
+            daily_tests: c.daily_tests !== undefined ? c.daily_tests : 30,
+            pvp_per_test: c.pvp_per_test !== undefined ? c.pvp_per_test : 1.10,
+            reagent_cost_per_test: c.reagent_cost_per_test !== undefined ? c.reagent_cost_per_test : 0.35,
+            showReagentVolume: c.showReagentVolume !== undefined ? c.showReagentVolume : false
+          };
+        });
+        
+        while (this.equipmentConfigs.length < 3) {
+          this.equipmentConfigs.push(createEmptyConfig());
+        }
+      }
+      
+      this.activeNavTab = 'simulator';
+      this.showToast(`Escenario "${sim.name}" cargado exitosamente.`, 'success');
+    },
+    openCreateEquipmentModal() {
+      this.isEditingEquipment = false;
+      this.currentEquipmentId = null;
+      this.equipmentForm = {
+        code: '',
+        name: '',
+        line: this.uniqueLines[0] || 'Hematología',
+        fob: 0,
+        ups: 0,
+        pc: 0,
+        impresora: 0,
+        control: 0,
+        calibrador: 0,
+        default_reagent_cost: 0
+      };
+      this.showEquipmentModal = true;
+    },
+    openEditEquipmentModal(eq) {
+      this.isEditingEquipment = true;
+      this.currentEquipmentId = eq.id;
+      this.equipmentForm = {
+        code: eq.code || '',
+        name: eq.name || '',
+        line: eq.line || 'Hematología',
+        fob: Number(eq.fob) || 0,
+        ups: Number(eq.ups) || 0,
+        pc: Number(eq.pc) || 0,
+        impresora: Number(eq.impresora) || 0,
+        control: Number(eq.control) || 0,
+        calibrador: Number(eq.calibrador) || 0,
+        default_reagent_cost: Number(eq.default_reagent_cost) || 0
+      };
+      this.showEquipmentModal = true;
+    },
+    async submitEquipmentForm() {
+      if (!this.equipmentForm.code || !this.equipmentForm.name || !this.equipmentForm.line) {
+        this.showToast('Código, Nombre y Línea son requeridos.', 'warning');
+        return;
+      }
+
+      const payload = { ...this.equipmentForm };
+      const isEdit = this.isEditingEquipment;
+      const url = isEdit ? `/equipments/${this.currentEquipmentId}` : '/equipments';
+      
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          const method = isEdit ? 'put' : 'post';
+          client[method](url, payload, {
+            onSuccess: () => {
+              this.showToast(isEdit ? 'Equipo actualizado correctamente.' : 'Equipo creado correctamente.', 'success');
+              this.showEquipmentModal = false;
+            },
+            onError: (errors) => {
+              const errMsg = Object.values(errors).join(' ');
+              this.showToast(errMsg || 'Error al guardar el equipo.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+          });
+          
+          if (response.ok) {
+            this.showToast(isEdit ? 'Equipo actualizado correctamente.' : 'Equipo creado correctamente.', 'success');
+            // Mock local update if running offline Node server
+            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+              if (isEdit) {
+                const idx = this.equipments.findIndex(e => e.id === this.currentEquipmentId);
+                if (idx !== -1) {
+                  this.equipments[idx] = { ...this.equipments[idx], ...payload };
+                }
+              } else {
+                const newId = this.equipments.length ? Math.max(...this.equipments.map(e => e.id)) + 1 : 1;
+                this.equipments.push({ id: newId, ...payload });
+              }
+            }
+            this.showEquipmentModal = false;
+          } else {
+            this.showToast('Error al conectar con la base de datos.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al guardar el equipo.', 'danger');
+      }
+    },
+    async deleteEquipment(eq) {
+      if (!confirm(`¿Estás seguro de que deseas eliminar el equipo "${eq.name}"?`)) {
+        return;
+      }
+
+      const url = `/equipments/${eq.id}`;
+      
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          client.delete(url, {
+            onSuccess: () => {
+              this.showToast('Equipo eliminado correctamente.', 'success');
+            },
+            onError: () => {
+              this.showToast('No se pudo eliminar el equipo.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          
+          if (response.ok) {
+            this.showToast('Equipo eliminado correctamente.', 'success');
+            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+              const idx = this.equipments.findIndex(e => e.id === eq.id);
+              if (idx !== -1) {
+                this.equipments.splice(idx, 1);
+              }
+            }
+          } else {
+            this.showToast('Error al eliminar de la base de datos.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al eliminar el equipo.', 'danger');
+      }
+    },
+    async deleteSimulation(sim, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      if (!confirm(`¿Estás seguro de que deseas eliminar la simulación "${sim.name}"?`)) {
+        return;
+      }
+
+      const url = `/simulations/${sim.id}`;
+      
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          client.delete(url, {
+            onSuccess: () => {
+              this.showToast('Escenario eliminado correctamente.', 'success');
+            },
+            onError: () => {
+              this.showToast('No se pudo eliminar el escenario.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          
+          if (response.ok) {
+            this.showToast('Escenario eliminado correctamente.', 'success');
+            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+              const idx = this.simulationsList.findIndex(s => s.id === sim.id);
+              if (idx !== -1) {
+                this.simulationsList.splice(idx, 1);
+              }
+            }
+          } else {
+            this.showToast('Error al eliminar el escenario.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al eliminar el escenario.', 'danger');
       }
     }
   }
