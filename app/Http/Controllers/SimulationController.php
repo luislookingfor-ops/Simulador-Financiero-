@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Equipment;
 use App\Models\Simulation;
+use App\Models\ReagentPlanning;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,9 +30,17 @@ class SimulationController extends Controller
             // Fail silently
         }
 
+        $reagentPlannings = [];
+        try {
+            $reagentPlannings = ReagentPlanning::orderBy('asesor', 'asc')->orderBy('cod_item', 'asc')->get();
+        } catch (\Exception $e) {
+            // Fail silently
+        }
+
         return Inertia::render('SimulationForm', [
             'equipments' => $equipments,
             'simulations' => $simulations,
+            'reagentPlannings' => $reagentPlannings,
         ]);
     }
 
@@ -322,5 +331,104 @@ class SimulationController extends Controller
         }
 
         return redirect()->back()->with('success', 'Escenario eliminado correctamente.');
+    }
+
+    public function storeReagentPlanning(Request $request)
+    {
+        $validated = $request->validate([
+            'asesor' => 'required|string|max:255',
+            'cliente' => 'nullable|string|max:255',
+            'cod_item' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'stock' => 'required|integer',
+            'rotacion_mensual' => 'nullable|numeric|min:0',
+            'uso_4_meses' => 'nullable|numeric|min:0',
+            'cantidad_importar' => 'nullable|numeric|min:0',
+            'total' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            ReagentPlanning::create($validated);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al crear reactivo: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Reactivo creado correctamente.');
+    }
+
+    public function updateReagentPlanning(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'asesor' => 'required|string|max:255',
+            'cliente' => 'nullable|string|max:255',
+            'cod_item' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'stock' => 'required|integer',
+            'rotacion_mensual' => 'nullable|numeric',
+            'uso_4_meses' => 'nullable|numeric',
+            'cantidad_importar' => 'nullable|numeric',
+            'total' => 'nullable|numeric',
+        ]);
+
+        try {
+            $planning = ReagentPlanning::findOrFail($id);
+            $planning->update($validated);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al actualizar reactivo: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Reactivo actualizado correctamente.');
+    }
+
+    public function destroyReagentPlanning($id)
+    {
+        try {
+            $planning = ReagentPlanning::findOrFail($id);
+            $planning->delete();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al eliminar reactivo: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Reactivo eliminado correctamente.');
+    }
+
+    public function bulkUpdateReagentPlanning(Request $request)
+    {
+        $validated = $request->validate([
+            'plannings' => 'required|array',
+            'plannings.*.id' => 'required|integer',
+            'plannings.*.asesor' => 'required|string',
+            'plannings.*.cliente' => 'nullable|string',
+            'plannings.*.cod_item' => 'required|string',
+            'plannings.*.descripcion' => 'required|string',
+            'plannings.*.stock' => 'required|integer',
+            'plannings.*.rotacion_mensual' => 'required|numeric',
+            'plannings.*.uso_4_meses' => 'required|numeric',
+            'plannings.*.cantidad_importar' => 'required|numeric',
+            'plannings.*.total' => 'required|numeric',
+        ]);
+
+        try {
+            \DB::transaction(function () use ($validated) {
+                foreach ($validated['plannings'] as $item) {
+                    $planning = ReagentPlanning::findOrFail($item['id']);
+                    $planning->update([
+                        'asesor' => $item['asesor'],
+                        'cliente' => $item['cliente'] ?? null,
+                        'cod_item' => $item['cod_item'],
+                        'descripcion' => $item['descripcion'],
+                        'stock' => $item['stock'],
+                        'rotacion_mensual' => $item['rotacion_mensual'],
+                        'uso_4_meses' => $item['uso_4_meses'],
+                        'cantidad_importar' => $item['cantidad_importar'],
+                        'total' => $item['total'],
+                    ]);
+                }
+            });
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al guardar los cambios: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Planificación guardada correctamente.');
     }
 }
