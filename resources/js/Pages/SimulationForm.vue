@@ -858,10 +858,9 @@
                   <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 160px;">Cliente</th>
                   <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 110px;">Código Item</th>
                   <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155;">Descripción Reactivo</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 80px;">Stock</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 100px;">Rotación Mensual</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #1e3a8a; width: 100px; background: #eff6ff;">Uso 4 Meses</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #065f46; width: 120px; background: #ecfdf5;">Importación Req.</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 100px;">Stock Inicial</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #1e3a8a; width: 140px; background: #eff6ff;">Necesidad 4 Meses</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #065f46; width: 140px; background: #ecfdf5;">Importación</th>
                   <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 120px;">Acciones</th>
                 </tr>
               </thead>
@@ -897,38 +896,37 @@
                     {{ item.descripcion }}
                   </td>
                   
-                  <!-- Stock Input -->
+                  <!-- Stock Inicial Input -->
                   <td style="padding: 6px 10px; text-align: center;">
                     <input 
                       type="number" 
                       v-model.number="item.stock" 
-                      min="0"
-                      @input="recalculatePlanningRow(item)"
-                      class="excel-input" 
-                      style="width: 80px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: black; background: white; box-sizing: border-box;"
-                    />
-                  </td>
-                  
-                  <!-- Monthly Rotation Input -->
-                  <td style="padding: 6px 10px; text-align: center;">
-                    <input 
-                      type="number" 
-                      v-model.number="item.rotacion_mensual" 
-                      min="0"
-                      @input="recalculatePlanningRow(item)"
+                      @input="recalculatePlanningRow(item, 'stock_or_need')"
                       class="excel-input" 
                       style="width: 90px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: black; background: white; box-sizing: border-box;"
                     />
                   </td>
                   
-                  <!-- Usage 4 Months (Calculated) -->
-                  <td style="padding: 8px 10px; text-align: center; font-weight: 700; color: #1d4ed8; background: #f0f7ff; font-size: 0.85rem;">
-                    {{ item.uso_4_meses }}
+                  <!-- Necesidad 4 Meses Input -->
+                  <td style="padding: 6px 10px; text-align: center; background: #f0f7ff;">
+                    <input 
+                      type="number" 
+                      v-model.number="item.uso_4_meses" 
+                      @input="recalculatePlanningRow(item, 'stock_or_need')"
+                      class="excel-input" 
+                      style="width: 100px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: #1e3a8a; background: white; box-sizing: border-box;"
+                    />
                   </td>
                   
-                  <!-- Import Quantity (Calculated) -->
-                  <td style="padding: 8px 10px; text-align: center; font-weight: 700; color: #047857; background: #f0fdf4; font-size: 0.85rem;">
-                    {{ item.cantidad_importar }}
+                  <!-- Importación Input (Suggested but Editable) -->
+                  <td style="padding: 6px 10px; text-align: center; background: #f0fdf4;">
+                    <input 
+                      type="number" 
+                      v-model.number="item.cantidad_importar" 
+                      @input="recalculatePlanningRow(item, 'importation')"
+                      class="excel-input" 
+                      style="width: 100px; text-align: center; padding: 4px; border: 1px solid #059669; border-radius: 4px; font-size: 0.8rem; font-weight: 700; color: #047857; background: #f0fdf4; box-sizing: border-box;"
+                    />
                   </td>
                   
                   <!-- Actions -->
@@ -2358,11 +2356,12 @@ export default {
         this.showToast('Error de red al eliminar reactivo.', 'danger');
       }
     },
-    recalculatePlanningRow(item) {
-      item.uso_4_meses = (Number(item.rotacion_mensual) || 0) * 4;
-      const needed = item.uso_4_meses - (Number(item.stock) || 0);
-      item.cantidad_importar = needed > 0 ? needed : 0;
-      item.total = item.cantidad_importar;
+    recalculatePlanningRow(item, source = 'stock_or_need') {
+      if (source === 'stock_or_need') {
+        const needed = (Number(item.uso_4_meses) || 0) - (Number(item.stock) || 0);
+        item.cantidad_importar = needed > 0 ? needed : 0;
+      }
+      item.total = Number(item.cantidad_importar) || 0;
     },
     async savePlanningBulk() {
       this.savingPlanning = true;
