@@ -396,7 +396,7 @@ class SimulationController extends Controller
     {
         $validated = $request->validate([
             'plannings' => 'required|array',
-            'plannings.*.id' => 'required|integer',
+            'plannings.*.id' => 'nullable',
             'plannings.*.asesor' => 'required|string',
             'plannings.*.cliente' => 'nullable|string',
             'plannings.*.cod_item' => 'required|string',
@@ -411,18 +411,23 @@ class SimulationController extends Controller
         try {
             \DB::transaction(function () use ($validated) {
                 foreach ($validated['plannings'] as $item) {
-                    $planning = ReagentPlanning::findOrFail($item['id']);
-                    $planning->update([
-                        'asesor' => $item['asesor'],
-                        'cliente' => $item['cliente'] ?? null,
-                        'cod_item' => $item['cod_item'],
-                        'descripcion' => $item['descripcion'],
-                        'stock' => $item['stock'],
-                        'rotacion_mensual' => $item['rotacion_mensual'],
-                        'uso_4_meses' => $item['uso_4_meses'],
-                        'cantidad_importar' => $item['cantidad_importar'],
-                        'total' => $item['total'],
-                    ]);
+                    $planning = null;
+                    if (!empty($item['id']) && is_numeric($item['id']) && $item['id'] > 0) {
+                        $planning = ReagentPlanning::find($item['id']);
+                    }
+                    if (!$planning) {
+                        $planning = new ReagentPlanning();
+                    }
+                    $planning->asesor = $item['asesor'];
+                    $planning->cliente = $item['cliente'] ?? null;
+                    $planning->cod_item = $item['cod_item'];
+                    $planning->descripcion = $item['descripcion'];
+                    $planning->stock = $item['stock'];
+                    $planning->rotacion_mensual = $item['rotacion_mensual'];
+                    $planning->uso_4_meses = $item['uso_4_meses'];
+                    $planning->cantidad_importar = $item['cantidad_importar'];
+                    $planning->total = $item['total'];
+                    $planning->save();
                 }
             });
         } catch (\Exception $e) {

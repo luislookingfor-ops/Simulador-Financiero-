@@ -52,6 +52,15 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
           Planificación
         </a>
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'consolidated' }"
+          @click.prevent="activeNavTab = 'consolidated'"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Consolidado General
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -777,7 +786,7 @@
                 onmouseout="this.style.background='#10b981'"
               >
                 <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Crear Reactivo
+                Nueva Planificación
               </button>
               
               <input 
@@ -962,40 +971,73 @@
             </div>
           </div>
 
-          <!-- Consolidated Summary Section -->
-          <div style="margin-top: 32px; border-top: 2px dashed #cbd5e1; padding-top: 24px;">
-            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">
-              <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-              Resumen Consolidado de Planificación (Suma de todos los Asesores)
-            </h3>
-            <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 16px 0;">Agrupa y suma las cantidades requeridas de todos los asesores y clientes para cada reactivo</p>
+        </div>
+      </div>
 
-            <div class="table-container" style="overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px;">
-              <table class="excel-table" style="width: 100%; border-collapse: collapse; min-width: 800px;">
-                <thead>
-                  <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
-                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569; width: 140px;">Código Item</th>
-                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Descripción del Reactivo</th>
-                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 110px;">Stock Consolidado</th>
-                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 140px;">Rotación Total / Mes</th>
-                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #1e3a8a; width: 140px; background: #f0f7ff;">Uso Total 4 Meses</th>
-                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #065f46; width: 160px; background: #e6fcf5;">Importación Req. Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="item in consolidatedPlanning" :key="item.cod_item" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
-                    <td style="padding: 8px 10px; font-weight: 600; color: #334155; font-size: 0.8rem;">{{ item.cod_item }}</td>
-                    <td style="padding: 8px 10px; font-size: 0.8rem; color: #0f172a;">{{ item.descripcion }}</td>
-                    <td style="padding: 8px 10px; text-align: center; font-size: 0.8rem; color: #334155; font-weight: 600;">{{ item.stock }}</td>
-                    <td style="padding: 8px 10px; text-align: center; font-size: 0.8rem; color: #334155; font-weight: 600;">{{ item.rotacion_mensual }}</td>
-                    <td style="padding: 8px 10px; text-align: center; font-weight: 700; color: #1d4ed8; background: #f0f7ff; font-size: 0.85rem;">{{ item.uso_4_meses }}</td>
-                    <td style="padding: 8px 10px; text-align: center; font-weight: 700; color: #047857; background: #e6fcf5; font-size: 0.85rem;">{{ item.cantidad_importar }}</td>
-                  </tr>
-                  <tr v-if="consolidatedPlanning.length === 0">
-                    <td colspan="6" style="padding: 24px; text-align: center; color: #64748b; font-style: italic; font-size: 0.85rem;">No hay reactivos planificados.</td>
-                  </tr>
-                </tbody>
-              </table>
+      <!-- Dashboard Grid: Tab 6 - Consolidado General -->
+      <div v-else-if="activeNavTab === 'consolidated'" class="dashboard-grid single-view">
+        <div class="card p-6 bg-white rounded-xl border border-gray-200 shadow-sm" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+          
+          <!-- Header and Overview -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Consolidado General de Planificación
+              </h2>
+              <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Visualización de las sumas totales de importación requerida de todos los asesores y clientes agrupados por reactivo</p>
+            </div>
+            
+            <button 
+              @click="exportConsolidatedToExcel" 
+              class="btn" 
+              style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: background 0.15s;"
+              onmouseover="this.style.background='#1d4ed8'"
+              onmouseout="this.style.background='#2563eb'"
+            >
+              <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Exportar Consolidado (Excel)
+            </button>
+          </div>
+
+          <!-- Consolidated Table -->
+          <div class="table-container" style="overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <table class="excel-table" style="width: 100%; border-collapse: collapse; min-width: 800px;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                  <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; font-weight: 700; color: #475569; width: 140px;">Código Item</th>
+                  <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; font-weight: 700; color: #475569;">Descripción del Reactivo</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #475569; width: 140px;">Stock Consolidado</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #475569; width: 160px;">Rotación Total / Mes</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #1e3a8a; width: 160px; background: #f0f7ff;">Uso Total 4 Meses</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #065f46; width: 180px; background: #e6fcf5;">Importación Req. Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in consolidatedPlanning" :key="item.cod_item" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                  <td style="padding: 10px 10px; font-weight: 600; color: #334155; font-size: 0.85rem;">{{ item.cod_item }}</td>
+                  <td style="padding: 10px 10px; font-size: 0.85rem; color: #0f172a;">{{ item.descripcion }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-size: 0.85rem; color: #334155; font-weight: 600;">{{ item.stock }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-size: 0.85rem; color: #334155; font-weight: 600;">{{ item.rotacion_mensual }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-weight: 700; color: #1d4ed8; background: #f0f7ff; font-size: 0.9rem;">{{ item.uso_4_meses }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-weight: 700; color: #047857; background: #e6fcf5; font-size: 0.9rem;">{{ item.cantidad_importar }}</td>
+                </tr>
+                <tr v-if="consolidatedPlanning.length === 0">
+                  <td colspan="6" style="padding: 32px; text-align: center; color: #64748b; font-style: italic; font-size: 0.9rem;">
+                    No hay reactivos planificados para consolidar. Crea una planificación primero.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Total sum summary -->
+          <div style="margin-top: 16px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; display: flex; justify-content: flex-end; gap: 32px; font-size: 0.95rem; font-weight: 700; color: #1e293b;">
+            <div>
+              Total Productos: <span style="color: var(--primary);">{{ consolidatedPlanning.length }}</span>
+            </div>
+            <div>
+              Total Acumulado a Importar (4 Meses): <span style="color: #047857;">{{ consolidatedPlanning.reduce((sum, item) => sum + (item.cantidad_importar || 0), 0) }}</span>
             </div>
           </div>
           
@@ -1085,7 +1127,7 @@
       <div class="card" style="width: 100%; max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden; box-sizing: border-box; border: 1px solid #cbd5e1;">
         <div style="background: var(--primary); padding: 16px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
           <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: white;">
-            {{ isEditingPlanning ? 'Editar Reactivo' : 'Agregar Nuevo Reactivo' }}
+            {{ isEditingPlanning ? 'Editar Reactivo' : 'Nueva Planificación por Asesor y Cliente' }}
           </h3>
           <button type="button" @click="showPlanningModal = false" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">&times;</button>
         </div>
@@ -1101,25 +1143,33 @@
             <input type="text" v-model="planningForm.cliente" required placeholder="Ej: Hospital Metropolitano" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
-            <div>
-              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Código Item *</label>
-              <input type="text" v-model="planningForm.cod_item" required placeholder="Ej: LRAFI001" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
-            </div>
-            <div>
-              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Descripción del Reactivo *</label>
-              <input type="text" v-model="planningForm.descripcion" required placeholder="Ej: AFIAS TSH X 24 TEST" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
-            </div>
+          <!-- Catalog Notice (only for new planning) -->
+          <div v-if="!isEditingPlanning" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px; font-size: 0.8rem; color: #1e4ed8; text-align: left; line-height: 1.4;">
+            <strong>Nota:</strong> Al hacer clic en Crear, se inicializarán automáticamente los <strong>{{ reagentCatalog.length }} reactivos</strong> del catálogo base para este asesor y cliente con stock y rotación en 0, listos para que edites sus valores en la grilla.
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div>
-              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Stock Actual</label>
-              <input type="number" v-model.number="planningForm.stock" min="0" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+          <!-- Product Details (only for editing single row) -->
+          <div v-if="isEditingPlanning" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Código Item *</label>
+                <input type="text" v-model="planningForm.cod_item" required placeholder="Ej: LRAFI001" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Descripción del Reactivo *</label>
+                <input type="text" v-model="planningForm.descripcion" required placeholder="Ej: AFIAS TSH X 24 TEST" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
             </div>
-            <div>
-              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Rotación Mensual</label>
-              <input type="number" v-model.number="planningForm.rotacion_mensual" min="0" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Stock Actual</label>
+                <input type="number" v-model.number="planningForm.stock" min="0" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Rotación Mensual</label>
+                <input type="number" v-model.number="planningForm.rotacion_mensual" min="0" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
             </div>
           </div>
 
@@ -1128,7 +1178,7 @@
               Cancelar
             </button>
             <button type="submit" class="btn btn-primary" style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
-              {{ isEditingPlanning ? 'Guardar Cambios' : 'Crear Reactivo' }}
+              {{ isEditingPlanning ? 'Guardar Cambios' : 'Crear Planificación' }}
             </button>
           </div>
         </form>
@@ -1233,16 +1283,81 @@ export default {
         type: 'info'
       },
       planningList: [],
-      selectedPlanningAdvisor: 'JORGE ESTRELLA',
-      selectedPlanningClient: 'Hospital Metropolitano',
+      selectedPlanningAdvisor: '',
+      selectedPlanningClient: '',
       planningSearchQuery: '',
       showPlanningModal: false,
       isEditingPlanning: false,
       currentPlanningId: null,
       savingPlanning: false,
+      reagentCatalog: [
+        { cod_item: 'LRAFI001', descripcion: 'AFIAS NT-PROBNP X 24 TEST' },
+        { cod_item: 'LRAFI002', descripcion: 'AFIAS PSA NEO X 24 TEST' },
+        { cod_item: 'LRAFI003', descripcion: 'AFIAS FPSA NEO X 24 TEST' },
+        { cod_item: 'LRAFI004', descripcion: 'AFIAS AFP X 24 TEST' },
+        { cod_item: 'LRAFI005', descripcion: 'AFIAS HBA1C NEO (HEMOGLOBINA GLICOSILADA) X 24 TEST' },
+        { cod_item: 'LRAFI006', descripcion: 'AFIAS INSULINA X 24 TEST' },
+        { cod_item: 'LRAFI007', descripcion: 'AFIAS TSH X 24 TEST' },
+        { cod_item: 'LRAFI008', descripcion: 'AFIAS T3 X 24 TEST' },
+        { cod_item: 'LRAFI009', descripcion: 'AFIAS T4 X 24 TEST' },
+        { cod_item: 'LRAFI010', descripcion: 'AFIAS FT4 X 24 TEST' },
+        { cod_item: 'LRAFI011', descripcion: 'AFIAS FSH X 24 TEST' },
+        { cod_item: 'LRAFI012', descripcion: 'AFIAS PRL (PROLACTINA) X 24 TEST' },
+        { cod_item: 'LRAFI013', descripcion: 'AFIAS TESTOSTERONA X 24 TEST' },
+        { cod_item: 'LRAFI014', descripcion: 'AFIAS CORTISOL X 24 TEST' },
+        { cod_item: 'LRAFI015', descripcion: 'AFIAS HELICOBACTER PYLORI SA X 24 TEST' },
+        { cod_item: 'LRAFI016', descripcion: 'AFIAS CRP (PROTEINA C REACTIVA) X 24 TEST' },
+        { cod_item: 'LRAFI017', descripcion: 'AFIAS PROCALCITONINA (PCT) X 24 TEST' },
+        { cod_item: 'LRAFI018', descripcion: 'AFIAS TOXO IGG X 24 TEST' },
+        { cod_item: 'LRAFI019', descripcion: 'AFIAS TOXO IGM X 24 TEST' },
+        { cod_item: 'LRAFI020', descripcion: 'AFIAS RUBEOLLA IGG X 24 TEST' },
+        { cod_item: 'LRAFI021', descripcion: 'AFIAS TOTAL IGE X 24 TEST' },
+        { cod_item: 'LRAFI022', descripcion: 'AFIAS FERRITINA X 24 TEST' },
+        { cod_item: 'LRAFI023', descripcion: 'AFIAS VITAMINA D NEO X 24 TEST' },
+        { cod_item: 'LRAFI024', descripcion: 'AFIAS TSH X 24 TEST R' },
+        { cod_item: 'LRAFI025', descripcion: 'AFIAS HBA1C NEO (HEMOGLOBINA GLICOSILADA) X 24 TEST R' },
+        { cod_item: 'LRAFI027', descripcion: 'AFIAS TNI PLUS X 24 TEST' },
+        { cod_item: 'LRAFI028', descripcion: 'AFIAS CK-MB NEO X 24 TEST' },
+        { cod_item: 'LRAFI029', descripcion: 'AFIAS D-DIMER NEO X 24 TEST' },
+        { cod_item: 'LRAFI030', descripcion: 'AFIAS CARDIAC TRIPLE X 24 TEST' },
+        { cod_item: 'LRAFI031', descripcion: 'AFIAS HSCRP X 24 TEST' },
+        { cod_item: 'LRAFI032', descripcion: 'AFIAS TROPONIN T X 24 TEST' },
+        { cod_item: 'LRAFI033', descripcion: 'AFIAS CEA X 24 TEST' },
+        { cod_item: 'LRAFI034', descripcion: 'AFIAS CA 19-9 X 24 TEST' },
+        { cod_item: 'LRAFI035', descripcion: 'AFIAS CA 125 X 24 TEST' },
+        { cod_item: 'LRAFI036', descripcion: 'AFIAS CYFRA 21-1 X 24 TEST' },
+        { cod_item: 'LRAFI037', descripcion: 'AFIAS MICROALBUMIN X 24 TEST' },
+        { cod_item: 'LRAFI038', descripcion: 'AFIAS CYSTATIN C X 24 TEST' },
+        { cod_item: 'LRAFI039', descripcion: 'AFIAS TOTAL BHCG X 24 TEST' },
+        { cod_item: 'LRAFI040', descripcion: 'AFIAS LH X 24 TEST' },
+        { cod_item: 'LRAFI041', descripcion: 'AFIAS PROGESTERONE X 24 TEST' },
+        { cod_item: 'LRAFI042', descripcion: 'AFIAS ESTRADIOL X 24 TEST' },
+        { cod_item: 'LRAFI043', descripcion: 'AFIAS AMH X 24 TEST' },
+        { cod_item: 'LRAFI044', descripcion: 'AFIAS CALPROTECTIN X 24 TEST' },
+        { cod_item: 'LRAFI045', descripcion: 'AFIAS COVID-19 AB X 24 TEST' },
+        { cod_item: 'LRAFI046', descripcion: 'AFIAS COVID-19 AG X 24 TEST' },
+        { cod_item: 'LRAFI047', descripcion: 'AFIAS COVID-19/FLU AG COMBO X 24 TEST' },
+        { cod_item: 'LRAFI048', descripcion: 'AFIAS HBSAG X 24 TEST' },
+        { cod_item: 'LRAFI049', descripcion: 'AFIAS ANTI-HBS X 24 TEST' },
+        { cod_item: 'LRAFI050', descripcion: 'AFIAS ANTI-HCV X 24 TEST' },
+        { cod_item: 'LRAFI051', descripcion: 'AFIAS DENGUE IGG/IGM X 24 TEST' },
+        { cod_item: 'LRAFI052', descripcion: 'AFIAS DENGUE NS1 AG X 24 TEST' },
+        { cod_item: 'LRAFI053', descripcion: 'AFIAS HIV 1/2 AB X 24 TEST' },
+        { cod_item: 'LRAFI054', descripcion: 'AFIAS NORO X 24 TEST' },
+        { cod_item: 'LRAFI055', descripcion: 'AFIAS ROTA X 24 TEST' },
+        { cod_item: 'LRAFI056', descripcion: 'AFIAS ROTA/ADENO X 24 TEST' },
+        { cod_item: 'LRAFI057', descripcion: 'AFIAS STREP A X 24 TEST' },
+        { cod_item: 'LRAFI058', descripcion: 'AFIAS FLU A+B X 24 TEST' },
+        { cod_item: 'LRAFI059', descripcion: 'AFIAS ANTI-CCP PLUS, 108 X 24 TEST' },
+        { cod_item: 'LRAFI060', descripcion: 'AFIAS PTH X 24 TEST' },
+        { cod_item: 'LRAFI062', descripcion: 'AFIAS COVID-19/FLU A+B/RSV AG X 24 TEST' },
+        { cod_item: 'LRAFI066', descripcion: 'GT-AFIAS CEA X 24 TEST' },
+        { cod_item: 'LRAFI067', descripcion: 'GT-AFIAS DENGUE IGG/IGM X 24 TEST' },
+        { cod_item: 'LRAFI068', descripcion: 'GT-AFIAS FT4 X 24 TEST' }
+      ],
       planningForm: {
-        asesor: 'JORGE ESTRELLA',
-        cliente: 'Hospital Metropolitano',
+        asesor: '',
+        cliente: '',
         cod_item: '',
         descripcion: '',
         stock: 0,
@@ -2086,67 +2201,102 @@ export default {
       this.showPlanningModal = true;
     },
     async submitPlanningForm() {
-      if (!this.planningForm.asesor || !this.planningForm.cod_item || !this.planningForm.descripcion) {
-        this.showToast('Asesor, Código de reactivo y Descripción son requeridos.', 'warning');
-        return;
-      }
+      if (this.isEditingPlanning) {
+        if (!this.planningForm.asesor || !this.planningForm.cod_item || !this.planningForm.descripcion) {
+          this.showToast('Asesor, Código de reactivo y Descripción son requeridos.', 'warning');
+          return;
+        }
 
-      this.planningForm.uso_4_meses = (Number(this.planningForm.rotacion_mensual) || 0) * 4;
-      const needed = this.planningForm.uso_4_meses - (Number(this.planningForm.stock) || 0);
-      this.planningForm.cantidad_importar = needed > 0 ? needed : 0;
-      this.planningForm.total = this.planningForm.cantidad_importar;
+        this.planningForm.uso_4_meses = (Number(this.planningForm.rotacion_mensual) || 0) * 4;
+        const needed = this.planningForm.uso_4_meses - (Number(this.planningForm.stock) || 0);
+        this.planningForm.cantidad_importar = needed > 0 ? needed : 0;
+        this.planningForm.total = this.planningForm.cantidad_importar;
 
-      const payload = { ...this.planningForm };
-      const isEdit = this.isEditingPlanning;
-      const url = isEdit ? `/reagent-plannings/${this.currentPlanningId}` : '/reagent-plannings';
+        const payload = { ...this.planningForm };
+        const url = `/reagent-plannings/${this.currentPlanningId}`;
 
-      try {
-        if (window.hasOwnProperty('Inertia') || this.$inertia) {
-          const client = this.$inertia || window.Inertia;
-          const method = isEdit ? 'put' : 'post';
-          client[method](url, payload, {
-            onSuccess: () => {
-              this.showToast(isEdit ? 'Reactivo actualizado correctamente.' : 'Reactivo creado correctamente.', 'success');
-              this.showPlanningModal = false;
-            },
-            onError: (errors) => {
-              const errMsg = Object.values(errors).join(' ');
-              this.showToast(errMsg || 'Error al guardar reactivo.', 'danger');
-            }
-          });
-        } else {
-          // Fallback fetch API
-          const response = await fetch(url, {
-            method: isEdit ? 'PUT' : 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Inertia': 'true',
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(payload)
-          });
-          
-          if (response.ok) {
-            this.showToast(isEdit ? 'Reactivo actualizado.' : 'Reactivo creado.', 'success');
-            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
-              if (isEdit) {
+        try {
+          if (window.hasOwnProperty('Inertia') || this.$inertia) {
+            const client = this.$inertia || window.Inertia;
+            client.put(url, payload, {
+              onSuccess: () => {
+                this.showToast('Reactivo actualizado correctamente.', 'success');
+                this.showPlanningModal = false;
+              },
+              onError: (errors) => {
+                const errMsg = Object.values(errors).join(' ');
+                this.showToast(errMsg || 'Error al guardar reactivo.', 'danger');
+              }
+            });
+          } else {
+            // Fallback fetch API
+            const response = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Inertia': 'true',
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              body: JSON.stringify(payload)
+            });
+            
+            if (response.ok) {
+              this.showToast('Reactivo actualizado.', 'success');
+              if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
                 const idx = this.planningList.findIndex(p => p.id === this.currentPlanningId);
                 if (idx !== -1) {
                   this.planningList[idx] = { ...this.planningList[idx], ...payload };
                 }
-              } else {
-                const newId = this.planningList.length ? Math.max(...this.planningList.map(p => p.id)) + 1 : 1;
-                this.planningList.push({ id: newId, ...payload });
               }
+              this.showPlanningModal = false;
+            } else {
+              this.showToast('Error de conexión al servidor.', 'danger');
             }
-            this.showPlanningModal = false;
-          } else {
-            this.showToast('Error de conexión al servidor.', 'danger');
           }
+        } catch (err) {
+          console.error(err);
+          this.showToast('Error de red al guardar reactivo.', 'danger');
         }
-      } catch (err) {
-        console.error(err);
-        this.showToast('Error de red al guardar reactivo.', 'danger');
+      } else {
+        // Creating new planning (Advisor + Client relationship)
+        if (!this.planningForm.asesor || !this.planningForm.cliente) {
+          this.showToast('Asesor y Cliente son requeridos.', 'warning');
+          return;
+        }
+
+        const asesor = this.planningForm.asesor.trim();
+        const cliente = this.planningForm.cliente.trim();
+
+        // Check if this relationship already exists in planningList to avoid duplicating catalog
+        const exists = this.planningList.some(p => p.asesor === asesor && p.cliente === cliente);
+        if (exists) {
+          this.showToast('Esta planificación (Asesor y Cliente) ya existe.', 'warning');
+          return;
+        }
+
+        // Generate planning rows for all catalog reagents
+        const baseId = this.planningList.length ? Math.max(...this.planningList.map(p => p.id)) + 1 : 1;
+        const newRows = this.reagentCatalog.map((catalogItem, idx) => ({
+          id: baseId + idx,
+          asesor: asesor,
+          cliente: cliente,
+          cod_item: catalogItem.cod_item,
+          descripcion: catalogItem.descripcion,
+          stock: 0,
+          rotacion_mensual: 0,
+          uso_4_meses: 0,
+          cantidad_importar: 0,
+          total: 0
+        }));
+
+        this.planningList.push(...newRows);
+
+        // Filter grid to show the newly created planning
+        this.selectedPlanningAdvisor = asesor;
+        this.selectedPlanningClient = cliente;
+
+        this.showToast(`Se inicializaron los ${newRows.length} reactivos del catálogo para ${asesor} y ${cliente}. Escribe stock y rotación y haz clic en Guardar Planificación para registrarlos.`, 'success');
+        this.showPlanningModal = false;
       }
     },
     async deletePlanning(item) {
@@ -2345,6 +2495,38 @@ export default {
       };
       
       reader.readAsText(file, 'UTF-8');
+    },
+    exportConsolidatedToExcel() {
+      const headers = ['Código Item', 'Descripción del Reactivo', 'Stock Consolidado', 'Rotación Total / Mes', 'Uso Total 4 Meses', 'Importación Requerida Total'];
+      const rows = this.consolidatedPlanning.map(p => [
+        p.cod_item,
+        p.descripcion,
+        p.stock,
+        p.rotacion_mensual,
+        p.uso_4_meses,
+        p.cantidad_importar
+      ]);
+      let csvContent = "\ufeff";
+      csvContent += headers.join(';') + "\r\n";
+      rows.forEach(row => {
+        const escapedRow = row.map(val => {
+          if (typeof val === 'string') {
+            return `"${val.replace(/"/g, '""')}"`;
+          }
+          return val;
+        });
+        csvContent += escapedRow.join(';') + "\r\n";
+      });
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `consolidado_general_reactivos_${dateStr}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   }
 };
