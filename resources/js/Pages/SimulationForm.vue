@@ -68,7 +68,7 @@
     <!-- Main Content -->
     <main class="main-content">
       <!-- Header -->
-      <header class="top-header">
+      <header v-if="activeNavTab === 'simulator'" class="top-header">
         <div class="header-title">
           <h1>Simulador de Costos y Proyecciones HUC</h1>
           <p>Simulador financiero para propuestas de comodato y venta de reactivos</p>
@@ -780,15 +780,22 @@
                 Crear Reactivo
               </button>
               
+              <input 
+                type="file" 
+                ref="fileInput" 
+                @change="handleExcelImport" 
+                accept=".csv" 
+                style="display: none;" 
+              />
               <button 
-                @click="exportPlanningToExcel" 
+                @click="$refs.fileInput.click()" 
                 class="btn" 
                 style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: background 0.15s;"
                 onmouseover="this.style.background='#1d4ed8'"
                 onmouseout="this.style.background='#2563eb'"
               >
-                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Exportar Excel
+                <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 4v12m0-12L8 8m4-4l4 4"/></svg>
+                Importar Excel (CSV)
               </button>
 
               <button 
@@ -835,20 +842,42 @@
 
           <!-- Spreadsheet Grid Table -->
           <div class="table-container" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <table class="excel-table" style="width: 100%; border-collapse: collapse; min-width: 900px;">
+            <table class="excel-table" style="width: 100%; border-collapse: collapse; min-width: 1100px;">
               <thead>
                 <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
-                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 120px;">Código Item</th>
+                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 140px;">Asesor</th>
+                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 160px;">Cliente</th>
+                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 110px;">Código Item</th>
                   <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155;">Descripción Reactivo</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 100px;">Stock</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 130px;">Rotación Mensual</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #1e3a8a; width: 130px; background: #eff6ff;">Uso 4 Meses</th>
-                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #065f46; width: 150px; background: #ecfdf5;">Importación Req.</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 80px;">Stock</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 100px;">Rotación Mensual</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #1e3a8a; width: 100px; background: #eff6ff;">Uso 4 Meses</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #065f46; width: 120px; background: #ecfdf5;">Importación Req.</th>
                   <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 120px;">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="item in filteredPlanningPlannings" :key="item.id" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                  <!-- Asesor Input -->
+                  <td style="padding: 6px 10px;">
+                    <input 
+                      type="text" 
+                      v-model="item.asesor" 
+                      class="excel-input" 
+                      style="width: 100%; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; color: black; background: white; box-sizing: border-box;"
+                    />
+                  </td>
+
+                  <!-- Cliente Input -->
+                  <td style="padding: 6px 10px;">
+                    <input 
+                      type="text" 
+                      v-model="item.cliente" 
+                      class="excel-input" 
+                      style="width: 100%; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; color: black; background: white; box-sizing: border-box;"
+                    />
+                  </td>
+
                   <!-- Code Item -->
                   <td style="padding: 8px 10px; font-weight: 600; color: #334155; font-size: 0.8rem;">
                     {{ item.cod_item }}
@@ -867,7 +896,7 @@
                       min="0"
                       @input="recalculatePlanningRow(item)"
                       class="excel-input" 
-                      style="width: 80px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: black; background: white;"
+                      style="width: 80px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: black; background: white; box-sizing: border-box;"
                     />
                   </td>
                   
@@ -879,7 +908,7 @@
                       min="0"
                       @input="recalculatePlanningRow(item)"
                       class="excel-input" 
-                      style="width: 90px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: black; background: white;"
+                      style="width: 90px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: black; background: white; box-sizing: border-box;"
                     />
                   </td>
                   
@@ -915,7 +944,7 @@
                 </tr>
                 
                 <tr v-if="filteredPlanningPlannings.length === 0">
-                  <td colspan="7" style="padding: 32px; text-align: center; color: #64748b; font-style: italic; font-size: 0.85rem;">
+                  <td colspan="9" style="padding: 32px; text-align: center; color: #64748b; font-style: italic; font-size: 0.85rem;">
                     No se encontraron reactivos para los filtros seleccionados.
                   </td>
                 </tr>
@@ -930,6 +959,43 @@
             </div>
             <div>
               Total a Importar: <span style="color: #047857;">{{ filteredPlanningPlannings.reduce((sum, item) => sum + (item.cantidad_importar || 0), 0) }}</span>
+            </div>
+          </div>
+
+          <!-- Consolidated Summary Section -->
+          <div style="margin-top: 32px; border-top: 2px dashed #cbd5e1; padding-top: 24px;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">
+              <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              Resumen Consolidado de Planificación (Suma de todos los Asesores)
+            </h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 16px 0;">Agrupa y suma las cantidades requeridas de todos los asesores y clientes para cada reactivo</p>
+
+            <div class="table-container" style="overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px;">
+              <table class="excel-table" style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                <thead>
+                  <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569; width: 140px;">Código Item</th>
+                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Descripción del Reactivo</th>
+                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 110px;">Stock Consolidado</th>
+                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 140px;">Rotación Total / Mes</th>
+                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #1e3a8a; width: 140px; background: #f0f7ff;">Uso Total 4 Meses</th>
+                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #065f46; width: 160px; background: #e6fcf5;">Importación Req. Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in consolidatedPlanning" :key="item.cod_item" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 8px 10px; font-weight: 600; color: #334155; font-size: 0.8rem;">{{ item.cod_item }}</td>
+                    <td style="padding: 8px 10px; font-size: 0.8rem; color: #0f172a;">{{ item.descripcion }}</td>
+                    <td style="padding: 8px 10px; text-align: center; font-size: 0.8rem; color: #334155; font-weight: 600;">{{ item.stock }}</td>
+                    <td style="padding: 8px 10px; text-align: center; font-size: 0.8rem; color: #334155; font-weight: 600;">{{ item.rotacion_mensual }}</td>
+                    <td style="padding: 8px 10px; text-align: center; font-weight: 700; color: #1d4ed8; background: #f0f7ff; font-size: 0.85rem;">{{ item.uso_4_meses }}</td>
+                    <td style="padding: 8px 10px; text-align: center; font-weight: 700; color: #047857; background: #e6fcf5; font-size: 0.85rem;">{{ item.cantidad_importar }}</td>
+                  </tr>
+                  <tr v-if="consolidatedPlanning.length === 0">
+                    <td colspan="6" style="padding: 24px; text-align: center; color: #64748b; font-style: italic; font-size: 0.85rem;">No hay reactivos planificados.</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
           
@@ -1253,6 +1319,27 @@ export default {
         }
         return matchAdvisor && matchClient && matchSearch;
       });
+    },
+    consolidatedPlanning() {
+      const summary = {};
+      this.planningList.forEach(item => {
+        const key = item.cod_item ? item.cod_item.trim() : (item.descripcion ? item.descripcion.trim() : 'UNKNOWN');
+        if (!summary[key]) {
+          summary[key] = {
+            cod_item: item.cod_item || '',
+            descripcion: item.descripcion || '',
+            stock: 0,
+            rotacion_mensual: 0,
+            uso_4_meses: 0,
+            cantidad_importar: 0
+          };
+        }
+        summary[key].stock += Number(item.stock) || 0;
+        summary[key].rotacion_mensual += Number(item.rotacion_mensual) || 0;
+        summary[key].uso_4_meses += Number(item.uso_4_meses) || 0;
+        summary[key].cantidad_importar += Number(item.cantidad_importar) || 0;
+      });
+      return Object.values(summary).sort((a, b) => a.cod_item.localeCompare(b.cod_item));
     },
     // Real-time client-side calculation engine
     calculations() {
@@ -2156,40 +2243,108 @@ export default {
         this.savingPlanning = false;
       }
     },
-    exportPlanningToExcel() {
-      const headers = ['Asesor', 'Cliente', 'Código Item', 'Descripción', 'Stock', 'Rotación Mensual', 'Uso 4 Meses', 'Importación Requerida', 'Total'];
-      const rows = this.filteredPlanningPlannings.map(p => [
-        p.asesor,
-        p.cliente || '',
-        p.cod_item,
-        p.descripcion,
-        p.stock,
-        p.rotacion_mensual,
-        p.uso_4_meses,
-        p.cantidad_importar,
-        p.total
-      ]);
-      let csvContent = "\ufeff";
-      csvContent += headers.join(';') + "\r\n";
-      rows.forEach(row => {
-        const escapedRow = row.map(val => {
-          if (typeof val === 'string') {
-            return `"${val.replace(/"/g, '""')}"`;
+    handleExcelImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/);
+        if (lines.length < 2) {
+          this.showToast('El archivo está vacío o no tiene suficientes líneas.', 'warning');
+          return;
+        }
+
+        // Detect separator: comma or semicolon
+        const firstLine = lines[0];
+        const separator = firstLine.includes(';') ? ';' : ',';
+        const headers = firstLine.split(separator).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+
+        // Map header indexes
+        const idxAsesor = headers.findIndex(h => h.includes('asesor') || h.includes('vendedor') || h.includes('rep'));
+        const idxCliente = headers.findIndex(h => h.includes('cliente') || h.includes('hospital') || h.includes('empresa') || h.includes('institu'));
+        const idxCodItem = headers.findIndex(h => h.includes('cod') || h.includes('item') || h.includes('codigo') || h.includes('código') || h.includes('part number') || h.includes('pn'));
+        const idxDescripcion = headers.findIndex(h => h.includes('desc') || h.includes('nombre') || h.includes('reag') || h.includes('reactivo') || h.includes('producto'));
+        const idxStock = headers.findIndex(h => h.includes('stock') || h.includes('inventario') || h.includes('cant') || h.includes('existencia'));
+        const idxRotacion = headers.findIndex(h => h.includes('rotac') || h.includes('mensual') || h.includes('rotación') || h.includes('rotacion'));
+
+        if (idxCodItem === -1 || idxDescripcion === -1) {
+          this.showToast('No se encontraron columnas obligatorias (Código y Descripción).', 'danger');
+          return;
+        }
+
+        const newPlannings = [];
+        let idCounter = 1;
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          // Parse CSV line handling quotes
+          let cols = [];
+          let currentVal = '';
+          let inQuotes = false;
+          for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === separator && !inQuotes) {
+              cols.push(currentVal.trim());
+              currentVal = '';
+            } else {
+              currentVal += char;
+            }
           }
-          return val;
-        });
-        csvContent += escapedRow.join(';') + "\r\n";
-      });
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      const dateStr = new Date().toISOString().slice(0, 10);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `planificacion_reactivos_${dateStr}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+          cols.push(currentVal.trim());
+
+          const cod_item = idxCodItem !== -1 ? (cols[idxCodItem] || '').replace(/"/g, '') : '';
+          const descripcion = idxDescripcion !== -1 ? (cols[idxDescripcion] || '').replace(/"/g, '') : '';
+          
+          if (!cod_item || !descripcion) continue;
+
+          const asesor = idxAsesor !== -1 ? (cols[idxAsesor] || '').replace(/"/g, '') : 'JORGE ESTRELLA';
+          const cliente = idxCliente !== -1 ? (cols[idxCliente] || '').replace(/"/g, '') : 'Hospital Metropolitano';
+          
+          // Parse stock: handle "no encontrado", "no tiene", empty, or non-numeric
+          const rawStock = idxStock !== -1 ? cols[idxStock] : '0';
+          let stock = parseInt(rawStock);
+          if (isNaN(stock)) stock = 0;
+
+          const rawRotacion = idxRotacion !== -1 ? cols[idxRotacion] : '0';
+          let rotacion = parseFloat(rawRotacion);
+          if (isNaN(rotacion)) rotacion = 0;
+
+          const uso_4_meses = rotacion * 4;
+          const cantidad_importar = Math.max(0, uso_4_meses - stock);
+
+          newPlannings.push({
+            id: idCounter++,
+            asesor,
+            cliente,
+            cod_item,
+            descripcion,
+            stock,
+            rotacion_mensual: rotacion,
+            uso_4_meses,
+            cantidad_importar,
+            total: cantidad_importar
+          });
+        }
+
+        if (newPlannings.length === 0) {
+          this.showToast('No se pudieron importar filas válidas del archivo.', 'warning');
+          return;
+        }
+
+        this.planningList = newPlannings;
+        this.showToast(`Se importaron ${newPlannings.length} reactivos correctamente. ¡Haz clic en Guardar Planificación para registrarlos en la base de datos!`, 'success');
+        
+        // Reset file input
+        event.target.value = '';
+      };
+      
+      reader.readAsText(file, 'UTF-8');
     }
   }
 };
