@@ -216,39 +216,95 @@
                 <div class="column-body">
                   <!-- Excel Top Metadata Grid -->
                   <div class="excel-form-top">
-                    <div class="excel-form-row">
-                      <div class="excel-label">Línea:</div>
-                      <div class="excel-val">
-                        <select v-model="equipmentConfigs[colIndex].lineFilter" class="excel-select font-bold">
-                          <option value="">TODAS LAS LÍNEAS</option>
-                          <option v-for="line in uniqueLines" :key="line" :value="line">{{ line.toUpperCase() }}</option>
-                        </select>
+                    <!-- Filtros de Búsqueda Avanzada para Supabase -->
+                      <div class="excel-form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-bottom: none; padding-bottom: 2px;">
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Línea de Negocio</label>
+                          <select v-model="equipmentConfigs[colIndex].lineFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                            <option value="">TODAS LAS LÍNEAS</option>
+                            <option v-for="opt in filterOptions.lineas" :key="opt" :value="opt">{{ opt.toUpperCase() }}</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Modelo</label>
+                          <select v-model="equipmentConfigs[colIndex].modelFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                            <option value="">TODOS LOS MODELOS</option>
+                            <option v-for="opt in filterOptions.modelos" :key="opt" :value="opt">{{ opt }}</option>
+                          </select>
+                        </div>
                       </div>
-                      <div class="excel-label text-right">Cantidad:</div>
-                      <div class="excel-val">
-                        <input type="number" v-model.number="equipmentConfigs[colIndex].quantity" @input="onQuantityChange(colIndex)" @change="onQuantityChange(colIndex)" min="1" max="100" class="excel-input text-success font-bold text-center" />
-                      </div>
-                    </div>
 
-                    <div class="excel-form-row">
-                      <div class="excel-label">Equipo:</div>
-                      <div class="excel-val col-span-3">
-                        <select 
-                          v-model="equipmentConfigs[colIndex].equipment_id" 
-                          @change="onEquipmentChange(colIndex)"
-                          class="excel-select font-bold underline-select"
-                        >
-                          <option :value="null">-- SELECCIONAR EQUIPO --</option>
-                          <option 
-                            v-for="eq in filteredEquipments(equipmentConfigs[colIndex].lineFilter)" 
-                            :key="eq.id" 
-                            :value="eq.id"
-                          >
-                            {{ eq.name }}
-                          </option>
-                        </select>
+                      <div class="excel-form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; border-bottom: none; padding-top: 2px; padding-bottom: 2px;">
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Marca</label>
+                          <select v-model="equipmentConfigs[colIndex].brandFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                            <option value="">TODAS LAS MARCAS</option>
+                            <option v-for="opt in filterOptions.marcas" :key="opt" :value="opt">{{ opt }}</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Tipo de Producto</label>
+                          <select v-model="equipmentConfigs[colIndex].typeFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                            <option value="">TODOS LOS TIPOS</option>
+                            <option v-for="opt in filterOptions.tipos" :key="opt" :value="opt">{{ opt }}</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Procedencia</label>
+                          <select v-model="equipmentConfigs[colIndex].nacionalImportadoFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                            <option value="">TODAS</option>
+                            <option v-for="opt in filterOptions.nacional_importado" :key="opt" :value="opt">
+                              {{ opt === 'N' || opt.toUpperCase().startsWith('NAC') ? 'NACIONAL' : 'IMPORTADO' }}
+                            </option>
+                          </select>
+                        </div>
                       </div>
-                    </div>
+
+                      <div class="excel-form-row" style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 8px; border-bottom: none; padding-top: 2px; padding-bottom: 4px;">
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Buscar por Nombre o Código</label>
+                          <input 
+                            type="text" 
+                            v-model="equipmentConfigs[colIndex].searchQuery" 
+                            @input="onFilterChange(colIndex)" 
+                            placeholder="Escribe para buscar..." 
+                            class="excel-input" 
+                            style="font-size: 0.8rem; padding: 4px 8px; background: white; color: black; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; width: 100%;" 
+                          />
+                        </div>
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Cantidad</label>
+                          <input type="number" v-model.number="equipmentConfigs[colIndex].quantity" @input="onQuantityChange(colIndex)" @change="onQuantityChange(colIndex)" min="1" max="100" class="excel-input text-success font-bold text-center" style="font-size: 0.8rem; padding: 4px; box-sizing: border-box; width: 100%;" />
+                        </div>
+                      </div>
+
+                      <div class="excel-form-row" style="padding-top: 4px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                          <div class="excel-label" style="font-size: 0.85rem; font-weight: 800; color: var(--primary); min-width: 60px;">Catálogo:</div>
+                          <select 
+                            v-model="equipmentConfigs[colIndex].selectedCatalogItemId" 
+                            class="excel-select font-bold underline-select"
+                            style="font-size: 0.85rem; width: 100%;"
+                          >
+                            <option :value="null">-- SELECCIONAR EQUIPO / REACTIVO --</option>
+                            <option 
+                              v-for="eq in equipmentConfigs[colIndex].filteredEquipments" 
+                              :key="eq.id" 
+                              :value="eq.id"
+                            >
+                              [{{ eq.code }}] - {{ eq.name }}
+                            </option>
+                          </select>
+                        </div>
+                        <button 
+                          type="button"
+                          @click="addCatalogItemToProposal(colIndex)"
+                          class="btn btn-primary font-bold"
+                          style="padding: 4px 12px; font-size: 0.85rem; border-radius: 4px; display: flex; align-items: center; height: 32px;"
+                        >
+                          + Agregar
+                        </button>
+                      </div>
 
                     <div class="excel-form-row" v-if="equipmentConfigs[colIndex].equipment_id">
                       <div class="excel-label">Tipo:</div>
@@ -627,12 +683,13 @@
       <!-- Dashboard Grid: Tab 3 - Maestro Equipos -->
       <div v-else-if="activeNavTab === 'equipments'" class="dashboard-grid single-view">
         <div class="card p-6 bg-white rounded-xl border border-gray-200 shadow-sm" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-            <div>
-              <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0;">Maestro de Equipos Ingelab</h2>
-              <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Lista completa de equipos médicos homologados y sus costos asociados</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
+          
+          <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+              <div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0;">Maestro de Equipos Ingelab</h2>
+                <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Visualiza y edita los valores de FOB y PVP de todos los productos en Supabase</p>
+              </div>
               <button 
                 @click="openCreateEquipmentModal" 
                 class="btn btn-primary" 
@@ -641,17 +698,57 @@
                 <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Agregar Producto
               </button>
-              <div style="position: relative; width: 280px; max-width: 100%;">
+            </div>
+
+            <!-- Grilla de Filtros para Maestro Equipos -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div>
+                <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Línea de Negocio</label>
+                <select v-model="masterFilters.lineFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
+                  <option value="">TODAS LAS LÍNEAS</option>
+                  <option v-for="opt in filterOptions.lineas" :key="opt" :value="opt">{{ opt.toUpperCase() }}</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Modelo</label>
+                <select v-model="masterFilters.modelFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
+                  <option value="">TODOS LOS MODELOS</option>
+                  <option v-for="opt in filterOptions.modelos" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Marca</label>
+                <select v-model="masterFilters.brandFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
+                  <option value="">TODAS LAS MARCAS</option>
+                  <option v-for="opt in filterOptions.marcas" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Tipo de Producto</label>
+                <select v-model="masterFilters.typeFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
+                  <option value="">TODOS LOS TIPOS</option>
+                  <option v-for="opt in filterOptions.tipos" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Procedencia</label>
+                <select v-model="masterFilters.nacionalImportadoFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
+                  <option value="">TODAS</option>
+                  <option v-for="opt in filterOptions.nacional_importado" :key="opt" :value="opt">
+                    {{ opt === 'N' || opt.toUpperCase().startsWith('NAC') ? 'NACIONAL' : 'IMPORTADO' }}
+                  </option>
+                </select>
+              </div>
+              <div style="grid-column: span 2;">
+                <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Buscar por Código o Descripción</label>
                 <input 
                   type="text" 
-                  v-model="equipmentSearchQuery" 
-                  placeholder="Buscar por código, nombre o línea..." 
+                  v-model="masterFilters.searchQuery" 
+                  @input="fetchMasterProducts" 
+                  placeholder="Escribe para buscar..." 
                   class="excel-input"
-                  style="width: 100%; padding: 8px 12px 8px 36px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box;"
+                  style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.8rem; background: white; color: black;"
                 />
-                <span style="position: absolute; left: 12px; top: 10px; color: #94a3b8; display: flex; align-items: center;">
-                  <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                </span>
               </div>
             </div>
           </div>
@@ -661,51 +758,48 @@
               <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
                   <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Línea</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Marca</th>
                   <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Código</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Equipo</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo FOB</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">UPS</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">PC</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Impresora</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Control</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Calibrador</th>
-                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right;">Costo Reactivo/Prueba</th>
-                  <th style="padding: 12px 10px; text-align: center; width: 110px;">Acciones</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Nombre/Descripción</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right; width: 130px;">Costo FOB ($)</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0; text-align: right; width: 130px;">PVP ($)</th>
+                  <th style="padding: 12px 10px; border-right: 1px solid #e2e8f0;">Tipo</th>
+                  <th style="padding: 12px 10px;">Procedencia</th>
                 </tr>
               </thead>
               <tbody style="color: #334155;">
-                <tr v-for="eq in filteredMasterEquipments" :key="eq.id" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-weight: 600; color: var(--primary);">{{ eq.line }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-family: monospace; color: #475569;">{{ eq.code }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">{{ eq.name }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #15803d; background: rgba(21, 128, 61, 0.03);">${{ formatSpanishDecimal(eq.fob, 2) }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.ups, 2) }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.pc, 2) }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.impresora, 2) }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.control, 2) }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; color: #64748b;">${{ formatSpanishDecimal(eq.calibrador, 2) }}</td>
-                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #1d4ed8; background: rgba(29, 78, 216, 0.02);">${{ formatSpanishDecimal(eq.default_reagent_cost, 2) }}</td>
-                  <td style="padding: 10px; text-align: center;">
-                    <div style="display: flex; gap: 6px; justify-content: center;">
-                      <button 
-                        @click="openEditEquipmentModal(eq)" 
-                        title="Editar Equipo"
-                        style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;"
-                      >
-                        Editar
-                      </button>
-                      <button 
-                        @click="deleteEquipment(eq)" 
-                        title="Eliminar Equipo"
-                        style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
+                <tr v-for="eq in masterFilters.products" :key="eq.id" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-weight: 600; color: var(--primary);">{{ eq.linea_negocio || 'SIN LÍNEA' }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-weight: 600;">{{ eq.cod_marca || 'SIN MARCA' }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-family: monospace; color: #475569;">{{ eq.cod_item }}</td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">{{ eq.descripcion }}</td>
+                  <td style="padding: 6px 10px; border-right: 1px solid #e2e8f0; text-align: right; background: rgba(21, 128, 61, 0.03);">
+                    <input 
+                      type="number" 
+                      step="0.01" 
+                      v-model.number="eq.fob" 
+                      @change="saveProductPrice(eq)" 
+                      class="table-editable-input text-right font-bold text-success" 
+                      style="width: 110px; padding: 4px 6px; font-size: 0.8rem; box-sizing: border-box; background: white; color: black; border: 1px solid #cbd5e1; border-radius: 4px;"
+                    />
                   </td>
+                  <td style="padding: 6px 10px; border-right: 1px solid #e2e8f0; text-align: right; background: rgba(29, 78, 216, 0.02);">
+                    <input 
+                      type="number" 
+                      step="0.01" 
+                      v-model.number="eq.pvp" 
+                      @change="saveProductPrice(eq)" 
+                      class="table-editable-input text-right font-bold text-primary" 
+                      style="width: 110px; padding: 4px 6px; font-size: 0.8rem; box-sizing: border-box; background: white; color: black; border: 1px solid #cbd5e1; border-radius: 4px;"
+                    />
+                  </td>
+                  <td style="padding: 10px; border-right: 1px solid #e2e8f0;">{{ eq.tipo_producto }}</td>
+                  <td style="padding: 10px;">{{ eq.nacional_importado === 'N' || (eq.nacional_importado && eq.nacional_importado.toUpperCase().startsWith('NAC')) ? 'NACIONAL' : 'IMPORTADO' }}</td>
                 </tr>
-                <tr v-if="filteredMasterEquipments.length === 0">
-                  <td colspan="11" style="padding: 24px; text-align: center; color: #94a3b8; font-style: italic;">No se encontraron equipos que coincidan con la búsqueda.</td>
+                <tr v-if="masterFilters.products.length === 0">
+                  <td colspan="8" style="padding: 30px; text-align: center; color: #64748b; font-size: 0.9rem;">
+                    Ningún producto coincide con los filtros aplicados.
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1290,6 +1384,13 @@ import EU5600ReagentSection from '../Components/EU5600ReagentSection.vue';
 function createEmptyConfig() {
   return {
     lineFilter: '',
+    modelFilter: '',
+    brandFilter: '',
+    typeFilter: '',
+    nacionalImportadoFilter: '',
+    searchQuery: '',
+    filteredEquipments: [],
+    selectedCatalogItemId: null,
     equipment_id: null,
     equipment_type: 'EQUIPO NUEVO',
     depreciation_percent: 100,
@@ -1393,6 +1494,22 @@ export default {
         password: '',
         role: 'user'
       },
+      filterOptions: {
+        lineas: [],
+        modelos: [],
+        marcas: [],
+        tipos: [],
+        nacional_importado: []
+      },
+      masterFilters: {
+        lineFilter: '',
+        modelFilter: '',
+        brandFilter: '',
+        typeFilter: '',
+        nacionalImportadoFilter: '',
+        searchQuery: '',
+        products: []
+      },
       reagentCatalog: [
         { cod_item: 'LEAFI001', descripcion: 'EQUIPO AFIAS-1', stock_jorge: 0, stock_ingelab: -1 },
         { cod_item: 'LRAFI001', descripcion: 'AFIAS NT-PROBNP X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
@@ -1478,6 +1595,11 @@ export default {
     if (this.auth && this.auth.user && this.auth.user.role === 'user') {
       this.activeNavTab = 'planning';
     }
+    this.fetchFilterOptions();
+    this.onFilterChange(0);
+    this.onFilterChange(1);
+    this.onFilterChange(2);
+    this.fetchMasterProducts();
   },
   watch: {
     activeNavTab(newTab) {
@@ -1579,7 +1701,7 @@ export default {
           return this.getEmptyCalculation();
         }
 
-        const eq = this.equipments.find(e => e.id === cfg.equipment_id);
+        const eq = this.getSelectedEquipment(cfg.equipment_id);
         if (!eq) return this.getEmptyCalculation();
 
         const qty = Number(cfg.quantity) || 1;
@@ -1868,7 +1990,23 @@ export default {
       if (!filterLine) return this.equipments;
       return this.equipments.filter(e => e.line === filterLine);
     },
-    getSelectedEquipment(id) {
+    getSelectedEquipment(id, colIndex) {
+      if (colIndex !== undefined) {
+        const cfg = this.equipmentConfigs[colIndex];
+        if (cfg && cfg.filteredEquipments) {
+          const found = cfg.filteredEquipments.find(e => e.id === id);
+          if (found) return found;
+        }
+      } else {
+        // Fallback: Scan all 3 column configurations to resolve the product details
+        for (let i = 0; i < 3; i++) {
+          const cfg = this.equipmentConfigs[i];
+          if (cfg && cfg.filteredEquipments) {
+            const found = cfg.filteredEquipments.find(e => e.id === id);
+            if (found) return found;
+          }
+        }
+      }
       return this.equipments.find(e => e.id === id) || { fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0 };
     },
     onEquipmentChange(colIndex) {
@@ -1877,7 +2015,7 @@ export default {
         this.resetColumn(colIndex);
         return;
       }
-      const eq = this.getSelectedEquipment(config.equipment_id);
+      const eq = this.getSelectedEquipment(config.equipment_id, colIndex);
       
       config.include_ups = eq.ups > 0;
       config.include_pc = eq.pc > 0;
@@ -2740,6 +2878,174 @@ export default {
         }).then(() => {
           window.location.href = '/login';
         });
+      }
+    },
+    async fetchFilterOptions() {
+      try {
+        const response = await fetch('/api/productos/filtros');
+        if (response.ok) {
+          const data = await response.json();
+          this.filterOptions = {
+            lineas: data.lineas || [],
+            modelos: data.modelos || [],
+            marcas: data.marcas || [],
+            tipos: data.tipos || [],
+            nacional_importado: data.nacional_importado || []
+          };
+        }
+      } catch (err) {
+        console.error("Error fetching filters:", err);
+      }
+    },
+    async onFilterChange(colIndex) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (!cfg) return;
+
+      const params = new URLSearchParams();
+      if (cfg.lineFilter) params.append('linea_negocio', cfg.lineFilter);
+      if (cfg.modelFilter) params.append('modelo_equipo', cfg.modelFilter);
+      if (cfg.brandFilter) params.append('cod_marca', cfg.brandFilter);
+      if (cfg.typeFilter) params.append('tipo_producto', cfg.typeFilter);
+      if (cfg.nacionalImportadoFilter) params.append('nacional_importado', cfg.nacionalImportadoFilter);
+      if (cfg.searchQuery) params.append('search', cfg.searchQuery);
+
+      try {
+        const response = await fetch(`/api/productos?${params.toString()}`);
+        if (response.ok) {
+          const products = await response.json();
+          // Mapear campos de base de datos a lo esperado por la lógica de simulaciones HUC
+          cfg.filteredEquipments = products.map(p => ({
+            id: p.id,
+            code: p.cod_item,
+            name: p.descripcion,
+            fob: Number(p.fob) || 0,
+            ups: Number(p.ups) || 0,
+            pc: Number(p.pc) || 0,
+            impresora: Number(p.impresora) || 0,
+            control: Number(p.control) || 0,
+            calibrador: Number(p.calibrador) || 0,
+            line: p.linea_negocio,
+            default_reagent_cost: Number(p.pvp) ? (Number(p.pvp) / 1.5) : 0.35, // revert pvp to reagent cost estimate
+            cod_item: p.cod_item,
+            descripcion: p.descripcion
+          }));
+        }
+      } catch (err) {
+        console.error("Error searching products:", err);
+      }
+    },
+    addCatalogItemToProposal(colIndex) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (!cfg) return;
+      if (!cfg.selectedCatalogItemId) {
+        this.showToast('Por favor selecciona un ítem del catálogo.', 'warning');
+        return;
+      }
+      
+      const eq = this.getSelectedEquipment(cfg.selectedCatalogItemId, colIndex);
+      if (!eq) return;
+
+      // If it is the first item, initialize equipment_id and config flags
+      if (!cfg.equipment_id) {
+        cfg.equipment_id = eq.id;
+        cfg.include_ups = eq.ups > 0;
+        cfg.include_pc = eq.pc > 0;
+        cfg.include_printer_base = eq.impresora > 0;
+        cfg.include_controls = (eq.control > 0 || eq.calibrador > 0);
+        cfg.need_controls = cfg.include_controls ? 'Sí' : 'No';
+        cfg.reagent_cost_per_test = Number(eq.default_reagent_cost) || 0.35;
+      }
+
+      const q = Number(cfg.quantity) || 1;
+      if (!cfg.customItems) cfg.customItems = [];
+      
+      cfg.customItems.push({
+        qty: q,
+        name: eq.name || eq.descripcion,
+        unitFob: Number(eq.fob) || 0,
+        cod_item: eq.code || eq.cod_item
+      });
+
+      // Clear selection so they can select another
+      cfg.selectedCatalogItemId = null;
+      this.showToast('Ítem agregado a la propuesta.', 'success');
+    },
+    async fetchMasterProducts() {
+      const cfg = this.masterFilters;
+      const params = new URLSearchParams();
+      if (cfg.lineFilter) params.append('linea_negocio', cfg.lineFilter);
+      if (cfg.modelFilter) params.append('modelo_equipo', cfg.modelFilter);
+      if (cfg.brandFilter) params.append('cod_marca', cfg.brandFilter);
+      if (cfg.typeFilter) params.append('tipo_producto', cfg.typeFilter);
+      if (cfg.nacionalImportadoFilter) params.append('nacional_importado', cfg.nacionalImportadoFilter);
+      if (cfg.searchQuery) params.append('search', cfg.searchQuery);
+
+      try {
+        const response = await fetch(`/api/productos?${params.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          cfg.products = data;
+        }
+      } catch (err) {
+        console.error("Error fetching master products:", err);
+      }
+    },
+    async saveProductPrice(product) {
+      try {
+        const response = await fetch(`/api/productos/${product.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+          },
+          body: JSON.stringify({
+            fob: Number(product.fob) || 0,
+            pvp: Number(product.pvp) || 0
+          })
+        });
+        if (response.ok) {
+          this.showToast('Precios guardados y actualizados en Supabase.', 'success');
+          
+          // 1. Duplicate price to any other items with same cod_item in the Maestro Equipos list
+          if (this.masterFilters.products) {
+            this.masterFilters.products.forEach(p => {
+              if (p.cod_item === product.cod_item) {
+                p.fob = Number(product.fob) || 0;
+                p.pvp = Number(product.pvp) || 0;
+              }
+            });
+          }
+
+          // 2. Also, update in filteredEquipments lists if those products are currently loaded there
+          for (let i = 0; i < 3; i++) {
+            const colCfg = this.equipmentConfigs[i];
+            if (colCfg && colCfg.filteredEquipments) {
+              colCfg.filteredEquipments.forEach(item => {
+                if (item.code === product.cod_item || item.cod_item === product.cod_item) {
+                  item.fob = Number(product.fob) || 0;
+                  item.default_reagent_cost = Number(product.pvp) ? (Number(product.pvp) / 1.5) : 0.35;
+                }
+              });
+
+              // Rebuild custom items if the selected equipment shares the same code to update values in proposal
+              const selectedEq = this.getSelectedEquipment(colCfg.equipment_id, i);
+              if (selectedEq && (selectedEq.code === product.cod_item || selectedEq.cod_item === product.cod_item)) {
+                if (colCfg.customItems) {
+                  colCfg.customItems.forEach(ci => {
+                    if (ci.cod_item === product.cod_item) {
+                      ci.unitFob = Number(product.fob) || 0;
+                    }
+                  });
+                }
+              }
+            }
+          }
+        } else {
+          this.showToast('Error al guardar los precios.', 'danger');
+        }
+      } catch (err) {
+        console.error("Error saving product prices:", err);
+        this.showToast('Error de red al guardar precios.', 'danger');
       }
     }
   }

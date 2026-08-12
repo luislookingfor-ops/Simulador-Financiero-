@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Equipment;
 use App\Models\Simulation;
 use App\Models\ReagentPlanning;
+use App\Models\SupabaseProduct;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
 class SimulationController extends Controller
@@ -435,5 +437,139 @@ class SimulationController extends Controller
         }
 
         return redirect()->back()->with('success', 'Planificación guardada correctamente.');
+    }
+
+    public function getSupabaseFilters()
+    {
+        try {
+            $response = Http::withoutVerifying()->withHeaders([
+                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+            ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
+                'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
+            ]);
+
+            if ($response->successful()) {
+                $data = collect($response->json());
+                
+                $lineas = $data->pluck('linea_negocio')->filter()->unique()->sort()->values();
+                $modelos = $data->pluck('modelo_equipo')->filter()->unique()->sort()->values();
+                $marcas = $data->pluck('cod_marca')->filter()->unique()->sort()->values();
+                $tipos = $data->pluck('tipo_producto')->filter()->unique()->sort()->values();
+                $nacional_importado = $data->pluck('nacional_importado')->filter()->unique()->sort()->values();
+                
+                return response()->json([
+                    'lineas' => $lineas,
+                    'modelos' => $modelos,
+                    'marcas' => $marcas,
+                    'tipos' => $tipos,
+                    'nacional_importado' => $nacional_importado,
+                ]);
+            }
+
+            return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getSupabaseProducts(Request $request)
+    {
+        try {
+            $params = [
+                'limit' => 200,
+            ];
+
+            if ($request->filled('linea_negocio')) {
+                $params['linea_negocio'] = 'eq.' . $request->input('linea_negocio');
+            }
+            if ($request->filled('modelo_equipo')) {
+                $params['modelo_equipo'] = 'eq.' . $request->input('modelo_equipo');
+            }
+            if ($request->filled('cod_marca')) {
+                $params['cod_marca'] = 'eq.' . $request->input('cod_marca');
+            }
+            if ($request->filled('tipo_producto')) {
+                $params['tipo_producto'] = 'eq.' . $request->input('tipo_producto');
+            }
+            if ($request->filled('nacional_importado')) {
+                $params['nacional_importado'] = 'eq.' . $request->input('nacional_importado');
+            }
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $params['or'] = '(descripcion.ilike.*' . $search . '*,cod_item.ilike.*' . $search . '*)';
+            }
+
+            $response = Http::withoutVerifying()->withHeaders([
+                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+            ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', $params);
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+
+            return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateProductPrices(Request $request, $id)
+    {
+        try {
+            $fob = $request->input('fob');
+            $pvp = $request->input('pvp');
+
+            // 1. Get the product to find its cod_item
+            $productRes = Http::withoutVerifying()->withHeaders([
+                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+            ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
+                'id' => 'eq.' . $id,
+                'select' => 'cod_item'
+            ]);
+
+            if ($productRes->successful() && !empty($productRes->json())) {
+                $codItem = $productRes->json()[0]['cod_item'] ?? null;
+                
+                if ($codItem) {
+                    // 2. Update all products with this cod_item in Supabase
+                    $response = Http::withoutVerifying()->withHeaders([
+                        'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                        'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                        'Content-Type' => 'application/json',
+                        'Prefer' => 'return=representation'
+                    ])->patch('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos?cod_item=eq.' . urlencode($codItem), [
+                        'fob' => $fob !== null ? (float)$fob : null,
+                        'pvp' => $pvp !== null ? (float)$pvp : null
+                    ]);
+
+                    if ($response->successful()) {
+                        return response()->json($response->json());
+                    }
+                    return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+                }
+            }
+
+            // Fallback: If cod_item not found or lookup failed, just update the single record
+            $response = Http::withoutVerifying()->withHeaders([
+                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Content-Type' => 'application/json',
+                'Prefer' => 'return=representation'
+            ])->patch('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos?id=eq.' . $id, [
+                'fob' => $fob !== null ? (float)$fob : null,
+                'pvp' => $pvp !== null ? (float)$pvp : null
+            ]);
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+
+            return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
