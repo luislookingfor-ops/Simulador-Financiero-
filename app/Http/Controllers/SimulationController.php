@@ -521,6 +521,38 @@ class SimulationController extends Controller
             $fob = $request->input('fob');
             $pvp = $request->input('pvp');
 
+            // 1. Get the product to find its cod_item
+            $productRes = Http::withoutVerifying()->withHeaders([
+                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+            ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
+                'id' => 'eq.' . $id,
+                'select' => 'cod_item'
+            ]);
+
+            if ($productRes->successful() && !empty($productRes->json())) {
+                $codItem = $productRes->json()[0]['cod_item'] ?? null;
+                
+                if ($codItem) {
+                    // 2. Update all products with this cod_item in Supabase
+                    $response = Http::withoutVerifying()->withHeaders([
+                        'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                        'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                        'Content-Type' => 'application/json',
+                        'Prefer' => 'return=representation'
+                    ])->patch('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos?cod_item=eq.' . urlencode($codItem), [
+                        'fob' => $fob !== null ? (float)$fob : null,
+                        'pvp' => $pvp !== null ? (float)$pvp : null
+                    ]);
+
+                    if ($response->successful()) {
+                        return response()->json($response->json());
+                    }
+                    return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+                }
+            }
+
+            // Fallback: If cod_item not found or lookup failed, just update the single record
             $response = Http::withoutVerifying()->withHeaders([
                 'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
                 'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
@@ -532,7 +564,7 @@ class SimulationController extends Controller
             ]);
 
             if ($response->successful()) {
-                return response()->json($response->json()[0] ?? ['success' => true]);
+                return response()->json($response->json());
             }
 
             return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());

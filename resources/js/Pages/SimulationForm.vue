@@ -3006,18 +3006,36 @@ export default {
         if (response.ok) {
           this.showToast('Precios guardados y actualizados en Supabase.', 'success');
           
-          // Also, update in filteredEquipments lists if that product is currently loaded there
+          // 1. Duplicate price to any other items with same cod_item in the Maestro Equipos list
+          if (this.masterFilters.products) {
+            this.masterFilters.products.forEach(p => {
+              if (p.cod_item === product.cod_item) {
+                p.fob = Number(product.fob) || 0;
+                p.pvp = Number(product.pvp) || 0;
+              }
+            });
+          }
+
+          // 2. Also, update in filteredEquipments lists if those products are currently loaded there
           for (let i = 0; i < 3; i++) {
             const colCfg = this.equipmentConfigs[i];
             if (colCfg && colCfg.filteredEquipments) {
-              const item = colCfg.filteredEquipments.find(e => e.id === product.id);
-              if (item) {
-                item.fob = Number(product.fob) || 0;
-                item.default_reagent_cost = Number(product.pvp) ? (Number(product.pvp) / 1.5) : 0.35;
-                
-                // If it is the selected item, rebuild customItems to update unitFob in the proposal table
-                if (colCfg.equipment_id === product.id) {
-                  this.rebuildCustomItems(i);
+              colCfg.filteredEquipments.forEach(item => {
+                if (item.code === product.cod_item || item.cod_item === product.cod_item) {
+                  item.fob = Number(product.fob) || 0;
+                  item.default_reagent_cost = Number(product.pvp) ? (Number(product.pvp) / 1.5) : 0.35;
+                }
+              });
+
+              // Rebuild custom items if the selected equipment shares the same code to update values in proposal
+              const selectedEq = this.getSelectedEquipment(colCfg.equipment_id, i);
+              if (selectedEq && (selectedEq.code === product.cod_item || selectedEq.cod_item === product.cod_item)) {
+                if (colCfg.customItems) {
+                  colCfg.customItems.forEach(ci => {
+                    if (ci.cod_item === product.cod_item) {
+                      ci.unitFob = Number(product.fob) || 0;
+                    }
+                  });
                 }
               }
             }
