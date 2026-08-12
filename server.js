@@ -336,6 +336,13 @@ app.get('/api/productos', (req, res) => {
   res.json(list.slice(0, 200));
 });
 
+// Route: PUT /api/productos/:id (Mock API)
+app.put('/api/productos/:id', (req, res) => {
+  const { id } = req.params;
+  const { fob, pvp } = req.body;
+  res.json({ id, fob, pvp, success: true });
+});
+
 // Route: POST /simulations (Save scenario)
 app.post('/simulations', (req, res) => {
   const { name, global_settings, equipment_settings } = req.body;

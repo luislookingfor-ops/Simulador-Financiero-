@@ -514,4 +514,30 @@ class SimulationController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function updateProductPrices(Request $request, $id)
+    {
+        try {
+            $fob = $request->input('fob');
+            $pvp = $request->input('pvp');
+
+            $response = Http::withoutVerifying()->withHeaders([
+                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                'Content-Type' => 'application/json',
+                'Prefer' => 'return=representation'
+            ])->patch('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos?id=eq.' . $id, [
+                'fob' => $fob !== null ? (float)$fob : null,
+                'pvp' => $pvp !== null ? (float)$pvp : null
+            ]);
+
+            if ($response->successful()) {
+                return response()->json($response->json()[0] ?? ['success' => true]);
+            }
+
+            return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }
