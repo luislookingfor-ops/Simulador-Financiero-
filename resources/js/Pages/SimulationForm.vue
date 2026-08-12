@@ -8,6 +8,7 @@
 
       <nav class="nav-menu">
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'simulator' }"
@@ -17,6 +18,7 @@
           Simulador HUC
         </a>
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'reagents' }"
@@ -26,6 +28,7 @@
           Volumen Consumo Reactivos
         </a>
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'equipments' }"
@@ -35,6 +38,7 @@
           Maestro Equipos
         </a>
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'history' }"
@@ -43,15 +47,48 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
           Historial Escenarios
         </a>
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'planning' }"
+          @click.prevent="activeNavTab = 'planning'"
+        >
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          Planificación
+        </a>
+        <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'consolidated' }"
+          @click.prevent="activeNavTab = 'consolidated'"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Consolidado General
+        </a>
+        <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'users' }"
+          @click.prevent="activeNavTab = 'users'"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94-3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+          Gestión de Usuarios
+        </a>
       </nav>
 
-      <div class="sidebar-footer">
-        <div class="user-profile">
-          <div class="avatar">C</div>
-          <div class="user-info">
-            <strong>Gerente Comercial</strong>
-            <span>Vendedor Senior</span>
+      <div class="sidebar-footer" style="padding: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+        <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
+          <div class="avatar" style="width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+            {{ (auth && auth.user && auth.user.name ? auth.user.name[0] : 'U').toUpperCase() }}
           </div>
+          <div class="user-info" style="flex: 1; min-width: 0;">
+            <strong style="color: white; font-size: 0.85rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ auth && auth.user ? auth.user.name : 'Usuario Ingelab' }}</strong>
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">{{ auth && auth.user ? auth.user.role : 'invitado' }}</span>
+          </div>
+          <a href="#" @click.prevent="logout" title="Cerrar Sesión" style="color: #ef4444; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 6px; background: rgba(239, 68, 68, 0.1); transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
+            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          </a>
         </div>
       </div>
     </aside>
@@ -59,7 +96,7 @@
     <!-- Main Content -->
     <main class="main-content">
       <!-- Header -->
-      <header class="top-header">
+      <header v-if="activeNavTab === 'simulator'" class="top-header">
         <div class="header-title">
           <h1>Simulador de Costos y Proyecciones HUC</h1>
           <p>Simulador financiero para propuestas de comodato y venta de reactivos</p>
@@ -748,6 +785,356 @@
           </div>
         </div>
       </div>
+
+      <!-- Dashboard Grid: Tab 5 - Planificación -->
+      <div v-else-if="activeNavTab === 'planning'" class="dashboard-grid single-view">
+        <div class="card p-6 bg-white rounded-xl border border-gray-200 shadow-sm" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+          
+          <!-- Header and Overview -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0;">Planificación de Reactivos</h2>
+              <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Control de importaciones, consumo de reactivos y stock disponible por Asesor y Cliente</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button 
+                @click="openCreatePlanningModal" 
+                class="btn" 
+                style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: background 0.15s;"
+                onmouseover="this.style.background='#059669'"
+                onmouseout="this.style.background='#10b981'"
+              >
+                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nueva Planificación
+              </button>
+              
+              <input 
+                type="file" 
+                ref="fileInput" 
+                @change="handleExcelImport" 
+                accept=".csv" 
+                style="display: none;" 
+              />
+              <button 
+                @click="$refs.fileInput.click()" 
+                class="btn" 
+                style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: background 0.15s;"
+                onmouseover="this.style.background='#1d4ed8'"
+                onmouseout="this.style.background='#2563eb'"
+              >
+                <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 4v12m0-12L8 8m4-4l4 4"/></svg>
+                Importar Excel (CSV)
+              </button>
+
+              <button 
+                @click="savePlanningBulk" 
+                :disabled="savingPlanning"
+                class="btn btn-primary" 
+                style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px;"
+              >
+                <span v-if="savingPlanning">Guardando...</span>
+                <span v-else>Guardar Planificación</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters Section -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1; min-width: 200px;">
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Asesor Comercial</label>
+              <select v-model="selectedPlanningAdvisor" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background: white; color: black; box-sizing: border-box;">
+                <option value="">Todos los Asesores</option>
+                <option v-for="adv in planningAdvisors" :key="adv" :value="adv">{{ adv }}</option>
+              </select>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Cliente / Hospital</label>
+              <select v-model="selectedPlanningClient" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background: white; color: black; box-sizing: border-box;">
+                <option value="">Todos los Clientes</option>
+                <option v-for="cli in planningClients" :key="cli" :value="cli">{{ cli }}</option>
+              </select>
+            </div>
+
+            <div style="flex: 1.5; min-width: 250px;">
+              <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Buscar Reactivo</label>
+              <input 
+                type="text" 
+                v-model="planningSearchQuery" 
+                placeholder="Buscar por código o descripción..." 
+                class="excel-input" 
+                style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; background: white; color: black; box-sizing: border-box;"
+              />
+            </div>
+          </div>
+
+          <!-- Spreadsheet Grid Table -->
+          <div class="table-container" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <table class="excel-table" style="width: 100%; border-collapse: collapse; min-width: 1100px;">
+              <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 140px;">Asesor</th>
+                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 160px;">Cliente</th>
+                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155; width: 110px;">Código Item</th>
+                  <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #334155;">Descripción Reactivo</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 100px;">Stock Inicial</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #1e3a8a; width: 140px; background: #eff6ff;">Necesidad 4 Meses</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #065f46; width: 140px; background: #ecfdf5;">Importación</th>
+                  <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #334155; width: 120px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in filteredPlanningPlannings" :key="item.id" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+                  <!-- Asesor Input -->
+                  <td style="padding: 6px 10px;">
+                    <input 
+                      type="text" 
+                      v-model="item.asesor" 
+                      class="excel-input" 
+                      style="width: 100%; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; color: black; background: white; box-sizing: border-box;"
+                    />
+                  </td>
+
+                  <!-- Cliente Input -->
+                  <td style="padding: 6px 10px;">
+                    <input 
+                      type="text" 
+                      v-model="item.cliente" 
+                      class="excel-input" 
+                      style="width: 100%; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; color: black; background: white; box-sizing: border-box;"
+                    />
+                  </td>
+
+                  <!-- Code Item -->
+                  <td style="padding: 8px 10px; font-weight: 600; color: #334155; font-size: 0.8rem;">
+                    {{ item.cod_item }}
+                  </td>
+                  
+                  <!-- Description -->
+                  <td style="padding: 8px 10px; font-size: 0.8rem; color: #0f172a;">
+                    {{ item.descripcion }}
+                  </td>
+                  
+                  <!-- Stock Inicial Input -->
+                  <td style="padding: 6px 10px; text-align: center;">
+                    <input 
+                      type="number" 
+                      v-model.number="item.stock" 
+                      @input="recalculatePlanningRow(item, 'stock_or_need')"
+                      class="excel-input" 
+                      style="width: 90px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: black; background: white; box-sizing: border-box;"
+                    />
+                  </td>
+                  
+                  <!-- Necesidad 4 Meses Input -->
+                  <td style="padding: 6px 10px; text-align: center; background: #f0f7ff;">
+                    <input 
+                      type="number" 
+                      v-model.number="item.uso_4_meses" 
+                      @input="recalculatePlanningRow(item, 'stock_or_need')"
+                      class="excel-input" 
+                      style="width: 100px; text-align: center; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; font-weight: 600; color: #1e3a8a; background: white; box-sizing: border-box;"
+                    />
+                  </td>
+                  
+                  <!-- Importación Input (Suggested but Editable) -->
+                  <td style="padding: 6px 10px; text-align: center; background: #f0fdf4;">
+                    <input 
+                      type="number" 
+                      v-model.number="item.cantidad_importar" 
+                      @input="recalculatePlanningRow(item, 'importation')"
+                      class="excel-input" 
+                      style="width: 100px; text-align: center; padding: 4px; border: 1px solid #059669; border-radius: 4px; font-size: 0.8rem; font-weight: 700; color: #047857; background: #f0fdf4; box-sizing: border-box;"
+                    />
+                  </td>
+                  
+                  <!-- Actions -->
+                  <td style="padding: 6px 10px; text-align: center;">
+                    <div style="display: flex; gap: 6px; justify-content: center;">
+                      <button 
+                        @click="openEditPlanningModal(item)" 
+                        title="Editar Datos Básicos"
+                        style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 600;"
+                      >
+                        Editar
+                      </button>
+                      <button 
+                        @click="deletePlanning(item)" 
+                        title="Eliminar Reactivo"
+                        style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 600;"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                
+                <tr v-if="filteredPlanningPlannings.length === 0">
+                  <td colspan="9" style="padding: 32px; text-align: center; color: #64748b; font-style: italic; font-size: 0.85rem;">
+                    No se encontraron reactivos para los filtros seleccionados.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Totals summary footer -->
+          <div style="margin-top: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; display: flex; justify-content: flex-end; gap: 24px; font-size: 0.85rem; font-weight: 700; color: #1e293b;">
+            <div>
+              Total Items Filtrados: <span style="color: var(--primary);">{{ filteredPlanningPlannings.length }}</span>
+            </div>
+            <div>
+              Total a Importar: <span style="color: #047857;">{{ filteredPlanningPlannings.reduce((sum, item) => sum + (item.cantidad_importar || 0), 0) }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Dashboard Grid: Tab 6 - Consolidado General -->
+      <div v-else-if="activeNavTab === 'consolidated'" class="dashboard-grid single-view">
+        <div class="card p-6 bg-white rounded-xl border border-gray-200 shadow-sm" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+          
+          <!-- Header and Overview -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0; display: flex; align-items: center; gap: 8px;">
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Consolidado General de Planificación
+              </h2>
+              <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">Visualización de las sumas totales de importación requerida de todos los asesores y clientes agrupados por reactivo</p>
+            </div>
+            
+            <button 
+              @click="exportConsolidatedToExcel" 
+              class="btn" 
+              style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: background 0.15s;"
+              onmouseover="this.style.background='#1d4ed8'"
+              onmouseout="this.style.background='#2563eb'"
+            >
+              <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Exportar Consolidado (Excel)
+            </button>
+          </div>
+
+          <!-- Consolidated Table -->
+          <div class="table-container" style="overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <table class="excel-table" style="width: 100%; border-collapse: collapse; min-width: 800px;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                  <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; font-weight: 700; color: #475569; width: 140px;">Código Item</th>
+                  <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; font-weight: 700; color: #475569;">Descripción del Reactivo</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #475569; width: 140px;">Stock Consolidado</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #475569; width: 160px;">Rotación Total / Mes</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #1e3a8a; width: 160px; background: #f0f7ff;">Uso Total 4 Meses</th>
+                  <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; font-weight: 700; color: #065f46; width: 180px; background: #e6fcf5;">Importación Req. Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in consolidatedPlanning" :key="item.cod_item" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                  <td style="padding: 10px 10px; font-weight: 600; color: #334155; font-size: 0.85rem;">{{ item.cod_item }}</td>
+                  <td style="padding: 10px 10px; font-size: 0.85rem; color: #0f172a;">{{ item.descripcion }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-size: 0.85rem; color: #334155; font-weight: 600;">{{ item.stock }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-size: 0.85rem; color: #334155; font-weight: 600;">{{ item.rotacion_mensual }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-weight: 700; color: #1d4ed8; background: #f0f7ff; font-size: 0.9rem;">{{ item.uso_4_meses }}</td>
+                  <td style="padding: 10px 10px; text-align: center; font-weight: 700; color: #047857; background: #e6fcf5; font-size: 0.9rem;">{{ item.cantidad_importar }}</td>
+                </tr>
+                <tr v-if="consolidatedPlanning.length === 0">
+                  <td colspan="6" style="padding: 32px; text-align: center; color: #64748b; font-style: italic; font-size: 0.9rem;">
+                    No hay reactivos planificados para consolidar. Crea una planificación primero.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Total sum summary -->
+          <div style="margin-top: 16px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; display: flex; justify-content: flex-end; gap: 32px; font-size: 0.95rem; font-weight: 700; color: #1e293b;">
+            <div>
+              Total Productos: <span style="color: var(--primary);">{{ consolidatedPlanning.length }}</span>
+            </div>
+            <div>
+              Total Acumulado a Importar (4 Meses): <span style="color: #047857;">{{ consolidatedPlanning.reduce((sum, item) => sum + (item.cantidad_importar || 0), 0) }}</span>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Dashboard Grid: Tab 7 - Gestión de Usuarios -->
+      <div v-else-if="activeNavTab === 'users'" class="dashboard-grid single-view">
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; width: 100%; box-sizing: border-box; align-items: start;">
+          
+          <!-- Users List Card -->
+          <div class="card" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+              <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Usuarios Registrados
+            </h3>
+            
+            <div class="table-container" style="overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px;">
+              <table class="excel-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Nombre</th>
+                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Usuario</th>
+                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Rol</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="u in usersList" :key="u.id" style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px; font-size: 0.85rem; font-weight: 600; color: #334155;">{{ u.name }}</td>
+                    <td style="padding: 10px; font-size: 0.85rem; color: #0f172a;">{{ u.username }}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 0.8rem;">
+                      <span :class="u.role === 'admin' ? 'badge-primary' : 'badge-success'" style="padding: 2px 8px; border-radius: 9999px; font-weight: 700; font-size: 0.7rem; text-transform: uppercase;">
+                        {{ u.role === 'admin' ? 'Admin' : 'Usuario' }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr v-if="usersList.length === 0">
+                    <td colspan="3" style="padding: 24px; text-align: center; color: #64748b; font-style: italic; font-size: 0.85rem;">Cargando usuarios...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Create User Card -->
+          <div class="card" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin: 0 0 16px 0;">Crear Nuevo Usuario</h3>
+            
+            <form @submit.prevent="createUser" style="display: flex; flex-direction: column; gap: 16px;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Nombre Completo *</label>
+                <input type="text" v-model="userForm.name" required placeholder="Ej: Juan Pérez" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Nombre de Usuario *</label>
+                <input type="text" v-model="userForm.username" required placeholder="Ej: jperez" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Contraseña *</label>
+                <input type="password" v-model="userForm.password" required placeholder="Ingrese la contraseña" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Rol de Acceso *</label>
+                <select v-model="userForm.role" required class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;">
+                  <option value="user">Usuario (Solo Planificación y Consolidado)</option>
+                  <option value="admin">Administrador (Ver y Editar Todo)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="padding: 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem; margin-top: 8px; width: 100%;">
+                Registrar Usuario
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
     </main>
 
     <!-- Equipment Create/Edit Modal -->
@@ -827,6 +1214,69 @@
       </div>
     </div>
 
+    <!-- Reagent Planning Create/Edit Modal -->
+    <div v-if="showPlanningModal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
+      <div class="card" style="width: 100%; max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden; box-sizing: border-box; border: 1px solid #cbd5e1;">
+        <div style="background: var(--primary); padding: 16px 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: white;">
+            {{ isEditingPlanning ? 'Editar Reactivo' : 'Nueva Planificación por Asesor y Cliente' }}
+          </h3>
+          <button type="button" @click="showPlanningModal = false" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">&times;</button>
+        </div>
+        
+        <form @submit.prevent="submitPlanningForm" style="padding: 24px; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; margin: 0;">
+          <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Asesor Responsable *</label>
+            <input type="text" v-model="planningForm.asesor" required placeholder="Ej: JORGE ESTRELLA" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Cliente / Institución *</label>
+            <input type="text" v-model="planningForm.cliente" required placeholder="Ej: Hospital Metropolitano" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+          </div>
+
+          <!-- Catalog Notice (only for new planning) -->
+          <div v-if="!isEditingPlanning" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px; font-size: 0.8rem; color: #1e4ed8; text-align: left; line-height: 1.4;">
+            <strong>Nota:</strong> Al hacer clic en Crear, se inicializarán automáticamente los <strong>{{ reagentCatalog.length }} reactivos</strong> del catálogo base para este asesor y cliente con stock y rotación en 0, listos para que edites sus valores en la grilla.
+          </div>
+
+          <!-- Product Details (only for editing single row) -->
+          <div v-if="isEditingPlanning" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Código Item *</label>
+                <input type="text" v-model="planningForm.cod_item" required placeholder="Ej: LRAFI001" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Descripción del Reactivo *</label>
+                <input type="text" v-model="planningForm.descripcion" required placeholder="Ej: AFIAS TSH X 24 TEST" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Stock Actual</label>
+                <input type="number" v-model.number="planningForm.stock" min="0" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px; text-align: left;">Rotación Mensual</label>
+                <input type="number" v-model.number="planningForm.rotacion_mensual" min="0" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" @click="showPlanningModal = false" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" style="padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 700;">
+              {{ isEditingPlanning ? 'Guardar Cambios' : 'Crear Planificación' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Toast Notification -->
     <div v-if="toast.show" class="toast" :class="'toast-' + toast.type">
       {{ toast.message }}
@@ -869,11 +1319,19 @@ export default {
     EU5600ReagentSection
   },
   props: {
+    auth: {
+      type: Object,
+      default: () => ({ user: null })
+    },
     equipments: {
       type: Array,
       default: () => []
     },
     simulations: {
+      type: Array,
+      default: () => []
+    },
+    reagentPlannings: {
       type: Array,
       default: () => []
     }
@@ -919,10 +1377,114 @@ export default {
         show: false,
         message: '',
         type: 'info'
+      },
+      planningList: [],
+      selectedPlanningAdvisor: '',
+      selectedPlanningClient: '',
+      planningSearchQuery: '',
+      showPlanningModal: false,
+      isEditingPlanning: false,
+      currentPlanningId: null,
+      savingPlanning: false,
+      usersList: [],
+      userForm: {
+        name: '',
+        username: '',
+        password: '',
+        role: 'user'
+      },
+      reagentCatalog: [
+        { cod_item: 'LEAFI001', descripcion: 'EQUIPO AFIAS-1', stock_jorge: 0, stock_ingelab: -1 },
+        { cod_item: 'LRAFI001', descripcion: 'AFIAS NT-PROBNP X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
+        { cod_item: 'LRAFI002', descripcion: 'AFIAS PSA NEO X 24 TEST', stock_jorge: 30, stock_ingelab: 30 },
+        { cod_item: 'LRAFI003', descripcion: 'AFIAS FPSA NEO X 24 TEST', stock_jorge: 15, stock_ingelab: 8 },
+        { cod_item: 'LRAFI004', descripcion: 'AFIAS AFP X 24 TEST', stock_jorge: 2, stock_ingelab: 3 },
+        { cod_item: 'LRAFI005', descripcion: 'AFIAS HBA1C NEO (HEMOGLOBINA GLICOSILADA) X 24 TEST', stock_jorge: 81, stock_ingelab: 26 },
+        { cod_item: 'LRAFI006', descripcion: 'AFIAS INSULINA X 24 TEST', stock_jorge: 23, stock_ingelab: 7 },
+        { cod_item: 'LRAFI007', descripcion: 'AFIAS TSH X 24 TEST', stock_jorge: 115, stock_ingelab: 17 },
+        { cod_item: 'LRAFI008', descripcion: 'AFIAS T3 X 24 TEST', stock_jorge: 10, stock_ingelab: 10 },
+        { cod_item: 'LRAFI009', descripcion: 'AFIAS T4 X 24 TEST', stock_jorge: 15, stock_ingelab: 18 },
+        { cod_item: 'LRAFI010', descripcion: 'AFIAS FT4 X 24 TEST', stock_jorge: 20, stock_ingelab: 11 },
+        { cod_item: 'LRAFI011', descripcion: 'AFIAS FSH X 24 TEST', stock_jorge: 7, stock_ingelab: 7 },
+        { cod_item: 'LRAFI012', descripcion: 'AFIAS PRL (PROLACTINA) X 24 TEST', stock_jorge: 2, stock_ingelab: 6 },
+        { cod_item: 'LRAFI013', descripcion: 'AFIAS TESTOSTERONA X 24 TEST', stock_jorge: 5, stock_ingelab: 2 },
+        { cod_item: 'LRAFI014', descripcion: 'AFIAS CORTISOL X 24 TEST', stock_jorge: 3, stock_ingelab: 5 },
+        { cod_item: 'LRAFI015', descripcion: 'AFIAS HELICOBACTER PYLORI SA X 24 TEST', stock_jorge: 104, stock_ingelab: 43 },
+        { cod_item: 'LRAFI016', descripcion: 'AFIAS CRP (PROTEINA C REACTIVA) X 24 TEST', stock_jorge: 39, stock_ingelab: 25 },
+        { cod_item: 'LRAFI017', descripcion: 'AFIAS PROCALCITONINA (PCT) X 24 TEST', stock_jorge: 9, stock_ingelab: 9 },
+        { cod_item: 'LRAFI018', descripcion: 'AFIAS TOXO IGG X 24 TEST', stock_jorge: 2, stock_ingelab: 1 },
+        { cod_item: 'LRAFI019', descripcion: 'AFIAS TOXO IGM X 24 TEST', stock_jorge: 1, stock_ingelab: 1 },
+        { cod_item: 'LRAFI020', descripcion: 'AFIAS RUBEOLLA IGG X 24 TEST', stock_jorge: 1, stock_ingelab: 1 },
+        { cod_item: 'LRAFI021', descripcion: 'AFIAS TOTAL IGE X 24 TEST', stock_jorge: 15, stock_ingelab: 3 },
+        { cod_item: 'LRAFI022', descripcion: 'AFIAS FERRITINA X 24 TEST', stock_jorge: 5, stock_ingelab: 7 },
+        { cod_item: 'LRAFI023', descripcion: 'AFIAS VITAMINA D NEO X 24 TEST', stock_jorge: 20, stock_ingelab: 9 },
+        { cod_item: 'LRAFI024', descripcion: 'AFIAS TSH X 24 TEST R', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI025', descripcion: 'AFIAS HBA1C NEO (HEMOGLOBINA GLICOSILADA) X 24 TEST R', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI026', descripcion: 'AFIAS TNI PLUS X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI027', descripcion: 'AFIAS TNI PLUS X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
+        { cod_item: 'LRAFI028', descripcion: 'AFIAS CK-MB NEO X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI029', descripcion: 'AFIAS D-DIMER NEO X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI030', descripcion: 'AFIAS CARDIAC TRIPLE X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI031', descripcion: 'AFIAS HSCRP X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI032', descripcion: 'AFIAS TROPONIN T X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI033', descripcion: 'AFIAS CEA X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
+        { cod_item: 'LRAFI034', descripcion: 'AFIAS CA 19-9 X 24 TEST', stock_jorge: 3, stock_ingelab: 2 },
+        { cod_item: 'LRAFI035', descripcion: 'AFIAS CA 125 X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI036', descripcion: 'AFIAS CYFRA 21-1 X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI037', descripcion: 'AFIAS MICROALBUMIN X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI038', descripcion: 'AFIAS CYSTATIN C X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI039', descripcion: 'AFIAS TOTAL BHCG X 24 TEST', stock_jorge: 3, stock_ingelab: 3 },
+        { cod_item: 'LRAFI040', descripcion: 'AFIAS LH X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI041', descripcion: 'AFIAS PROGESTERONE X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI042', descripcion: 'AFIAS ESTRADIOL X 24 TEST', stock_jorge: 3, stock_ingelab: 2 },
+        { cod_item: 'LRAFI043', descripcion: 'AFIAS AMH X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
+        { cod_item: 'LRAFI044', descripcion: 'AFIAS CALPROTECTIN X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI045', descripcion: 'AFIAS COVID-19 AB X 24 TEST', stock_jorge: 2, stock_ingelab: 3 },
+        { cod_item: 'LRAFI046', descripcion: 'AFIAS COVID-19 AG X 24 TEST', stock_jorge: 2, stock_ingelab: 3 },
+        { cod_item: 'LRAFI047', descripcion: 'AFIAS COVID-19/FLU AG COMBO X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI048', descripcion: 'AFIAS HBSAG X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI049', descripcion: 'AFIAS ANTI-HBS X 24 TEST', stock_jorge: 4, stock_ingelab: 2 },
+        { cod_item: 'LRAFI050', descripcion: 'AFIAS ANTI-HCV X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI051', descripcion: 'AFIAS DENGUE IGG/IGM X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI052', descripcion: 'AFIAS DENGUE NS1 AG X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI053', descripcion: 'AFIAS HIV 1/2 AB X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI054', descripcion: 'AFIAS NORO X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI055', descripcion: 'AFIAS ROTA X 24 TEST', stock_jorge: 1, stock_ingelab: 2 },
+        { cod_item: 'LRAFI056', descripcion: 'AFIAS ROTA/ADENO X 24 TEST', stock_jorge: 3, stock_ingelab: 3 },
+        { cod_item: 'LRAFI057', descripcion: 'AFIAS STREP A X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
+        { cod_item: 'LRAFI058', descripcion: 'AFIAS FLU A+B X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI059', descripcion: 'AFIAS ANTI-CCP PLUS, 108 X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI060', descripcion: 'AFIAS PTH X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI062', descripcion: 'AFIAS COVID-19/FLU A+B/RSV AG X 24 TEST', stock_jorge: 0, stock_ingelab: 0 },
+        { cod_item: 'LRAFI063', descripcion: 'AFIAS IL-6 X 24 TEST', stock_jorge: 0, stock_ingelab: 1 },
+        { cod_item: 'LRAFI066', descripcion: 'GT-AFIAS CEA X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
+        { cod_item: 'LRAFI067', descripcion: 'GT-AFIAS DENGUE IGG/IGM X 24 TEST', stock_jorge: 39, stock_ingelab: 39 },
+        { cod_item: 'LRAFI068', descripcion: 'GT-AFIAS FT4 X 24 TEST', stock_jorge: 1, stock_ingelab: 1 }
+      ],
+      planningForm: {
+        asesor: '',
+        cliente: '',
+        cod_item: '',
+        descripcion: '',
+        stock: 0,
+        rotacion_mensual: 0,
+        uso_4_meses: 0,
+        cantidad_importar: 0,
+        total: 0
       }
     };
   },
+  created() {
+    if (this.auth && this.auth.user && this.auth.user.role === 'user') {
+      this.activeNavTab = 'planning';
+    }
+  },
   watch: {
+    activeNavTab(newTab) {
+      if (newTab === 'users') {
+        this.fetchUsers();
+      }
+    },
     'globalSettings.client_type': {
       immediate: true,
       handler(newType) {
@@ -930,6 +1492,21 @@ export default {
           this.reagentOperatingDays = 30;
         } else if (newType === 'Privado') {
           this.reagentOperatingDays = 24;
+        }
+      }
+    },
+    reagentPlannings: {
+      immediate: true,
+      deep: true,
+      handler(newList) {
+        if (newList) {
+          this.planningList = newList.map(item => ({
+            ...item,
+            rotacion_mensual: Number(item.rotacion_mensual) || 0,
+            uso_4_meses: Number(item.uso_4_meses) || 0,
+            cantidad_importar: Number(item.cantidad_importar) || 0,
+            total: Number(item.total) || 0
+          }));
         }
       }
     }
@@ -952,6 +1529,48 @@ export default {
     },
     simulationsList() {
       return this.simulations || [];
+    },
+    planningAdvisors() {
+      const advisors = this.planningList.map(p => p.asesor);
+      return [...new Set(advisors)].filter(Boolean);
+    },
+    planningClients() {
+      const clients = this.planningList.map(p => p.cliente);
+      return [...new Set(clients)].filter(Boolean);
+    },
+    filteredPlanningPlannings() {
+      return this.planningList.filter(p => {
+        const matchAdvisor = !this.selectedPlanningAdvisor || p.asesor === this.selectedPlanningAdvisor;
+        const matchClient = !this.selectedPlanningClient || p.cliente === this.selectedPlanningClient;
+        let matchSearch = true;
+        if (this.planningSearchQuery) {
+          const q = this.planningSearchQuery.toLowerCase();
+          matchSearch = (p.cod_item && p.cod_item.toLowerCase().includes(q)) ||
+                        (p.descripcion && p.descripcion.toLowerCase().includes(q));
+        }
+        return matchAdvisor && matchClient && matchSearch;
+      });
+    },
+    consolidatedPlanning() {
+      const summary = {};
+      this.planningList.forEach(item => {
+        const key = item.cod_item ? item.cod_item.trim() : (item.descripcion ? item.descripcion.trim() : 'UNKNOWN');
+        if (!summary[key]) {
+          summary[key] = {
+            cod_item: item.cod_item || '',
+            descripcion: item.descripcion || '',
+            stock: 0,
+            rotacion_mensual: 0,
+            uso_4_meses: 0,
+            cantidad_importar: 0
+          };
+        }
+        summary[key].stock += Number(item.stock) || 0;
+        summary[key].rotacion_mensual += Number(item.rotacion_mensual) || 0;
+        summary[key].uso_4_meses += Number(item.uso_4_meses) || 0;
+        summary[key].cantidad_importar += Number(item.cantidad_importar) || 0;
+      });
+      return Object.values(summary).sort((a, b) => a.cod_item.localeCompare(b.cod_item));
     },
     // Real-time client-side calculation engine
     calculations() {
@@ -1663,6 +2282,464 @@ export default {
       } catch (err) {
         console.error(err);
         this.showToast('Error de red al eliminar el escenario.', 'danger');
+      }
+    },
+    openCreatePlanningModal() {
+      this.isEditingPlanning = false;
+      this.currentPlanningId = null;
+      this.planningForm = {
+        asesor: this.selectedPlanningAdvisor || 'JORGE ESTRELLA',
+        cliente: this.selectedPlanningClient || 'Hospital Metropolitano',
+        cod_item: '',
+        descripcion: '',
+        stock: 0,
+        rotacion_mensual: 0,
+        uso_4_meses: 0,
+        cantidad_importar: 0,
+        total: 0
+      };
+      this.showPlanningModal = true;
+    },
+    openEditPlanningModal(item) {
+      this.isEditingPlanning = true;
+      this.currentPlanningId = item.id;
+      this.planningForm = {
+        asesor: item.asesor || '',
+        cliente: item.cliente || '',
+        cod_item: item.cod_item || '',
+        descripcion: item.descripcion || '',
+        stock: Number(item.stock) || 0,
+        rotacion_mensual: Number(item.rotacion_mensual) || 0,
+        uso_4_meses: Number(item.uso_4_meses) || 0,
+        cantidad_importar: Number(item.cantidad_importar) || 0,
+        total: Number(item.total) || 0
+      };
+      this.showPlanningModal = true;
+    },
+    async submitPlanningForm() {
+      if (this.isEditingPlanning) {
+        if (!this.planningForm.asesor || !this.planningForm.cod_item || !this.planningForm.descripcion) {
+          this.showToast('Asesor, Código de reactivo y Descripción son requeridos.', 'warning');
+          return;
+        }
+
+        this.planningForm.uso_4_meses = (Number(this.planningForm.rotacion_mensual) || 0) * 4;
+        const needed = this.planningForm.uso_4_meses - (Number(this.planningForm.stock) || 0);
+        this.planningForm.cantidad_importar = needed > 0 ? needed : 0;
+        this.planningForm.total = this.planningForm.cantidad_importar;
+
+        const payload = { ...this.planningForm };
+        const url = `/reagent-plannings/${this.currentPlanningId}`;
+
+        try {
+          if (window.hasOwnProperty('Inertia') || this.$inertia) {
+            const client = this.$inertia || window.Inertia;
+            client.put(url, payload, {
+              onSuccess: () => {
+                this.showToast('Reactivo actualizado correctamente.', 'success');
+                this.showPlanningModal = false;
+              },
+              onError: (errors) => {
+                const errMsg = Object.values(errors).join(' ');
+                this.showToast(errMsg || 'Error al guardar reactivo.', 'danger');
+              }
+            });
+          } else {
+            // Fallback fetch API
+            const response = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Inertia': 'true',
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              body: JSON.stringify(payload)
+            });
+            
+            if (response.ok) {
+              this.showToast('Reactivo actualizado.', 'success');
+              if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+                const idx = this.planningList.findIndex(p => p.id === this.currentPlanningId);
+                if (idx !== -1) {
+                  this.planningList[idx] = { ...this.planningList[idx], ...payload };
+                }
+              }
+              this.showPlanningModal = false;
+            } else {
+              this.showToast('Error de conexión al servidor.', 'danger');
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          this.showToast('Error de red al guardar reactivo.', 'danger');
+        }
+      } else {
+        // Creating new planning (Advisor + Client relationship)
+        if (!this.planningForm.asesor || !this.planningForm.cliente) {
+          this.showToast('Asesor y Cliente son requeridos.', 'warning');
+          return;
+        }
+
+        const asesor = this.planningForm.asesor.trim();
+        const cliente = this.planningForm.cliente.trim();
+
+        // Check if this relationship already exists in planningList to avoid duplicating catalog
+        const exists = this.planningList.some(p => p.asesor === asesor && p.cliente === cliente);
+        if (exists) {
+          this.showToast('Esta planificación (Asesor y Cliente) ya existe.', 'warning');
+          return;
+        }
+
+        const isJorge = /jorge/i.test(asesor) || /estrella/i.test(asesor);
+        const isIngelab = /ingelab/i.test(asesor) || /corp/i.test(asesor);
+
+        // Generate planning rows for all catalog reagents
+        const baseId = this.planningList.length ? Math.max(...this.planningList.map(p => p.id)) + 1 : 1;
+        const newRows = this.reagentCatalog.map((catalogItem, idx) => {
+          let stock = 0;
+          if (isJorge) {
+            stock = catalogItem.stock_jorge;
+          } else if (isIngelab) {
+            stock = catalogItem.stock_ingelab;
+          }
+          return {
+            id: baseId + idx,
+            asesor: asesor,
+            cliente: cliente,
+            cod_item: catalogItem.cod_item,
+            descripcion: catalogItem.descripcion,
+            stock: stock,
+            rotacion_mensual: 0,
+            uso_4_meses: 0,
+            cantidad_importar: 0,
+            total: 0
+          };
+        });
+
+        this.planningList.push(...newRows);
+
+        // Filter grid to show the newly created planning
+        this.selectedPlanningAdvisor = asesor;
+        this.selectedPlanningClient = cliente;
+
+        this.showToast(`Se inicializaron los ${newRows.length} reactivos del catálogo para ${asesor} y ${cliente}. Escribe stock y rotación y haz clic en Guardar Planificación para registrarlos.`, 'success');
+        this.showPlanningModal = false;
+      }
+    },
+    async deletePlanning(item) {
+      if (!confirm(`¿Estás seguro de que deseas eliminar el reactivo "${item.descripcion}"?`)) {
+        return;
+      }
+
+      const url = `/reagent-plannings/${item.id}`;
+      
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          client.delete(url, {
+            onSuccess: () => {
+              this.showToast('Reactivo eliminado correctamente.', 'success');
+            },
+            onError: () => {
+              this.showToast('No se pudo eliminar el reactivo.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          
+          if (response.ok) {
+            this.showToast('Reactivo eliminado.', 'success');
+            if (!window.hasOwnProperty('Inertia') && !this.$inertia) {
+              const idx = this.planningList.findIndex(p => p.id === item.id);
+              if (idx !== -1) {
+                this.planningList.splice(idx, 1);
+              }
+            }
+          } else {
+            this.showToast('Error al eliminar reactivo.', 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al eliminar reactivo.', 'danger');
+      }
+    },
+    recalculatePlanningRow(item, source = 'stock_or_need') {
+      if (source === 'stock_or_need') {
+        const needed = (Number(item.uso_4_meses) || 0) - (Number(item.stock) || 0);
+        item.cantidad_importar = needed > 0 ? needed : 0;
+      }
+      item.total = Number(item.cantidad_importar) || 0;
+    },
+    async savePlanningBulk() {
+      this.savingPlanning = true;
+      const payload = { plannings: this.planningList };
+      const url = '/reagent-plannings/bulk-update';
+
+      try {
+        if (window.hasOwnProperty('Inertia') || this.$inertia) {
+          const client = this.$inertia || window.Inertia;
+          client.post(url, payload, {
+            onSuccess: () => {
+              this.showToast('Planificación de reactivos guardada correctamente.', 'success');
+              this.savingPlanning = false;
+            },
+            onError: () => {
+              this.showToast('Error al guardar planificación en lote.', 'danger');
+              this.savingPlanning = false;
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+          });
+          
+          if (response.ok) {
+            this.showToast('Planificación de reactivos guardada (Local Mock).', 'success');
+          } else {
+            this.showToast('Error al conectar con la base de datos.', 'danger');
+          }
+          this.savingPlanning = false;
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al guardar planificación.', 'danger');
+        this.savingPlanning = false;
+      }
+    },
+    handleExcelImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/);
+        if (lines.length < 2) {
+          this.showToast('El archivo está vacío o no tiene suficientes líneas.', 'warning');
+          return;
+        }
+
+        // Detect separator: comma or semicolon
+        const firstLine = lines[0];
+        const separator = firstLine.includes(';') ? ';' : ',';
+        const headers = firstLine.split(separator).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+
+        // Map header indexes
+        const idxAsesor = headers.findIndex(h => h.includes('asesor') || h.includes('vendedor') || h.includes('rep'));
+        const idxCliente = headers.findIndex(h => h.includes('cliente') || h.includes('hospital') || h.includes('empresa') || h.includes('institu'));
+        const idxCodItem = headers.findIndex(h => h.includes('cod') || h.includes('item') || h.includes('codigo') || h.includes('código') || h.includes('part number') || h.includes('pn'));
+        const idxDescripcion = headers.findIndex(h => h.includes('desc') || h.includes('nombre') || h.includes('reag') || h.includes('reactivo') || h.includes('producto'));
+        const idxStock = headers.findIndex(h => h.includes('stock') || h.includes('inventario') || h.includes('cant') || h.includes('existencia'));
+        const idxRotacion = headers.findIndex(h => h.includes('rotac') || h.includes('mensual') || h.includes('rotación') || h.includes('rotacion'));
+
+        if (idxCodItem === -1 || idxDescripcion === -1) {
+          this.showToast('No se encontraron columnas obligatorias (Código y Descripción).', 'danger');
+          return;
+        }
+
+        const newPlannings = [];
+        let idCounter = 1;
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          // Parse CSV line handling quotes
+          let cols = [];
+          let currentVal = '';
+          let inQuotes = false;
+          for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === separator && !inQuotes) {
+              cols.push(currentVal.trim());
+              currentVal = '';
+            } else {
+              currentVal += char;
+            }
+          }
+          cols.push(currentVal.trim());
+
+          const cod_item = idxCodItem !== -1 ? (cols[idxCodItem] || '').replace(/"/g, '') : '';
+          const descripcion = idxDescripcion !== -1 ? (cols[idxDescripcion] || '').replace(/"/g, '') : '';
+          
+          if (!cod_item || !descripcion) continue;
+
+          const asesor = idxAsesor !== -1 ? (cols[idxAsesor] || '').replace(/"/g, '') : 'JORGE ESTRELLA';
+          const cliente = idxCliente !== -1 ? (cols[idxCliente] || '').replace(/"/g, '') : 'Hospital Metropolitano';
+          
+          // Parse stock: handle "no encontrado", "no tiene", empty, or non-numeric
+          const rawStock = idxStock !== -1 ? cols[idxStock] : '0';
+          let stock = parseInt(rawStock);
+          if (isNaN(stock)) stock = 0;
+
+          const rawRotacion = idxRotacion !== -1 ? cols[idxRotacion] : '0';
+          let rotacion = parseFloat(rawRotacion);
+          if (isNaN(rotacion)) rotacion = 0;
+
+          const uso_4_meses = rotacion * 4;
+          const cantidad_importar = Math.max(0, uso_4_meses - stock);
+
+          newPlannings.push({
+            id: idCounter++,
+            asesor,
+            cliente,
+            cod_item,
+            descripcion,
+            stock,
+            rotacion_mensual: rotacion,
+            uso_4_meses,
+            cantidad_importar,
+            total: cantidad_importar
+          });
+        }
+
+        if (newPlannings.length === 0) {
+          this.showToast('No se pudieron importar filas válidas del archivo.', 'warning');
+          return;
+        }
+
+        this.planningList = newPlannings;
+        this.showToast(`Se importaron ${newPlannings.length} reactivos correctamente. ¡Haz clic en Guardar Planificación para registrarlos en la base de datos!`, 'success');
+        
+        // Reset file input
+        event.target.value = '';
+      };
+      
+      reader.readAsText(file, 'UTF-8');
+    },
+    exportConsolidatedToExcel() {
+      const headers = ['Código Item', 'Descripción del Reactivo', 'Stock Consolidado', 'Rotación Total / Mes', 'Uso Total 4 Meses', 'Importación Requerida Total'];
+      const rows = this.consolidatedPlanning.map(p => [
+        p.cod_item,
+        p.descripcion,
+        p.stock,
+        p.rotacion_mensual,
+        p.uso_4_meses,
+        p.cantidad_importar
+      ]);
+      let csvContent = "\ufeff";
+      csvContent += headers.join(';') + "\r\n";
+      rows.forEach(row => {
+        const escapedRow = row.map(val => {
+          if (typeof val === 'string') {
+            return `"${val.replace(/"/g, '""')}"`;
+          }
+          return val;
+        });
+        csvContent += escapedRow.join(';') + "\r\n";
+      });
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `consolidado_general_reactivos_${dateStr}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+    async fetchUsers() {
+      try {
+        const response = await fetch('/users');
+        if (response.ok) {
+          this.usersList = await response.json();
+        }
+      } catch (err) {
+        console.error('Error fetching users:', err);
+      }
+    },
+    async createUser() {
+      if (!this.userForm.name || !this.userForm.username || !this.userForm.password || !this.userForm.role) {
+        this.showToast('Todos los campos son obligatorios.', 'warning');
+        return;
+      }
+      
+      const payload = { ...this.userForm };
+      
+      try {
+        if (this.$inertia) {
+          this.$inertia.post('/users', payload, {
+            onSuccess: () => {
+              this.showToast('Usuario creado correctamente.', 'success');
+              this.userForm = { name: '', username: '', password: '', role: 'user' };
+              this.fetchUsers();
+            },
+            onError: (errors) => {
+              const errMsg = Object.values(errors).join(' ');
+              this.showToast(errMsg || 'Error al crear usuario.', 'danger');
+            }
+          });
+        } else if (window.hasOwnProperty('Inertia')) {
+          window.Inertia.post('/users', payload, {
+            onSuccess: () => {
+              this.showToast('Usuario creado correctamente.', 'success');
+              this.userForm = { name: '', username: '', password: '', role: 'user' };
+              this.fetchUsers();
+            },
+            onError: (errors) => {
+              const errMsg = Object.values(errors).join(' ');
+              this.showToast(errMsg || 'Error al crear usuario.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch('/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+          });
+          if (response.ok) {
+            this.showToast('Usuario creado correctamente.', 'success');
+            this.userForm = { name: '', username: '', password: '', role: 'user' };
+            this.fetchUsers();
+          } else {
+            const data = await response.json().catch(() => ({}));
+            const errMsg = data.errors ? Object.values(data.errors).join(' ') : 'Error al crear usuario.';
+            this.showToast(errMsg, 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al crear usuario.', 'danger');
+      }
+    },
+    logout() {
+      if (this.$inertia) {
+        this.$inertia.post('/logout');
+      } else if (window.hasOwnProperty('Inertia')) {
+        window.Inertia.post('/logout');
+      } else {
+        fetch('/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Inertia': 'true'
+          }
+        }).then(() => {
+          window.location.href = '/login';
+        });
       }
     }
   }
