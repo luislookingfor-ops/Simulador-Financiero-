@@ -8,6 +8,7 @@
 
       <nav class="nav-menu">
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'simulator' }"
@@ -17,6 +18,7 @@
           Simulador HUC
         </a>
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'reagents' }"
@@ -26,6 +28,7 @@
           Volumen Consumo Reactivos
         </a>
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'equipments' }"
@@ -35,6 +38,7 @@
           Maestro Equipos
         </a>
         <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
           :class="{ active: activeNavTab === 'history' }"
@@ -61,15 +65,30 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           Consolidado General
         </a>
+        <a 
+          v-if="auth && auth.user && auth.user.role === 'admin'"
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'users' }"
+          @click.prevent="activeNavTab = 'users'"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94-3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+          Gestión de Usuarios
+        </a>
       </nav>
 
-      <div class="sidebar-footer">
-        <div class="user-profile">
-          <div class="avatar">C</div>
-          <div class="user-info">
-            <strong>Gerente Comercial</strong>
-            <span>Vendedor Senior</span>
+      <div class="sidebar-footer" style="padding: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+        <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
+          <div class="avatar" style="width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
+            {{ (auth && auth.user && auth.user.name ? auth.user.name[0] : 'U').toUpperCase() }}
           </div>
+          <div class="user-info" style="flex: 1; min-width: 0;">
+            <strong style="color: white; font-size: 0.85rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ auth && auth.user ? auth.user.name : 'Usuario Ingelab' }}</strong>
+            <span style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">{{ auth && auth.user ? auth.user.role : 'invitado' }}</span>
+          </div>
+          <a href="#" @click.prevent="logout" title="Cerrar Sesión" style="color: #ef4444; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 6px; background: rgba(239, 68, 68, 0.1); transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'">
+            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          </a>
         </div>
       </div>
     </aside>
@@ -1041,6 +1060,81 @@
           
         </div>
       </div>
+
+      <!-- Dashboard Grid: Tab 7 - Gestión de Usuarios -->
+      <div v-else-if="activeNavTab === 'users'" class="dashboard-grid single-view">
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; width: 100%; box-sizing: border-box; align-items: start;">
+          
+          <!-- Users List Card -->
+          <div class="card" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">
+              <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Usuarios Registrados
+            </h3>
+            
+            <div class="table-container" style="overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px;">
+              <table class="excel-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Nombre</th>
+                    <th style="padding: 10px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #475569;">Usuario</th>
+                    <th style="padding: 10px; text-align: center; font-size: 0.8rem; font-weight: 700; color: #475569; width: 100px;">Rol</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="u in usersList" :key="u.id" style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px; font-size: 0.85rem; font-weight: 600; color: #334155;">{{ u.name }}</td>
+                    <td style="padding: 10px; font-size: 0.85rem; color: #0f172a;">{{ u.username }}</td>
+                    <td style="padding: 10px; text-align: center; font-size: 0.8rem;">
+                      <span :class="u.role === 'admin' ? 'badge-primary' : 'badge-success'" style="padding: 2px 8px; border-radius: 9999px; font-weight: 700; font-size: 0.7rem; text-transform: uppercase;">
+                        {{ u.role === 'admin' ? 'Admin' : 'Usuario' }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr v-if="usersList.length === 0">
+                    <td colspan="3" style="padding: 24px; text-align: center; color: #64748b; font-style: italic; font-size: 0.85rem;">Cargando usuarios...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Create User Card -->
+          <div class="card" style="padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin: 0 0 16px 0;">Crear Nuevo Usuario</h3>
+            
+            <form @submit.prevent="createUser" style="display: flex; flex-direction: column; gap: 16px;">
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Nombre Completo *</label>
+                <input type="text" v-model="userForm.name" required placeholder="Ej: Juan Pérez" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+              
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Nombre de Usuario *</label>
+                <input type="text" v-model="userForm.username" required placeholder="Ej: jperez" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Contraseña *</label>
+                <input type="password" v-model="userForm.password" required placeholder="Ingrese la contraseña" class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;" />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Rol de Acceso *</label>
+                <select v-model="userForm.role" required class="excel-input" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; background: white; color: black;">
+                  <option value="user">Usuario (Solo Planificación y Consolidado)</option>
+                  <option value="admin">Administrador (Ver y Editar Todo)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="padding: 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem; margin-top: 8px; width: 100%;">
+                Registrar Usuario
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
     </main>
 
     <!-- Equipment Create/Edit Modal -->
@@ -1225,6 +1319,10 @@ export default {
     EU5600ReagentSection
   },
   props: {
+    auth: {
+      type: Object,
+      default: () => ({ user: null })
+    },
     equipments: {
       type: Array,
       default: () => []
@@ -1288,6 +1386,13 @@ export default {
       isEditingPlanning: false,
       currentPlanningId: null,
       savingPlanning: false,
+      usersList: [],
+      userForm: {
+        name: '',
+        username: '',
+        password: '',
+        role: 'user'
+      },
       reagentCatalog: [
         { cod_item: 'LEAFI001', descripcion: 'EQUIPO AFIAS-1', stock_jorge: 0, stock_ingelab: -1 },
         { cod_item: 'LRAFI001', descripcion: 'AFIAS NT-PROBNP X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
@@ -1369,7 +1474,17 @@ export default {
       }
     };
   },
+  created() {
+    if (this.auth && this.auth.user && this.auth.user.role === 'user') {
+      this.activeNavTab = 'planning';
+    }
+  },
   watch: {
+    activeNavTab(newTab) {
+      if (newTab === 'users') {
+        this.fetchUsers();
+      }
+    },
     'globalSettings.client_type': {
       immediate: true,
       handler(newType) {
@@ -2540,6 +2655,92 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+    async fetchUsers() {
+      try {
+        const response = await fetch('/users');
+        if (response.ok) {
+          this.usersList = await response.json();
+        }
+      } catch (err) {
+        console.error('Error fetching users:', err);
+      }
+    },
+    async createUser() {
+      if (!this.userForm.name || !this.userForm.username || !this.userForm.password || !this.userForm.role) {
+        this.showToast('Todos los campos son obligatorios.', 'warning');
+        return;
+      }
+      
+      const payload = { ...this.userForm };
+      
+      try {
+        if (this.$inertia) {
+          this.$inertia.post('/users', payload, {
+            onSuccess: () => {
+              this.showToast('Usuario creado correctamente.', 'success');
+              this.userForm = { name: '', username: '', password: '', role: 'user' };
+              this.fetchUsers();
+            },
+            onError: (errors) => {
+              const errMsg = Object.values(errors).join(' ');
+              this.showToast(errMsg || 'Error al crear usuario.', 'danger');
+            }
+          });
+        } else if (window.hasOwnProperty('Inertia')) {
+          window.Inertia.post('/users', payload, {
+            onSuccess: () => {
+              this.showToast('Usuario creado correctamente.', 'success');
+              this.userForm = { name: '', username: '', password: '', role: 'user' };
+              this.fetchUsers();
+            },
+            onError: (errors) => {
+              const errMsg = Object.values(errors).join(' ');
+              this.showToast(errMsg || 'Error al crear usuario.', 'danger');
+            }
+          });
+        } else {
+          // Fallback fetch API
+          const response = await fetch('/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+          });
+          if (response.ok) {
+            this.showToast('Usuario creado correctamente.', 'success');
+            this.userForm = { name: '', username: '', password: '', role: 'user' };
+            this.fetchUsers();
+          } else {
+            const data = await response.json().catch(() => ({}));
+            const errMsg = data.errors ? Object.values(data.errors).join(' ') : 'Error al crear usuario.';
+            this.showToast(errMsg, 'danger');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.showToast('Error de red al crear usuario.', 'danger');
+      }
+    },
+    logout() {
+      if (this.$inertia) {
+        this.$inertia.post('/logout');
+      } else if (window.hasOwnProperty('Inertia')) {
+        window.Inertia.post('/logout');
+      } else {
+        fetch('/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Inertia': 'true'
+          }
+        }).then(() => {
+          window.location.href = '/login';
+        });
+      }
     }
   }
 };

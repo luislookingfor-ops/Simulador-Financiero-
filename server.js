@@ -108,6 +108,20 @@ function getPlannings() {
   }
 }
 
+const USERS_FILE = path.join(__dirname, 'users.json');
+let loggedInUser = null;
+
+function getMockUsers() {
+  if (!fs.existsSync(USERS_FILE)) {
+    fs.writeFileSync(USERS_FILE, JSON.stringify([], null, 2), 'utf8');
+  }
+  try {
+    return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+  } catch (e) {
+    return [];
+  }
+}
+
 // Renders the app.blade.php Inertia HTML template
 function renderInertiaView(pagePayload) {
   const templatePath = path.join(__dirname, 'resources/views/app.blade.php');
@@ -131,11 +145,17 @@ function renderInertiaView(pagePayload) {
 
 // Route: GET /
 app.get('/', (req, res) => {
+  if (!loggedInUser) {
+    return res.redirect('/login');
+  }
   const sims = getSimulations();
   const plannings = getPlannings();
   const pageData = {
     component: 'SimulationForm',
     props: {
+      auth: {
+        user: loggedInUser
+      },
       equipments: EQUIPMENTS,
       simulations: sims,
       reagentPlannings: plannings
@@ -144,14 +164,121 @@ app.get('/', (req, res) => {
     version: '1.0'
   };
 
-  // If it's an Inertia client request, return JSON
   if (req.headers['x-inertia']) {
     res.setHeader('X-Inertia', 'true');
     return res.json(pageData);
   }
 
-  // Else, serve HTML shell
   res.send(renderInertiaView(pageData));
+});
+
+// Route: GET /login
+app.get('/login', (req, res) => {
+  if (loggedInUser) {
+    return res.redirect('/');
+  }
+  const pageData = {
+    component: 'Login',
+    props: {},
+    url: '/login',
+    version: '1.0'
+  };
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    return res.json(pageData);
+  }
+  res.send(renderInertiaView(pageData));
+});
+
+// Route: POST /login
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === 'admin' && password === 'Ingelab2026@') {
+    loggedInUser = {
+      id: 1,
+      name: 'Administrador Ingelab',
+      username: 'admin',
+      role: 'admin'
+    };
+    if (req.headers['x-inertia']) {
+      res.setHeader('X-Inertia', 'true');
+      res.setHeader('X-Inertia-Location', '/');
+      return res.status(303).json({});
+    }
+    return res.redirect(303, '/');
+  }
+
+  const users = getMockUsers();
+  const found = users.find(u => u.username === username && u.password === password);
+  if (found) {
+    loggedInUser = {
+      id: found.id,
+      name: found.name,
+      username: found.username,
+      role: found.role
+    };
+    if (req.headers['x-inertia']) {
+      res.setHeader('X-Inertia', 'true');
+      res.setHeader('X-Inertia-Location', '/');
+      return res.status(303).json({});
+    }
+    return res.redirect(303, '/');
+  }
+
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    return res.status(422).json({ errors: { username: 'Las credenciales mock no coinciden.' } });
+  }
+  res.status(400).send('Credenciales incorrectas');
+});
+
+// Route: POST /logout
+app.post('/logout', (req, res) => {
+  loggedInUser = null;
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    res.setHeader('X-Inertia-Location', '/login');
+    return res.status(303).json({});
+  }
+  res.redirect(303, '/login');
+});
+
+// Route: GET /users
+app.get('/users', (req, res) => {
+  if (!loggedInUser || loggedInUser.role !== 'admin') {
+    return res.status(403).send('No autorizado');
+  }
+  const users = getMockUsers();
+  const all = [
+    { id: 1, name: 'Administrador Ingelab', username: 'admin', role: 'admin' },
+    ...users
+  ];
+  res.json(all);
+});
+
+// Route: POST /users
+app.post('/users', (req, res) => {
+  if (!loggedInUser || loggedInUser.role !== 'admin') {
+    return res.status(403).send('No autorizado');
+  }
+  const { name, username, password, role } = req.body;
+  const users = getMockUsers();
+  const newUser = {
+    id: users.length + 2,
+    name,
+    username,
+    password,
+    role
+  };
+  users.push(newUser);
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+
+  if (req.headers['x-inertia']) {
+    res.setHeader('X-Inertia', 'true');
+    res.setHeader('X-Inertia-Location', '/');
+    return res.status(303).json({});
+  }
+  res.redirect(303, '/');
 });
 
 // Route: POST /simulations (Save scenario)
