@@ -22,6 +22,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/reagent-plannings/{id}', [SimulationController::class, 'destroyReagentPlanning'])->name('reagent-plannings.destroy');
     Route::post('/reagent-plannings/bulk-update', [SimulationController::class, 'bulkUpdateReagentPlanning'])->name('reagent-plannings.bulk-update');
 
+    // API routes for Supabase products
+    Route::get('/api/productos/filtros', [SimulationController::class, 'getSupabaseFilters'])->name('productos.filtros');
+    Route::get('/api/productos', [SimulationController::class, 'getSupabaseProducts'])->name('productos.index');
+
     // Admin only routes
     Route::middleware([AdminMiddleware::class])->group(function () {
         Route::post('/simulations', [SimulationController::class, 'store'])->name('simulation.store');

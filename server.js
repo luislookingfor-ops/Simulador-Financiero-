@@ -281,6 +281,56 @@ app.post('/users', (req, res) => {
   res.redirect(303, '/');
 });
 
+// Route: GET /api/productos/filtros (Mock API)
+app.get('/api/productos/filtros', (req, res) => {
+  const lineas = Array.from(new Set(EQUIPMENTS.map(e => e.line))).sort();
+  const modelos = Array.from(new Set(EQUIPMENTS.map(e => e.code))).sort();
+  const marcas = ['MINDRAY', 'LIFOTRONIC', 'TECO', 'YHLO', 'EDAN', 'SEAMATY', 'HORRON', 'BIOSENS', 'COAGULOMETRO', 'AFIAS'].sort();
+  const tipos = ['EQUIPO', 'REACTIVO', 'REPUESTO'].sort();
+  res.json({ lineas, modelos, marcas, tipos });
+});
+
+// Route: GET /api/productos (Mock API)
+app.get('/api/productos', (req, res) => {
+  const { linea_negocio, modelo_equipo, cod_marca, tipo_producto, search } = req.query;
+  let list = EQUIPMENTS.map(e => ({
+    id: e.id,
+    cod_item: e.code,
+    descripcion: e.name,
+    modelo_equipo: e.code,
+    linea_negocio: e.line,
+    cod_marca: e.code.includes('MND') ? 'MINDRAY' : (e.code.includes('LFT') ? 'LIFOTRONIC' : 'OTRO'),
+    tipo_producto: 'EQUIPO',
+    fob: e.fob,
+    pvp: e.default_reagent_cost * 1.5,
+    stock: 5,
+    ups: e.ups,
+    pc: e.pc,
+    impresora: e.impresora,
+    control: e.control,
+    calibrador: e.calibrador
+  }));
+
+  if (linea_negocio) {
+    list = list.filter(p => p.linea_negocio === linea_negocio);
+  }
+  if (modelo_equipo) {
+    list = list.filter(p => p.modelo_equipo === modelo_equipo);
+  }
+  if (cod_marca) {
+    list = list.filter(p => p.cod_marca === cod_marca);
+  }
+  if (tipo_producto) {
+    list = list.filter(p => p.tipo_producto === tipo_producto);
+  }
+  if (search) {
+    const s = search.toLowerCase();
+    list = list.filter(p => p.descripcion.toLowerCase().includes(s) || p.cod_item.toLowerCase().includes(s));
+  }
+
+  res.json(list.slice(0, 200));
+});
+
 // Route: POST /simulations (Save scenario)
 app.post('/simulations', (req, res) => {
   const { name, global_settings, equipment_settings } = req.body;
