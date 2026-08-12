@@ -446,7 +446,7 @@ class SimulationController extends Controller
                 'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
                 'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
             ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
-                'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto',
+                'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
             ]);
 
             if ($response->successful()) {
@@ -456,12 +456,14 @@ class SimulationController extends Controller
                 $modelos = $data->pluck('modelo_equipo')->filter()->unique()->sort()->values();
                 $marcas = $data->pluck('cod_marca')->filter()->unique()->sort()->values();
                 $tipos = $data->pluck('tipo_producto')->filter()->unique()->sort()->values();
+                $nacional_importado = $data->pluck('nacional_importado')->filter()->unique()->sort()->values();
                 
                 return response()->json([
                     'lineas' => $lineas,
                     'modelos' => $modelos,
                     'marcas' => $marcas,
                     'tipos' => $tipos,
+                    'nacional_importado' => $nacional_importado,
                 ]);
             }
 
@@ -489,6 +491,9 @@ class SimulationController extends Controller
             }
             if ($request->filled('tipo_producto')) {
                 $params['tipo_producto'] = 'eq.' . $request->input('tipo_producto');
+            }
+            if ($request->filled('nacional_importado')) {
+                $params['nacional_importado'] = 'eq.' . $request->input('nacional_importado');
             }
             if ($request->filled('search')) {
                 $search = $request->input('search');

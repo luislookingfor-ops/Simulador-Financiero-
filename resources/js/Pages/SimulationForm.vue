@@ -234,7 +234,7 @@
                         </div>
                       </div>
 
-                      <div class="excel-form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-bottom: none; padding-top: 2px; padding-bottom: 2px;">
+                      <div class="excel-form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; border-bottom: none; padding-top: 2px; padding-bottom: 2px;">
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Marca</label>
                           <select v-model="equipmentConfigs[colIndex].brandFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
@@ -247,6 +247,15 @@
                           <select v-model="equipmentConfigs[colIndex].typeFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODOS LOS TIPOS</option>
                             <option v-for="opt in filterOptions.tipos" :key="opt" :value="opt">{{ opt }}</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Procedencia</label>
+                          <select v-model="equipmentConfigs[colIndex].nacionalImportadoFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                            <option value="">TODAS</option>
+                            <option v-for="opt in filterOptions.nacional_importado" :key="opt" :value="opt">
+                              {{ opt === 'N' || opt.toUpperCase().startsWith('NAC') ? 'NACIONAL' : 'IMPORTADO' }}
+                            </option>
                           </select>
                         </div>
                       </div>
@@ -1333,6 +1342,7 @@ function createEmptyConfig() {
     modelFilter: '',
     brandFilter: '',
     typeFilter: '',
+    nacionalImportadoFilter: '',
     searchQuery: '',
     filteredEquipments: [],
     equipment_id: null,
@@ -1442,7 +1452,8 @@ export default {
         lineas: [],
         modelos: [],
         marcas: [],
-        tipos: []
+        tipos: [],
+        nacional_importado: []
       },
       reagentCatalog: [
         { cod_item: 'LEAFI001', descripcion: 'EQUIPO AFIAS-1', stock_jorge: 0, stock_ingelab: -1 },
@@ -1929,6 +1940,15 @@ export default {
         if (cfg && cfg.filteredEquipments) {
           const found = cfg.filteredEquipments.find(e => e.id === id);
           if (found) return found;
+        }
+      } else {
+        // Fallback: Scan all 3 column configurations to resolve the product details
+        for (let i = 0; i < 3; i++) {
+          const cfg = this.equipmentConfigs[i];
+          if (cfg && cfg.filteredEquipments) {
+            const found = cfg.filteredEquipments.find(e => e.id === id);
+            if (found) return found;
+          }
         }
       }
       return this.equipments.find(e => e.id === id) || { fob: 0, ups: 0, pc: 0, impresora: 0, control: 0, calibrador: 0 };
@@ -2813,7 +2833,8 @@ export default {
             lineas: data.lineas || [],
             modelos: data.modelos || [],
             marcas: data.marcas || [],
-            tipos: data.tipos || []
+            tipos: data.tipos || [],
+            nacional_importado: data.nacional_importado || []
           };
         }
       } catch (err) {
@@ -2829,6 +2850,7 @@ export default {
       if (cfg.modelFilter) params.append('modelo_equipo', cfg.modelFilter);
       if (cfg.brandFilter) params.append('cod_marca', cfg.brandFilter);
       if (cfg.typeFilter) params.append('tipo_producto', cfg.typeFilter);
+      if (cfg.nacionalImportadoFilter) params.append('nacional_importado', cfg.nacionalImportadoFilter);
       if (cfg.searchQuery) params.append('search', cfg.searchQuery);
 
       try {

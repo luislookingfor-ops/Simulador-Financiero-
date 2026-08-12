@@ -287,12 +287,13 @@ app.get('/api/productos/filtros', (req, res) => {
   const modelos = Array.from(new Set(EQUIPMENTS.map(e => e.code))).sort();
   const marcas = ['MINDRAY', 'LIFOTRONIC', 'TECO', 'YHLO', 'EDAN', 'SEAMATY', 'HORRON', 'BIOSENS', 'COAGULOMETRO', 'AFIAS'].sort();
   const tipos = ['EQUIPO', 'REACTIVO', 'REPUESTO'].sort();
-  res.json({ lineas, modelos, marcas, tipos });
+  const nacional_importado = ['N', 'I'];
+  res.json({ lineas, modelos, marcas, tipos, nacional_importado });
 });
 
 // Route: GET /api/productos (Mock API)
 app.get('/api/productos', (req, res) => {
-  const { linea_negocio, modelo_equipo, cod_marca, tipo_producto, search } = req.query;
+  const { linea_negocio, modelo_equipo, cod_marca, tipo_producto, nacional_importado, search } = req.query;
   let list = EQUIPMENTS.map(e => ({
     id: e.id,
     cod_item: e.code,
@@ -301,6 +302,7 @@ app.get('/api/productos', (req, res) => {
     linea_negocio: e.line,
     cod_marca: e.code.includes('MND') ? 'MINDRAY' : (e.code.includes('LFT') ? 'LIFOTRONIC' : 'OTRO'),
     tipo_producto: 'EQUIPO',
+    nacional_importado: e.code.includes('MND') ? 'I' : 'N',
     fob: e.fob,
     pvp: e.default_reagent_cost * 1.5,
     stock: 5,
@@ -322,6 +324,9 @@ app.get('/api/productos', (req, res) => {
   }
   if (tipo_producto) {
     list = list.filter(p => p.tipo_producto === tipo_producto);
+  }
+  if (nacional_importado) {
+    list = list.filter(p => p.nacional_importado === nacional_importado);
   }
   if (search) {
     const s = search.toLowerCase();
