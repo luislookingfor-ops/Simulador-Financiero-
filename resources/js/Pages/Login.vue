@@ -3,9 +3,7 @@
     <div class="login-card">
       <div class="login-header">
         <div class="logo-container">
-          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-          </svg>
+          <img src="/images/logo.png" alt="INGELAB Logo" class="brand-logo" />
         </div>
         <h1>INGELAB</h1>
         <p>Sistema Simulador Financiero & Planificación</p>
@@ -115,13 +113,15 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 .login-page {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #f4f6fa 0%, #e2e8f0 100%);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -129,12 +129,10 @@ export default {
 .login-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(27, 35, 62, 0.08);
   border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 25px -5px rgba(27, 35, 62, 0.05), 0 20px 48px 0 rgba(27, 35, 62, 0.05);
   padding: 40px 32px;
   box-sizing: border-box;
   text-align: center;
@@ -145,35 +143,30 @@ export default {
 }
 
 .logo-container {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 auto 16px auto;
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 }
 
-.logo-icon {
-  width: 32px;
-  height: 32px;
-  color: white;
+.brand-logo {
+  max-height: 50px;
+  width: auto;
 }
 
 .login-header h1 {
   font-size: 1.8rem;
   font-weight: 800;
-  color: white;
+  color: #1b365d; /* Ingelab Deep Blue */
   margin: 0 0 8px 0;
   letter-spacing: 0.05em;
 }
 
 .login-header p {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: #64748b;
   margin: 0;
+  font-weight: 500;
 }
 
 .login-form {
@@ -192,7 +185,7 @@ export default {
 .form-group label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #cbd5e1;
+  color: #1b365d;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -214,10 +207,10 @@ export default {
 .input-wrapper input {
   width: 100%;
   padding: 12px 12px 12px 42px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f8fafc;
+  border: 1px solid rgba(27, 35, 62, 0.15);
   border-radius: 8px;
-  color: white;
+  color: #1e293b;
   font-size: 0.9rem;
   outline: none;
   transition: all 0.2s ease;
@@ -225,15 +218,16 @@ export default {
 }
 
 .input-wrapper input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: #1b365d;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(27, 54, 93, 0.15);
 }
 
 .error-message {
   font-size: 0.8rem;
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.15);
   border-radius: 6px;
   padding: 10px 12px;
 }
@@ -241,7 +235,7 @@ export default {
 .login-btn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: #1b365d; /* Ingelab Deep Blue */
   border: none;
   border-radius: 8px;
   color: white;
@@ -253,7 +247,7 @@ export default {
 }
 
 .login-btn:hover:not(:disabled) {
-  opacity: 0.95;
+  background: #11223e;
   transform: translateY(-1px);
 }
 
