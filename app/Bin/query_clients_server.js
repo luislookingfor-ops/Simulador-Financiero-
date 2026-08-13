@@ -10,10 +10,28 @@ const dbConfig = {
   password: 'dcstuNOhUWbFSntp',
   ssl: {
     rejectUnauthorized: false
-  }
+  },
+  max: 10,
+  idleTimeoutMillis: 10000, // close idle connections after 10 seconds
+  connectionTimeoutMillis: 5000
 };
 
+// Create the connection pool
 const pool = new pg.Pool(dbConfig);
+
+// Handle errors on idle clients in the pool to prevent uncaught exception crashes
+pool.on('error', (err, client) => {
+  console.error('Unexpected error on idle client in pg pool:', err.message);
+});
+
+// Global exception and rejection catchers to ensure the service NEVER crashes
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception thrown:', err);
+});
 
 const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
