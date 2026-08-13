@@ -447,6 +447,7 @@ class SimulationController extends Controller
                 'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
             ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
                 'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
+                'limit' => 10000
             ]);
 
             if ($response->successful()) {
