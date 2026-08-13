@@ -313,14 +313,14 @@
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Línea de Negocio</label>
                           <select v-model="equipmentConfigs[colIndex].lineFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODAS LAS LÍNEAS</option>
-                            <option v-for="opt in filterOptions.lineas" :key="opt" :value="opt">{{ opt.toUpperCase() }}</option>
+                            <option v-for="opt in getFilteredOptions(colIndex, 'linea_negocio')" :key="opt" :value="opt">{{ opt.toUpperCase() }}</option>
                           </select>
                         </div>
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Modelo</label>
                           <select v-model="equipmentConfigs[colIndex].modelFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODOS LOS MODELOS</option>
-                            <option v-for="opt in filterOptions.modelos" :key="opt" :value="opt">{{ opt }}</option>
+                            <option v-for="opt in getFilteredOptions(colIndex, 'modelo_equipo')" :key="opt" :value="opt">{{ opt }}</option>
                           </select>
                         </div>
                       </div>
@@ -330,21 +330,21 @@
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Marca</label>
                           <select v-model="equipmentConfigs[colIndex].brandFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODAS LAS MARCAS</option>
-                            <option v-for="opt in filterOptions.marcas" :key="opt" :value="opt">{{ opt }}</option>
+                            <option v-for="opt in getFilteredOptions(colIndex, 'cod_marca')" :key="opt" :value="opt">{{ opt }}</option>
                           </select>
                         </div>
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Tipo de Producto</label>
                           <select v-model="equipmentConfigs[colIndex].typeFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODOS LOS TIPOS</option>
-                            <option v-for="opt in filterOptions.tipos" :key="opt" :value="opt">{{ opt }}</option>
+                            <option v-for="opt in getFilteredOptions(colIndex, 'tipo_producto')" :key="opt" :value="opt">{{ opt }}</option>
                           </select>
                         </div>
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Procedencia</label>
                           <select v-model="equipmentConfigs[colIndex].nacionalImportadoFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODAS</option>
-                            <option v-for="opt in filterOptions.nacional_importado" :key="opt" :value="opt">
+                            <option v-for="opt in getFilteredOptions(colIndex, 'nacional_importado')" :key="opt" :value="opt">
                               {{ opt === 'N' || opt.toUpperCase().startsWith('NAC') ? 'NACIONAL' : 'IMPORTADO' }}
                             </option>
                           </select>
@@ -797,35 +797,35 @@
                 <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Línea de Negocio</label>
                 <select v-model="masterFilters.lineFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
                   <option value="">TODAS LAS LÍNEAS</option>
-                  <option v-for="opt in filterOptions.lineas" :key="opt" :value="opt">{{ opt.toUpperCase() }}</option>
+                  <option v-for="opt in getFilteredMasterOptions('linea_negocio')" :key="opt" :value="opt">{{ opt.toUpperCase() }}</option>
                 </select>
               </div>
               <div>
                 <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Modelo</label>
                 <select v-model="masterFilters.modelFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
                   <option value="">TODOS LOS MODELOS</option>
-                  <option v-for="opt in filterOptions.modelos" :key="opt" :value="opt">{{ opt }}</option>
+                  <option v-for="opt in getFilteredMasterOptions('modelo_equipo')" :key="opt" :value="opt">{{ opt }}</option>
                 </select>
               </div>
               <div>
                 <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Marca</label>
                 <select v-model="masterFilters.brandFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
                   <option value="">TODAS LAS MARCAS</option>
-                  <option v-for="opt in filterOptions.marcas" :key="opt" :value="opt">{{ opt }}</option>
+                  <option v-for="opt in getFilteredMasterOptions('cod_marca')" :key="opt" :value="opt">{{ opt }}</option>
                 </select>
               </div>
               <div>
                 <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Tipo de Producto</label>
                 <select v-model="masterFilters.typeFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
                   <option value="">TODOS LOS TIPOS</option>
-                  <option v-for="opt in filterOptions.tipos" :key="opt" :value="opt">{{ opt }}</option>
+                  <option v-for="opt in getFilteredMasterOptions('tipo_producto')" :key="opt" :value="opt">{{ opt }}</option>
                 </select>
               </div>
               <div>
                 <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-align: left;">Procedencia</label>
                 <select v-model="masterFilters.nacionalImportadoFilter" @change="fetchMasterProducts" class="excel-select font-bold" style="font-size: 0.8rem; padding: 6px; background: white;">
                   <option value="">TODAS</option>
-                  <option v-for="opt in filterOptions.nacional_importado" :key="opt" :value="opt">
+                  <option v-for="opt in getFilteredMasterOptions('nacional_importado')" :key="opt" :value="opt">
                     {{ opt === 'N' || opt.toUpperCase().startsWith('NAC') ? 'NACIONAL' : 'IMPORTADO' }}
                   </option>
                 </select>
@@ -1592,6 +1592,7 @@ export default {
         tipos: [],
         nacional_importado: []
       },
+      allProductsMetadata: [],
       masterFilters: {
         lineFilter: '',
         modelFilter: '',
@@ -2998,6 +2999,7 @@ export default {
             tipos: data.tipos || [],
             nacional_importado: data.nacional_importado || []
           };
+          this.allProductsMetadata = data.productos || [];
         }
       } catch (err) {
         console.error("Error fetching filters:", err);
@@ -3200,6 +3202,72 @@ export default {
     selectClient(client) {
       this.scenarioName = client.nombre;
       this.showClientSearchDropdown = false;
+    },
+    getFilteredOptions(colIndex, field) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (!cfg) return [];
+      if (!this.allProductsMetadata || this.allProductsMetadata.length === 0) {
+        if (field === 'linea_negocio') return this.filterOptions.lineas;
+        if (field === 'modelo_equipo') return this.filterOptions.modelos;
+        if (field === 'cod_marca') return this.filterOptions.marcas;
+        if (field === 'tipo_producto') return this.filterOptions.tipos;
+        if (field === 'nacional_importado') return this.filterOptions.nacional_importado;
+        return [];
+      }
+
+      let list = this.allProductsMetadata;
+
+      if (field !== 'linea_negocio' && cfg.lineFilter) {
+        list = list.filter(p => p.linea_negocio === cfg.lineFilter);
+      }
+      if (field !== 'modelo_equipo' && cfg.modelFilter) {
+        list = list.filter(p => p.modelo_equipo === cfg.modelFilter);
+      }
+      if (field !== 'cod_marca' && cfg.brandFilter) {
+        list = list.filter(p => p.cod_marca === cfg.brandFilter);
+      }
+      if (field !== 'tipo_producto' && cfg.typeFilter) {
+        list = list.filter(p => p.tipo_producto === cfg.typeFilter);
+      }
+      if (field !== 'nacional_importado' && cfg.nacionalImportadoFilter) {
+        list = list.filter(p => p.nacional_importado === cfg.nacionalImportadoFilter);
+      }
+
+      const values = list.map(p => p[field]).filter(Boolean);
+      return [...new Set(values)].sort();
+    },
+    getFilteredMasterOptions(field) {
+      const cfg = this.masterFilters;
+      if (!cfg) return [];
+      if (!this.allProductsMetadata || this.allProductsMetadata.length === 0) {
+        if (field === 'linea_negocio') return this.filterOptions.lineas;
+        if (field === 'modelo_equipo') return this.filterOptions.modelos;
+        if (field === 'cod_marca') return this.filterOptions.marcas;
+        if (field === 'tipo_producto') return this.filterOptions.tipos;
+        if (field === 'nacional_importado') return this.filterOptions.nacional_importado;
+        return [];
+      }
+
+      let list = this.allProductsMetadata;
+
+      if (field !== 'linea_negocio' && cfg.lineFilter) {
+        list = list.filter(p => p.linea_negocio === cfg.lineFilter);
+      }
+      if (field !== 'modelo_equipo' && cfg.modelFilter) {
+        list = list.filter(p => p.modelo_equipo === cfg.modelFilter);
+      }
+      if (field !== 'cod_marca' && cfg.brandFilter) {
+        list = list.filter(p => p.cod_marca === cfg.brandFilter);
+      }
+      if (field !== 'tipo_producto' && cfg.typeFilter) {
+        list = list.filter(p => p.tipo_producto === cfg.typeFilter);
+      }
+      if (field !== 'nacional_importado' && cfg.nacionalImportadoFilter) {
+        list = list.filter(p => p.nacional_importado === cfg.nacionalImportadoFilter);
+      }
+
+      const values = list.map(p => p[field]).filter(Boolean);
+      return [...new Set(values)].sort();
     }
   }
 };
