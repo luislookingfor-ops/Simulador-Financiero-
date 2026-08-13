@@ -397,6 +397,55 @@
                         </button>
                       </div>
 
+                      <!-- EDAN Special Calculator Panel -->
+                      <div v-if="equipmentConfigs[colIndex].brandFilter === 'EDAN'" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 10px; border-left: 4px solid #16a34a;">
+                        <div style="font-weight: 800; font-size: 0.8rem; color: #155724; margin-bottom: 8px; text-align: left; display: flex; align-items: center; gap: 6px;">
+                          <span style="font-size: 1rem;">🩺</span> 
+                          <span>CONFIGURACIÓN SIMULADOR EDAN</span>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; text-align: left;">
+                          <div>
+                            <label style="font-size: 0.7rem; font-weight: 700; color: #14532d; display: block; margin-bottom: 2px;">Determinaciones Anuales</label>
+                            <input 
+                              type="number" 
+                              v-model.number="equipmentConfigs[colIndex].edanDeterminaciones" 
+                              @input="calculateEdanProposal(colIndex)"
+                              placeholder="Ej. 5000"
+                              class="excel-input"
+                              style="width: 100%; padding: 4px 8px; font-size: 0.8rem; background: white; color: black; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;"
+                            />
+                          </div>
+
+                          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; align-items: center;">
+                            <label style="font-size: 0.7rem; font-weight: 700; color: #14532d;">¿Requiere Jeringas (LREDA012)?</label>
+                            <select 
+                              v-model="equipmentConfigs[colIndex].edanJeringas" 
+                              @change="calculateEdanProposal(colIndex)"
+                              class="excel-select"
+                              style="font-size: 0.8rem; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%;"
+                            >
+                              <option value="No">No</option>
+                              <option value="Sí">Sí</option>
+                            </select>
+                          </div>
+
+                          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; align-items: center;">
+                            <label style="font-size: 0.7rem; font-weight: 700; color: #14532d;">¿Necesita Controles?</label>
+                            <select 
+                              v-model="equipmentConfigs[colIndex].edanControles" 
+                              @change="calculateEdanProposal(colIndex)"
+                              class="excel-select"
+                              style="font-size: 0.8rem; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%;"
+                            >
+                              <option value="No">No</option>
+                              <option value="Semanal">Controles Semanales</option>
+                              <option value="Diario">Controles Diarios</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
                     <div class="excel-form-row" v-if="equipmentConfigs[colIndex].equipment_id">
                       <div class="excel-label">Tipo:</div>
                       <div class="excel-val col-span-3">
@@ -1502,7 +1551,10 @@ function createEmptyConfig() {
     daily_tests: 30,
     pvp_per_test: 1.10,
     reagent_cost_per_test: 0.35,
-    showReagentVolume: false
+    showReagentVolume: false,
+    edanDeterminaciones: '',
+    edanJeringas: 'No',
+    edanControles: 'No'
   };
 }
 
@@ -3268,6 +3320,84 @@ export default {
 
       const values = list.map(p => p[field]).filter(Boolean);
       return [...new Set(values)].sort();
+    },
+    calculateEdanProposal(colIndex) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (!cfg) return;
+
+      // 1. Clear previous EDAN auto-added items
+      if (!cfg.customItems) cfg.customItems = [];
+      cfg.customItems = cfg.customItems.filter(item => !item.isEdanAuto);
+
+      const D = Number(cfg.edanDeterminaciones) || 0;
+      if (D <= 0) return;
+
+      const J = cfg.edanJeringas === 'Sí';
+      const C = cfg.edanControles; // 'No', 'Semanal', 'Diario'
+      const mensual = D / 12;
+
+      // 2. Determine calibrator and reagent pack based on monthly average
+      let calCode, packCode;
+      let calQty, packQty;
+
+      if (mensual < 450) {
+        calCode = 'LREDA003';
+        calQty = Math.ceil(D / 700);
+        packCode = 'LREDA013';
+        packQty = Math.ceil(D / 300);
+      } else {
+        calCode = 'LREDA001';
+        calQty = Math.ceil(D / 1000);
+        packCode = 'LREDA010';
+        packQty = Math.ceil(D / 600);
+      }
+
+      const itemsToAdd = [
+        { code: calCode, qty: calQty },
+        { code: packCode, qty: packQty }
+      ];
+
+      // 3. Add syringes if requested
+      if (J) {
+        itemsToAdd.push({ code: 'LREDA012', qty: D });
+      }
+
+      // 4. Add controls if requested
+      if (C === 'Semanal') {
+        itemsToAdd.push({ code: 'LREDA004', qty: 48 });
+        itemsToAdd.push({ code: 'LREDA005', qty: 48 });
+        itemsToAdd.push({ code: 'LREDA006', qty: 48 });
+      } else if (C === 'Diario') {
+        itemsToAdd.push({ code: 'LREDA004', qty: 12 });
+        itemsToAdd.push({ code: 'LREDA005', qty: 12 });
+        itemsToAdd.push({ code: 'LREDA006', qty: 12 });
+      }
+
+      const EDAN_DEFAULTS = {
+        'LREDA001': { name: 'CALIBRADOR DE GASOMETRIA CF-1 (1000 CICLOS, 2-26°C, 6 MESES (AMBIENTE)', fob: 195.00 },
+        'LREDA003': { name: 'CALIBRADOR DE GASOMETRIA CF-1R (700 CICLOS, 2-8°C, 12 MESES (REFRIGERADO)', fob: 165.00 },
+        'LREDA004': { name: 'CONTROL DE CALIDAD GASOMETRIA NIVEL 1 (6 AMPOLLETAS)', fob: 45.00 },
+        'LREDA005': { name: 'CONTROL DE CALIDAD GASOMETRIA NIVEL 2 (6 AMPOLLETAS)', fob: 45.00 },
+        'LREDA006': { name: 'CONTROL DE CALIDAD GASOMETRIA NIVEL 3 (6 AMPOLLETAS)', fob: 45.00 },
+        'LREDA010': { name: 'BM10-R PACK DE REACTIVOS GASOMETRIA (600 TESTS, 2-8°C, 12 MESES) REFRIGERADO', fob: 720.00 },
+        'LREDA012': { name: 'JERINGAS DE GASES 22G X 1 X UND', fob: 0.85 },
+        'LREDA013': { name: 'BM10-R PACK DE REACTIVOS GASOMETRIA (300 TESTS, 2-8°C, 12 MESES) REFRIGERADO', fob: 420.00 }
+      };
+
+      // 5. Build and push custom items
+      itemsToAdd.forEach(item => {
+        const dbProd = this.allProductsMetadata.find(p => p.cod_item === item.code);
+        const name = dbProd ? dbProd.descripcion : (EDAN_DEFAULTS[item.code]?.name || item.code);
+        const fob = dbProd && dbProd.fob !== undefined && dbProd.fob !== null ? Number(dbProd.fob) : (EDAN_DEFAULTS[item.code]?.fob || 0);
+
+        cfg.customItems.push({
+          qty: item.qty,
+          name: name,
+          unitFob: fob,
+          cod_item: item.code,
+          isEdanAuto: true
+        });
+      });
     }
   }
 };
