@@ -608,7 +608,11 @@ class SimulationController extends Controller
         try {
             $nodeBin = $this->getNodeExecutable();
             $scriptPath = base_path('app/Bin/query_clients.js');
-            $process = new \Symfony\Component\Process\Process([$nodeBin, $scriptPath, 'get-filters'], base_path());
+            $process = new \Symfony\Component\Process\Process(
+                [$nodeBin, $scriptPath, 'get-filters'], 
+                base_path(), 
+                ['OPENSSL_CONF' => '', 'SSLEAY_CONF' => '']
+            );
             $process->run();
 
             if (!$process->isSuccessful()) {
@@ -641,7 +645,11 @@ class SimulationController extends Controller
                 $args[] = '--search=' . $request->input('search');
             }
 
-            $process = new \Symfony\Component\Process\Process($args, base_path());
+            $process = new \Symfony\Component\Process\Process(
+                $args, 
+                base_path(), 
+                ['OPENSSL_CONF' => '', 'SSLEAY_CONF' => '']
+            );
             $process->run();
 
             if (!$process->isSuccessful()) {
