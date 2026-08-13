@@ -442,33 +442,39 @@ class SimulationController extends Controller
     public function getSupabaseFilters()
     {
         try {
-            $response = Http::withoutVerifying()->withHeaders([
-                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
-                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
-            ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
-                'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
-                'limit' => 10000
-            ]);
-
-            if ($response->successful()) {
-                $data = collect($response->json());
-                
-                $lineas = $data->pluck('linea_negocio')->filter()->unique()->sort()->values();
-                $modelos = $data->pluck('modelo_equipo')->filter()->unique()->sort()->values();
-                $marcas = $data->pluck('cod_marca')->filter()->unique()->sort()->values();
-                $tipos = $data->pluck('tipo_producto')->filter()->unique()->sort()->values();
-                $nacional_importado = $data->pluck('nacional_importado')->filter()->unique()->sort()->values();
-                
-                return response()->json([
-                    'lineas' => $lineas,
-                    'modelos' => $modelos,
-                    'marcas' => $marcas,
-                    'tipos' => $tipos,
-                    'nacional_importado' => $nacional_importado,
+            $allData = [];
+            for ($offset = 0; $offset < 6000; $offset += 1000) {
+                $response = Http::withoutVerifying()->withHeaders([
+                    'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                    'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
+                    'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
+                    'limit' => 1000,
+                    'offset' => $offset
                 ]);
+
+                if ($response->successful()) {
+                    $allData = array_merge($allData, $response->json());
+                } else {
+                    return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+                }
             }
 
-            return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+            $data = collect($allData);
+            
+            $lineas = $data->pluck('linea_negocio')->filter()->unique()->sort()->values();
+            $modelos = $data->pluck('modelo_equipo')->filter()->unique()->sort()->values();
+            $marcas = $data->pluck('cod_marca')->filter()->unique()->sort()->values();
+            $tipos = $data->pluck('tipo_producto')->filter()->unique()->sort()->values();
+            $nacional_importado = $data->pluck('nacional_importado')->filter()->unique()->sort()->values();
+            
+            return response()->json([
+                'lineas' => $lineas,
+                'modelos' => $modelos,
+                'marcas' => $marcas,
+                'tipos' => $tipos,
+                'nacional_importado' => $nacional_importado,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -571,6 +577,101 @@ class SimulationController extends Controller
             return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    private function getNodeExecutable()
+    {
+        $paths = [
+            'node',
+            'C:\Program Files\nodejs\node.exe',
+            'C:\Program Files (x86)\nodejs\node.exe',
+        ];
+
+        foreach ($paths as $path) {
+            try {
+                $process = new \Symfony\Component\Process\Process([$path, '-v']);
+                $process->run();
+                if ($process->isSuccessful()) {
+                    return $path;
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
+
+        return 'node';
+    }
+
+    private function startMicroserviceAsync()
+    {
+        try {
+            $nodeBin = $this->getNodeExecutable();
+            $scriptPath = base_path('app/Bin/query_clients_server.js');
+            putenv('OPENSSL_CONF');
+            putenv('SSLEAY_CONF');
+
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                pclose(popen("start /B \"\" \"$nodeBin\" \"$scriptPath\" > NUL 2>&1", "r"));
+            } else {
+                exec("node \"$scriptPath\" > /dev/null 2>&1 &");
+            }
+        } catch (\Exception $e) {
+            // ignore
+        }
+    }
+
+    public function getClientFilters()
+    {
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes/filtros');
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            return response()->json(['error' => 'Microservice response failed: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            $this->startMicroserviceAsync();
+            usleep(1500000); // Wait 1.5 seconds
+
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes/filtros');
+                if ($response->successful()) {
+                    return response()->json($response->json());
+                }
+                return response()->json(['error' => 'Microservice retry failed: ' . $response->body()], $response->status());
+            } catch (\Exception $e2) {
+                return response()->json(['error' => 'No se pudo conectar al microservicio de clientes (puerto 3000): ' . $e2->getMessage()], 500);
+            }
+        }
+    }
+
+    public function searchClients(Request $request)
+    {
+        try {
+            $params = [];
+            if ($request->filled('empresa')) $params['empresa'] = $request->input('empresa');
+            if ($request->filled('sector')) $params['sector'] = $request->input('sector');
+            if ($request->filled('provincia')) $params['provincia'] = $request->input('provincia');
+            if ($request->filled('search')) $params['search'] = $request->input('search');
+
+            $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes', $params);
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            return response()->json(['error' => 'Microservice response failed: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            $this->startMicroserviceAsync();
+            usleep(1500000); // Wait 1.5s
+
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes', $params);
+                if ($response->successful()) {
+                    return response()->json($response->json());
+                }
+                return response()->json(['error' => 'Microservice retry failed: ' . $response->body()], $response->status());
+            } catch (\Exception $e2) {
+                return response()->json(['error' => 'No se pudo conectar al microservicio de clientes (puerto 3000): ' . $e2->getMessage()], 500);
+            }
         }
     }
 }

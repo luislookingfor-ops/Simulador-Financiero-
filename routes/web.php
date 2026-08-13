@@ -27,6 +27,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/productos', [SimulationController::class, 'getSupabaseProducts'])->name('productos.index');
     Route::put('/api/productos/{id}', [SimulationController::class, 'updateProductPrices'])->name('productos.update');
 
+    // API routes for Supabase clients
+    Route::get('/api/clientes/filtros', [SimulationController::class, 'getClientFilters'])->name('clientes.filtros');
+    Route::get('/api/clientes', [SimulationController::class, 'searchClients'])->name('clientes.index');
+
     // Admin only routes
     Route::middleware([AdminMiddleware::class])->group(function () {
         Route::post('/simulations', [SimulationController::class, 'store'])->name('simulation.store');
