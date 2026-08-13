@@ -603,66 +603,75 @@ class SimulationController extends Controller
         return 'node';
     }
 
-    public function getClientFilters()
+    private function startMicroserviceAsync()
     {
         try {
+            $nodeBin = $this->getNodeExecutable();
+            $scriptPath = base_path('app/Bin/query_clients_server.js');
             putenv('OPENSSL_CONF');
             putenv('SSLEAY_CONF');
 
-            $nodeBin = $this->getNodeExecutable();
-            $scriptPath = base_path('app/Bin/query_clients.js');
-            $process = new \Symfony\Component\Process\Process(
-                [$nodeBin, $scriptPath, 'get-filters'], 
-                base_path()
-            );
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                return response()->json(['error' => 'Node script failed: ' . $process->getErrorOutput()], 500);
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                pclose(popen("start /B \"\" \"$nodeBin\" \"$scriptPath\" > NUL 2>&1", "r"));
+            } else {
+                exec("node \"$scriptPath\" > /dev/null 2>&1 &");
             }
-
-            return response()->json(json_decode($process->getOutput(), true));
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            // ignore
+        }
+    }
+
+    public function getClientFilters()
+    {
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes/filtros');
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            return response()->json(['error' => 'Microservice response failed: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            $this->startMicroserviceAsync();
+            usleep(1500000); // Wait 1.5 seconds
+
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes/filtros');
+                if ($response->successful()) {
+                    return response()->json($response->json());
+                }
+                return response()->json(['error' => 'Microservice retry failed: ' . $response->body()], $response->status());
+            } catch (\Exception $e2) {
+                return response()->json(['error' => 'No se pudo conectar al microservicio de clientes (puerto 3000): ' . $e2->getMessage()], 500);
+            }
         }
     }
 
     public function searchClients(Request $request)
     {
         try {
-            putenv('OPENSSL_CONF');
-            putenv('SSLEAY_CONF');
+            $params = [];
+            if ($request->filled('empresa')) $params['empresa'] = $request->input('empresa');
+            if ($request->filled('sector')) $params['sector'] = $request->input('sector');
+            if ($request->filled('provincia')) $params['provincia'] = $request->input('provincia');
+            if ($request->filled('search')) $params['search'] = $request->input('search');
 
-            $nodeBin = $this->getNodeExecutable();
-            $scriptPath = base_path('app/Bin/query_clients.js');
-            $args = [$nodeBin, $scriptPath, 'search-clients'];
-
-            if ($request->filled('empresa')) {
-                $args[] = '--empresa=' . $request->input('empresa');
+            $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes', $params);
+            if ($response->successful()) {
+                return response()->json($response->json());
             }
-            if ($request->filled('sector')) {
-                $args[] = '--sector=' . $request->input('sector');
-            }
-            if ($request->filled('provincia')) {
-                $args[] = '--provincia=' . $request->input('provincia');
-            }
-            if ($request->filled('search')) {
-                $args[] = '--search=' . $request->input('search');
-            }
-
-            $process = new \Symfony\Component\Process\Process(
-                $args, 
-                base_path()
-            );
-            $process->run();
-
-            if (!$process->isSuccessful()) {
-                return response()->json(['error' => 'Node script failed: ' . $process->getErrorOutput()], 500);
-            }
-
-            return response()->json(json_decode($process->getOutput(), true));
+            return response()->json(['error' => 'Microservice response failed: ' . $response->body()], $response->status());
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            $this->startMicroserviceAsync();
+            usleep(1500000); // Wait 1.5s
+
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(3)->get('http://127.0.0.1:3000/api/clientes', $params);
+                if ($response->successful()) {
+                    return response()->json($response->json());
+                }
+                return response()->json(['error' => 'Microservice retry failed: ' . $response->body()], $response->status());
+            } catch (\Exception $e2) {
+                return response()->json(['error' => 'No se pudo conectar al microservicio de clientes (puerto 3000): ' . $e2->getMessage()], 500);
+            }
         }
     }
 }
