@@ -474,6 +474,7 @@ class SimulationController extends Controller
                 'marcas' => $marcas,
                 'tipos' => $tipos,
                 'nacional_importado' => $nacional_importado,
+                'productos' => $allData,
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
