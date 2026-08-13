@@ -101,14 +101,105 @@
           <h1>Simulador de Costos y Proyecciones HUC</h1>
           <p>Simulador financiero para propuestas de comodato y venta de reactivos</p>
         </div>
-        <div class="scenario-actions">
-          <input 
-            type="text" 
-            v-model="scenarioName" 
-            placeholder="Nombre de la Simulación (ej. Hosp. Metropolitano)" 
-            class="form-input text-input shadow-sm"
-          />
-          <button @click="saveScenario" class="btn btn-primary" :disabled="saving">
+        <div class="scenario-actions" style="position: relative; display: flex; align-items: center; gap: 8px;">
+          <!-- Custom Client Autocomplete Selector -->
+          <div style="position: relative; width: 340px;">
+            <div style="position: relative; display: flex; align-items: center; width: 100%;">
+              <input 
+                type="text" 
+                v-model="scenarioName" 
+                @focus="showClientSearchDropdown = true"
+                placeholder="Nombre de la Simulación o Cliente..." 
+                class="form-input text-input shadow-sm"
+                style="width: 100%; padding-right: 32px;"
+              />
+              <span 
+                @click="showClientSearchDropdown = !showClientSearchDropdown"
+                style="position: absolute; right: 10px; color: #64748b; cursor: pointer; font-size: 0.75rem;"
+              >
+                ▼
+              </span>
+            </div>
+            
+            <!-- Floating Dropdown Box -->
+            <div 
+              v-if="showClientSearchDropdown" 
+              class="card shadow-lg border border-gray-200" 
+              style="position: absolute; top: 100%; right: 0; width: 420px; background: white; border-radius: 8px; padding: 12px; margin-top: 6px; z-index: 1000; box-sizing: border-box;"
+            >
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
+                <span style="font-weight: 800; font-size: 0.85rem; color: var(--primary);">Buscar Cliente del Catálogo</span>
+                <span 
+                  @click="showClientSearchDropdown = false" 
+                  style="cursor: pointer; color: #ef4444; font-size: 0.85rem; font-weight: 800;"
+                >
+                  ✕ Cerrar
+                </span>
+              </div>
+
+              <!-- Quick Cascading Filters -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <div>
+                  <label style="font-size: 0.65rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Empresa</label>
+                  <select v-model="clientFilters.empresa" @change="searchClients" class="excel-select" style="font-size: 0.75rem; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    <option value="">TODAS</option>
+                    <option v-for="opt in clientOptions.empresas" :key="opt" :value="opt">{{ opt }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size: 0.65rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Sector</label>
+                  <select v-model="clientFilters.sector" @change="searchClients" class="excel-select" style="font-size: 0.75rem; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    <option value="">TODOS</option>
+                    <option v-for="opt in clientOptions.sectores" :key="opt" :value="opt">{{ opt }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 8px;">
+                <label style="font-size: 0.65rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Provincia</label>
+                <select v-model="clientFilters.provincia" @change="searchClients" class="excel-select" style="font-size: 0.75rem; padding: 4px; background: white; border: 1px solid #cbd5e1; border-radius: 4px;">
+                  <option value="">TODAS</option>
+                  <option v-for="opt in clientOptions.provincias" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom: 8px;">
+                <label style="font-size: 0.65rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Buscar por Nombre o Identificación</label>
+                <input 
+                  type="text" 
+                  v-model="clientFilters.search" 
+                  @input="searchClients"
+                  placeholder="Escribe el nombre o RUC..."
+                  class="excel-input"
+                  style="width: 100%; padding: 4px 8px; font-size: 0.75rem; box-sizing: border-box; background: white; color: black; border: 1px solid #cbd5e1; border-radius: 4px;"
+                />
+              </div>
+
+              <!-- List of matching clients -->
+              <div style="max-height: 180px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc;">
+                <div 
+                  v-for="c in clientFilters.list" 
+                  :key="c.id" 
+                  @click="selectClient(c)"
+                  style="padding: 6px 10px; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.1s ease; text-align: left;"
+                  onmouseover="this.style.background='#f1f5f9'"
+                  onmouseout="this.style.background='transparent'"
+                >
+                  <div style="font-weight: 700; font-size: 0.8rem; color: #0f172a;">{{ c.nombre }}</div>
+                  <div style="display: flex; gap: 8px; font-size: 0.65rem; color: #64748b; margin-top: 2px;">
+                    <span><strong>ID:</strong> {{ c.cod_cliente }}</span>
+                    <span><strong>RUC:</strong> {{ c.identificacion }}</span>
+                    <span><strong>Provincia:</strong> {{ c.provincia }}</span>
+                  </div>
+                </div>
+                <div v-if="clientFilters.list.length === 0" style="padding: 15px; text-align: center; color: #64748b; font-size: 0.75rem; font-style: italic;">
+                  No se encontraron clientes.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button @click="saveScenario" class="btn btn-primary" :disabled="saving" style="height: 38px;">
             <span v-if="saving">Guardando...</span>
             <span v-else>Guardar Escenario</span>
           </button>
@@ -1510,6 +1601,19 @@ export default {
         searchQuery: '',
         products: []
       },
+      clientFilters: {
+        empresa: '',
+        sector: '',
+        provincia: '',
+        search: '',
+        list: []
+      },
+      clientOptions: {
+        empresas: [],
+        sectores: [],
+        provincias: []
+      },
+      showClientSearchDropdown: false,
       reagentCatalog: [
         { cod_item: 'LEAFI001', descripcion: 'EQUIPO AFIAS-1', stock_jorge: 0, stock_ingelab: -1 },
         { cod_item: 'LRAFI001', descripcion: 'AFIAS NT-PROBNP X 24 TEST', stock_jorge: 2, stock_ingelab: 2 },
@@ -1600,6 +1704,8 @@ export default {
     this.onFilterChange(1);
     this.onFilterChange(2);
     this.fetchMasterProducts();
+    this.fetchClientFilters();
+    this.searchClients();
   },
   watch: {
     activeNavTab(newTab) {
@@ -3047,6 +3153,43 @@ export default {
         console.error("Error saving product prices:", err);
         this.showToast('Error de red al guardar precios.', 'danger');
       }
+    },
+    async fetchClientFilters() {
+      try {
+        const response = await fetch('/api/clientes/filtros');
+        if (response.ok) {
+          const data = await response.json();
+          this.clientOptions = {
+            empresas: data.empresas || [],
+            sectores: data.sectores || [],
+            provincias: data.provincias || []
+          };
+        }
+      } catch (err) {
+        console.error("Error fetching client filters:", err);
+      }
+    },
+    async searchClients() {
+      const cfg = this.clientFilters;
+      const params = new URLSearchParams();
+      if (cfg.empresa) params.append('empresa', cfg.empresa);
+      if (cfg.sector) params.append('sector', cfg.sector);
+      if (cfg.provincia) params.append('provincia', cfg.provincia);
+      if (cfg.search) params.append('search', cfg.search);
+
+      try {
+        const response = await fetch(`/api/clientes?${params.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          cfg.list = data || [];
+        }
+      } catch (err) {
+        console.error("Error searching clients:", err);
+      }
+    },
+    selectClient(client) {
+      this.scenarioName = client.nombre;
+      this.showClientSearchDropdown = false;
     }
   }
 };

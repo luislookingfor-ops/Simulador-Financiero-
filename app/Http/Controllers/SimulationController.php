@@ -442,33 +442,39 @@ class SimulationController extends Controller
     public function getSupabaseFilters()
     {
         try {
-            $response = Http::withoutVerifying()->withHeaders([
-                'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
-                'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
-            ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
-                'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
-                'limit' => 10000
-            ]);
-
-            if ($response->successful()) {
-                $data = collect($response->json());
-                
-                $lineas = $data->pluck('linea_negocio')->filter()->unique()->sort()->values();
-                $modelos = $data->pluck('modelo_equipo')->filter()->unique()->sort()->values();
-                $marcas = $data->pluck('cod_marca')->filter()->unique()->sort()->values();
-                $tipos = $data->pluck('tipo_producto')->filter()->unique()->sort()->values();
-                $nacional_importado = $data->pluck('nacional_importado')->filter()->unique()->sort()->values();
-                
-                return response()->json([
-                    'lineas' => $lineas,
-                    'modelos' => $modelos,
-                    'marcas' => $marcas,
-                    'tipos' => $tipos,
-                    'nacional_importado' => $nacional_importado,
+            $allData = [];
+            for ($offset = 0; $offset < 6000; $offset += 1000) {
+                $response = Http::withoutVerifying()->withHeaders([
+                    'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                    'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+                ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
+                    'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
+                    'limit' => 1000,
+                    'offset' => $offset
                 ]);
+
+                if ($response->successful()) {
+                    $allData = array_merge($allData, $response->json());
+                } else {
+                    return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+                }
             }
 
-            return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+            $data = collect($allData);
+            
+            $lineas = $data->pluck('linea_negocio')->filter()->unique()->sort()->values();
+            $modelos = $data->pluck('modelo_equipo')->filter()->unique()->sort()->values();
+            $marcas = $data->pluck('cod_marca')->filter()->unique()->sort()->values();
+            $tipos = $data->pluck('tipo_producto')->filter()->unique()->sort()->values();
+            $nacional_importado = $data->pluck('nacional_importado')->filter()->unique()->sort()->values();
+            
+            return response()->json([
+                'lineas' => $lineas,
+                'modelos' => $modelos,
+                'marcas' => $marcas,
+                'tipos' => $tipos,
+                'nacional_importado' => $nacional_importado,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -569,6 +575,55 @@ class SimulationController extends Controller
             }
 
             return response()->json(['error' => 'Supabase API error: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getClientFilters()
+    {
+        try {
+            $scriptPath = base_path('app/Bin/query_clients.js');
+            $process = new \Symfony\Component\Process\Process(['node', $scriptPath, 'get-filters']);
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                return response()->json(['error' => 'Node script failed: ' . $process->getErrorOutput()], 500);
+            }
+
+            return response()->json(json_decode($process->getOutput(), true));
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function searchClients(Request $request)
+    {
+        try {
+            $scriptPath = base_path('app/Bin/query_clients.js');
+            $args = ['node', $scriptPath, 'search-clients'];
+
+            if ($request->filled('empresa')) {
+                $args[] = '--empresa=' . $request->input('empresa');
+            }
+            if ($request->filled('sector')) {
+                $args[] = '--sector=' . $request->input('sector');
+            }
+            if ($request->filled('provincia')) {
+                $args[] = '--provincia=' . $request->input('provincia');
+            }
+            if ($request->filled('search')) {
+                $args[] = '--search=' . $request->input('search');
+            }
+
+            $process = new \Symfony\Component\Process\Process($args);
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                return response()->json(['error' => 'Node script failed: ' . $process->getErrorOutput()], 500);
+            }
+
+            return response()->json(json_decode($process->getOutput(), true));
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
