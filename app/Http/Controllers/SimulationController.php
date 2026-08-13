@@ -606,12 +606,14 @@ class SimulationController extends Controller
     public function getClientFilters()
     {
         try {
+            putenv('OPENSSL_CONF');
+            putenv('SSLEAY_CONF');
+
             $nodeBin = $this->getNodeExecutable();
             $scriptPath = base_path('app/Bin/query_clients.js');
             $process = new \Symfony\Component\Process\Process(
                 [$nodeBin, $scriptPath, 'get-filters'], 
-                base_path(), 
-                ['OPENSSL_CONF' => '', 'SSLEAY_CONF' => '']
+                base_path()
             );
             $process->run();
 
@@ -628,6 +630,9 @@ class SimulationController extends Controller
     public function searchClients(Request $request)
     {
         try {
+            putenv('OPENSSL_CONF');
+            putenv('SSLEAY_CONF');
+
             $nodeBin = $this->getNodeExecutable();
             $scriptPath = base_path('app/Bin/query_clients.js');
             $args = [$nodeBin, $scriptPath, 'search-clients'];
@@ -647,8 +652,7 @@ class SimulationController extends Controller
 
             $process = new \Symfony\Component\Process\Process(
                 $args, 
-                base_path(), 
-                ['OPENSSL_CONF' => '', 'SSLEAY_CONF' => '']
+                base_path()
             );
             $process->run();
 
