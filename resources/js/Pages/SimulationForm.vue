@@ -3342,14 +3342,14 @@ export default {
 
       if (mensual < 450) {
         calCode = 'LREDA003';
-        calQty = Math.ceil(D / 700);
         packCode = 'LREDA013';
         packQty = Math.ceil(D / 300);
+        calQty = packQty;
       } else {
         calCode = 'LREDA001';
-        calQty = Math.ceil(D / 1000);
         packCode = 'LREDA010';
         packQty = Math.ceil(D / 600);
+        calQty = packQty;
       }
 
       const itemsToAdd = [
@@ -3362,15 +3362,15 @@ export default {
         itemsToAdd.push({ code: 'LREDA012', qty: D });
       }
 
-      // 4. Add controls if requested
+      // 4. Add controls if requested (swapped daily and weekly quantities)
       if (C === 'Semanal') {
-        itemsToAdd.push({ code: 'LREDA004', qty: 48 });
-        itemsToAdd.push({ code: 'LREDA005', qty: 48 });
-        itemsToAdd.push({ code: 'LREDA006', qty: 48 });
-      } else if (C === 'Diario') {
         itemsToAdd.push({ code: 'LREDA004', qty: 12 });
         itemsToAdd.push({ code: 'LREDA005', qty: 12 });
         itemsToAdd.push({ code: 'LREDA006', qty: 12 });
+      } else if (C === 'Diario') {
+        itemsToAdd.push({ code: 'LREDA004', qty: 48 });
+        itemsToAdd.push({ code: 'LREDA005', qty: 48 });
+        itemsToAdd.push({ code: 'LREDA006', qty: 48 });
       }
 
       const EDAN_DEFAULTS = {
