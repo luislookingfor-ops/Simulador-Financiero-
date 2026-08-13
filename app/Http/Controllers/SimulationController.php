@@ -580,11 +580,35 @@ class SimulationController extends Controller
         }
     }
 
+    private function getNodeExecutable()
+    {
+        $paths = [
+            'node',
+            'C:\Program Files\nodejs\node.exe',
+            'C:\Program Files (x86)\nodejs\node.exe',
+        ];
+
+        foreach ($paths as $path) {
+            try {
+                $process = new \Symfony\Component\Process\Process([$path, '-v']);
+                $process->run();
+                if ($process->isSuccessful()) {
+                    return $path;
+                }
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
+
+        return 'node';
+    }
+
     public function getClientFilters()
     {
         try {
+            $nodeBin = $this->getNodeExecutable();
             $scriptPath = base_path('app/Bin/query_clients.js');
-            $process = new \Symfony\Component\Process\Process(['node', $scriptPath, 'get-filters']);
+            $process = new \Symfony\Component\Process\Process([$nodeBin, $scriptPath, 'get-filters'], base_path());
             $process->run();
 
             if (!$process->isSuccessful()) {
@@ -600,8 +624,9 @@ class SimulationController extends Controller
     public function searchClients(Request $request)
     {
         try {
+            $nodeBin = $this->getNodeExecutable();
             $scriptPath = base_path('app/Bin/query_clients.js');
-            $args = ['node', $scriptPath, 'search-clients'];
+            $args = [$nodeBin, $scriptPath, 'search-clients'];
 
             if ($request->filled('empresa')) {
                 $args[] = '--empresa=' . $request->input('empresa');
@@ -616,7 +641,7 @@ class SimulationController extends Controller
                 $args[] = '--search=' . $request->input('search');
             }
 
-            $process = new \Symfony\Component\Process\Process($args);
+            $process = new \Symfony\Component\Process\Process($args, base_path());
             $process->run();
 
             if (!$process->isSuccessful()) {

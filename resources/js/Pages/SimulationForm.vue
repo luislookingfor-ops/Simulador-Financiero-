@@ -3164,9 +3164,14 @@ export default {
             sectores: data.sectores || [],
             provincias: data.provincias || []
           };
+        } else {
+          const data = await response.json().catch(() => ({}));
+          console.error("Failed to fetch client filters:", response.status, data);
+          this.showToast(`Error al cargar filtros de clientes: ${data.error || response.statusText || response.status}`, 'danger');
         }
       } catch (err) {
         console.error("Error fetching client filters:", err);
+        this.showToast('Error de red al conectar con el servidor de clientes.', 'danger');
       }
     },
     async searchClients() {
@@ -3182,9 +3187,14 @@ export default {
         if (response.ok) {
           const data = await response.json();
           cfg.list = data || [];
+        } else {
+          const data = await response.json().catch(() => ({}));
+          console.error("Failed to search clients:", response.status, data);
+          this.showToast(`Error al buscar clientes: ${data.error || response.statusText || response.status}`, 'danger');
         }
       } catch (err) {
         console.error("Error searching clients:", err);
+        this.showToast('Error de red al buscar clientes.', 'danger');
       }
     },
     selectClient(client) {
