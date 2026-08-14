@@ -1828,6 +1828,13 @@ export default {
         }
       }
     },
+    'globalSettings.contract_months'(newVal) {
+      for (let i = 0; i < 3; i++) {
+        if (this.equipmentConfigs[i].brandFilter === 'EDAN') {
+          this.calculateEdanProposal(i);
+        }
+      }
+    },
     reagentPlannings: {
       immediate: true,
       deep: true,
@@ -3206,17 +3213,18 @@ export default {
         cfg.include_controls = (eq.control > 0 || eq.calibrador > 0);
         cfg.need_controls = cfg.include_controls ? 'Sí' : 'No';
         cfg.reagent_cost_per_test = Number(eq.default_reagent_cost) || 0.35;
+        this.rebuildCustomItems(colIndex);
+      } else {
+        const q = Number(cfg.quantity) || 1;
+        if (!cfg.customItems) cfg.customItems = [];
+        
+        cfg.customItems.push({
+          qty: q,
+          name: eq.name || eq.descripcion,
+          unitFob: Number(eq.fob) || 0,
+          cod_item: eq.code || eq.cod_item
+        });
       }
-
-      const q = Number(cfg.quantity) || 1;
-      if (!cfg.customItems) cfg.customItems = [];
-      
-      cfg.customItems.push({
-        qty: q,
-        name: eq.name || eq.descripcion,
-        unitFob: Number(eq.fob) || 0,
-        cod_item: eq.code || eq.cod_item
-      });
 
       // Clear selection so they can select another
       cfg.selectedCatalogItemId = null;
@@ -3442,6 +3450,9 @@ export default {
       const C = cfg.edanControles; // 'No', 'Semanal', 'Diario'
       const mensual = D / 12;
 
+      const contractMonths = Number(this.globalSettings.contract_months) || 36;
+      const years = contractMonths / 12;
+
       // 2. Determine calibrator and reagent pack based on monthly average
       let calCode, packCode;
       let calQty, packQty;
@@ -3449,12 +3460,12 @@ export default {
       if (mensual < 450) {
         calCode = 'LREDA003';
         packCode = 'LREDA013';
-        packQty = Math.ceil(D / 300);
+        packQty = Math.ceil(Math.ceil(D / 300) * years);
         calQty = packQty;
       } else {
         calCode = 'LREDA001';
         packCode = 'LREDA010';
-        packQty = Math.ceil(D / 600);
+        packQty = Math.ceil(Math.ceil(D / 600) * years);
         calQty = packQty;
       }
 
@@ -3465,18 +3476,18 @@ export default {
 
       // 3. Add syringes if requested
       if (J) {
-        itemsToAdd.push({ code: 'LREDA012', qty: D });
+        itemsToAdd.push({ code: 'LREDA012', qty: Math.ceil(D * years) });
       }
 
       // 4. Add controls if requested (swapped daily and weekly quantities)
       if (C === 'Semanal') {
-        itemsToAdd.push({ code: 'LREDA004', qty: 12 });
-        itemsToAdd.push({ code: 'LREDA005', qty: 12 });
-        itemsToAdd.push({ code: 'LREDA006', qty: 12 });
+        itemsToAdd.push({ code: 'LREDA004', qty: Math.ceil(12 * years) });
+        itemsToAdd.push({ code: 'LREDA005', qty: Math.ceil(12 * years) });
+        itemsToAdd.push({ code: 'LREDA006', qty: Math.ceil(12 * years) });
       } else if (C === 'Diario') {
-        itemsToAdd.push({ code: 'LREDA004', qty: 48 });
-        itemsToAdd.push({ code: 'LREDA005', qty: 48 });
-        itemsToAdd.push({ code: 'LREDA006', qty: 48 });
+        itemsToAdd.push({ code: 'LREDA004', qty: Math.ceil(48 * years) });
+        itemsToAdd.push({ code: 'LREDA005', qty: Math.ceil(48 * years) });
+        itemsToAdd.push({ code: 'LREDA006', qty: Math.ceil(48 * years) });
       }
 
       const EDAN_DEFAULTS = {
