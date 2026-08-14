@@ -405,16 +405,45 @@
                         </div>
                         
                         <div style="display: grid; grid-template-columns: 1fr; gap: 8px; text-align: left;">
-                          <div>
-                            <label style="font-size: 0.7rem; font-weight: 700; color: #14532d; display: block; margin-bottom: 2px;">Determinaciones Anuales</label>
+                          <!-- Pruebas Diarias -->
+                          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; align-items: center;">
+                            <label style="font-size: 0.75rem; font-weight: 700; color: #14532d;">Pruebas Diarias</label>
                             <input 
                               type="number" 
-                              v-model.number="equipmentConfigs[colIndex].edanDeterminaciones" 
-                              @input="calculateEdanProposal(colIndex)"
-                              placeholder="Ej. 5000"
-                              class="excel-input"
+                              v-model.number="equipmentConfigs[colIndex].edanPruebasDiarias" 
+                              @input="onEdanDiariasChange(colIndex)"
+                              placeholder="Ej. 15"
+                              class="excel-input text-center font-bold"
                               style="width: 100%; padding: 4px 8px; font-size: 0.8rem; background: white; color: black; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;"
                             />
+                          </div>
+
+                          <!-- Pruebas Mensuales -->
+                          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; align-items: center;">
+                            <label style="font-size: 0.75rem; font-weight: 700; color: #14532d;">Pruebas Mensuales</label>
+                            <input 
+                              type="text" 
+                              :value="formatNumber(equipmentConfigs[colIndex].edanPruebasMensuales)" 
+                              disabled
+                              class="excel-input text-center font-bold"
+                              style="width: 100%; padding: 4px 8px; font-size: 0.8rem; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; cursor: not-allowed;"
+                            />
+                          </div>
+
+                          <!-- Pruebas Anuales / Totales -->
+                          <div style="display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: 8px; align-items: center;">
+                            <label style="font-size: 0.75rem; font-weight: 700; color: #14532d;">Pruebas Anuales</label>
+                            <input 
+                              type="text" 
+                              :value="formatNumber(equipmentConfigs[colIndex].edanDeterminaciones)" 
+                              disabled
+                              class="excel-input text-center font-bold"
+                              style="width: 100%; padding: 4px 8px; font-size: 0.8rem; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; cursor: not-allowed;"
+                            />
+                            <div style="font-size: 0.65rem; line-height: 1.1; text-align: left; padding-left: 8px;">
+                              <span style="font-weight: 800; color: #475569; display: block; font-size: 0.6rem;">PRUEBAS TOTALES</span>
+                              <span style="font-size: 0.85rem; font-weight: 900; color: #1e293b;">{{ formatNumber(edanPruebasTotales) }}</span>
+                            </div>
                           </div>
 
                           <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; align-items: center;">
@@ -1521,6 +1550,33 @@
 <script>
 import EU5600ReagentSection from '../Components/EU5600ReagentSection.vue';
 
+function flagCustomItems(customItems, eqName) {
+  if (!customItems) return [];
+  return customItems.map(item => {
+    const name = item.name || '';
+    const code = item.cod_item || '';
+    
+    const isBaseOrAcc = (
+      name === eqName ||
+      name === 'UPS SMART RT 1500VA 120V' ||
+      name === 'COMPUTADOR 19.5"' ||
+      name === 'IMPRESORA TINTA CONTINUA' ||
+      name === 'IMPRESORA ZEBRA' ||
+      name === 'SOFTWARE' ||
+      name === 'CONTROLES Y CALIBRADORES'
+    );
+    
+    const edanCodes = ['LREDA001', 'LREDA003', 'LREDA004', 'LREDA005', 'LREDA006', 'LREDA010', 'LREDA012', 'LREDA013'];
+    const isEdanAutoItem = edanCodes.includes(code);
+
+    return {
+      ...item,
+      isBaseOrAccessory: item.isBaseOrAccessory !== undefined ? item.isBaseOrAccessory : isBaseOrAcc,
+      isEdanAuto: item.isEdanAuto !== undefined ? item.isEdanAuto : isEdanAutoItem
+    };
+  });
+}
+
 function createEmptyConfig() {
   return {
     lineFilter: '',
@@ -1554,7 +1610,9 @@ function createEmptyConfig() {
     showReagentVolume: false,
     edanDeterminaciones: '',
     edanJeringas: 'No',
-    edanControles: 'No'
+    edanControles: 'No',
+    edanPruebasDiarias: '',
+    edanPruebasMensuales: ''
   };
 }
 
@@ -1796,6 +1854,14 @@ export default {
     uniqueLines() {
       const lines = this.equipments.map(eq => eq.line);
       return [...new Set(lines)];
+    },
+    edanPruebasTotales() {
+      return this.equipmentConfigs.reduce((sum, cfg) => {
+        if (cfg.brandFilter === 'EDAN' && cfg.edanDeterminaciones) {
+          return sum + (Number(cfg.edanDeterminaciones) || 0);
+        }
+        return sum;
+      }, 0);
     },
     filteredMasterEquipments() {
       if (!this.equipmentSearchQuery) {
@@ -2095,33 +2161,42 @@ export default {
       if (!eq) return;
 
       const q = Number(config.quantity) || 1;
-      const items = [
-        { qty: q, name: eq.name, unitFob: Number(eq.fob) }
+
+      // 1. Keep only non-base/non-accessory items (e.g. manually added, or auto-calculated EDAN items)
+      let otherItems = [];
+      if (config.customItems) {
+        otherItems = config.customItems.filter(item => !item.isBaseOrAccessory);
+      }
+
+      // 2. Build the list of base equipment and accessories
+      const baseItems = [
+        { qty: q, name: eq.name, unitFob: Number(eq.fob), cod_item: eq.code || eq.cod_item, isBaseOrAccessory: true }
       ];
 
       if (config.include_ups && Number(eq.ups) > 0) {
-        items.push({ qty: q, name: 'UPS SMART RT 1500VA 120V', unitFob: Number(eq.ups) });
+        baseItems.push({ qty: q, name: 'UPS SMART RT 1500VA 120V', unitFob: Number(eq.ups), isBaseOrAccessory: true });
       }
       if (config.include_pc && Number(eq.pc) > 0) {
-        items.push({ qty: q, name: 'COMPUTADOR 19.5"', unitFob: Number(eq.pc) });
+        baseItems.push({ qty: q, name: 'COMPUTADOR 19.5"', unitFob: Number(eq.pc), isBaseOrAccessory: true });
       }
       if (config.include_printer_base && Number(eq.impresora) > 0) {
-        items.push({ qty: q, name: 'IMPRESORA TINTA CONTINUA', unitFob: Number(eq.impresora) });
+        baseItems.push({ qty: q, name: 'IMPRESORA TINTA CONTINUA', unitFob: Number(eq.impresora), isBaseOrAccessory: true });
       }
       if (config.need_zebra === 'Sí' || config.include_zebra) {
-        items.push({ qty: q, name: 'IMPRESORA ZEBRA', unitFob: 330 });
+        baseItems.push({ qty: q, name: 'IMPRESORA ZEBRA', unitFob: 330, isBaseOrAccessory: true });
       }
       if (config.need_software === 'Sí' || config.include_software) {
-        items.push({ qty: q, name: 'SOFTWARE', unitFob: Number(config.software_value) || 2000 });
+        baseItems.push({ qty: q, name: 'SOFTWARE', unitFob: Number(config.software_value) || 2000, isBaseOrAccessory: true });
       }
       if (config.need_controls === 'Sí' || config.include_controls) {
         const ctrlCost = Number(eq.control) + Number(eq.calibrador);
         if (ctrlCost > 0) {
-          items.push({ qty: q, name: 'CONTROLES Y CALIBRADORES', unitFob: ctrlCost });
+          baseItems.push({ qty: q, name: 'CONTROLES Y CALIBRADORES', unitFob: ctrlCost, isBaseOrAccessory: true });
         }
       }
 
-      config.customItems = items;
+      // 3. Combine them: other items first, and base/accessory items at the bottom
+      config.customItems = [...otherItems, ...baseItems];
     },
     syncToggles(colIndex) {
       const cfg = this.equipmentConfigs[colIndex];
@@ -2359,13 +2434,24 @@ export default {
           }
         }
         this.equipmentConfigs = eqSettings.map(c => {
+          const eq = this.getSelectedEquipment(c.equipment_id);
+          const eqName = eq ? eq.name : '';
+          const flaggedItems = flagCustomItems(c.customItems, eqName);
+
           return {
             lineFilter: c.lineFilter || '',
+            brandFilter: c.brandFilter || '',
+            modelFilter: c.modelFilter || '',
+            typeFilter: c.typeFilter || '',
+            nacionalImportadoFilter: c.nacionalImportadoFilter || '',
+            searchQuery: c.searchQuery || '',
+            filteredEquipments: c.filteredEquipments || [],
+            selectedCatalogItemId: c.selectedCatalogItemId || null,
             equipment_id: c.equipment_id || null,
             equipment_type: c.equipment_type || 'EQUIPO NUEVO',
             depreciation_percent: c.depreciation_percent !== undefined ? c.depreciation_percent : 100,
             quantity: c.quantity !== undefined ? c.quantity : 1,
-            customItems: c.customItems || [],
+            customItems: flaggedItems,
             include_ups: c.include_ups !== undefined ? c.include_ups : true,
             include_pc: c.include_pc !== undefined ? c.include_pc : true,
             include_printer_base: c.include_printer_base !== undefined ? c.include_printer_base : true,
@@ -2381,7 +2467,12 @@ export default {
             daily_tests: c.daily_tests !== undefined ? c.daily_tests : 30,
             pvp_per_test: c.pvp_per_test !== undefined ? c.pvp_per_test : 1.10,
             reagent_cost_per_test: c.reagent_cost_per_test !== undefined ? c.reagent_cost_per_test : 0.35,
-            showReagentVolume: c.showReagentVolume !== undefined ? c.showReagentVolume : false
+            showReagentVolume: c.showReagentVolume !== undefined ? c.showReagentVolume : false,
+            edanDeterminaciones: c.edanDeterminaciones !== undefined ? c.edanDeterminaciones : '',
+            edanJeringas: c.edanJeringas || 'No',
+            edanControles: c.edanControles || 'No',
+            edanPruebasDiarias: c.edanPruebasDiarias !== undefined ? c.edanPruebasDiarias : '',
+            edanPruebasMensuales: c.edanPruebasMensuales !== undefined ? c.edanPruebasMensuales : ''
           };
         });
         
@@ -3320,6 +3411,20 @@ export default {
 
       const values = list.map(p => p[field]).filter(Boolean);
       return [...new Set(values)].sort();
+    },
+    onEdanDiariasChange(colIndex) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (!cfg) return;
+
+      const diarias = Number(cfg.edanPruebasDiarias) || 0;
+      if (diarias <= 0) {
+        cfg.edanPruebasMensuales = '';
+        cfg.edanDeterminaciones = '';
+      } else {
+        cfg.edanPruebasMensuales = diarias * 30;
+        cfg.edanDeterminaciones = diarias * 30 * 12;
+      }
+      this.calculateEdanProposal(colIndex);
     },
     calculateEdanProposal(colIndex) {
       const cfg = this.equipmentConfigs[colIndex];
