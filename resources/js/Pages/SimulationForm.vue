@@ -431,18 +431,11 @@
                           </div>
 
                           <!-- Pruebas Anuales / Totales -->
-                          <div style="display: grid; grid-template-columns: 1.4fr 1fr 1.2fr; gap: 8px; align-items: center;">
+                          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; align-items: center;">
                             <label style="font-size: 0.75rem; font-weight: 700; color: #14532d;">Pruebas Anuales</label>
-                            <input 
-                              type="text" 
-                              :value="formatNumber(equipmentConfigs[colIndex].edanDeterminaciones)" 
-                              disabled
-                              class="excel-input text-center font-bold"
-                              style="width: 100%; padding: 4px 8px; font-size: 0.8rem; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; cursor: not-allowed;"
-                            />
-                            <div style="font-size: 0.65rem; line-height: 1.1; text-align: left; padding-left: 8px;">
+                            <div style="font-size: 0.65rem; line-height: 1.1; text-align: left;">
                               <span style="font-weight: 800; color: #475569; display: block; font-size: 0.6rem;">PRUEBAS TOTALES</span>
-                              <span style="font-size: 0.85rem; font-weight: 900; color: #1e293b;">{{ formatNumber(edanPruebasTotales) }}</span>
+                              <span style="font-size: 0.95rem; font-weight: 900; color: #1e293b; display: block; margin-top: 1px;">{{ formatNumber(equipmentConfigs[colIndex].edanDeterminaciones) }}</span>
                             </div>
                           </div>
 
@@ -619,8 +612,9 @@
                   </div>
 
                   <!-- Volumetrics Grid -->
-                  <div class="excel-volumetrics-card">
-                    <div class="vol-left-col">
+                  <!-- Volumetrics Grid -->
+                  <div class="excel-volumetrics-card" :style="equipmentConfigs[colIndex].brandFilter === 'EDAN' ? 'display: flex; justify-content: center; align-items: center; padding: 16px;' : ''">
+                    <div class="vol-left-col" v-if="equipmentConfigs[colIndex].brandFilter !== 'EDAN'">
                       <div class="vol-item-row">
                         <span class="vol-lbl text-danger font-bold">Pruebas Diarias</span>
                         <input type="number" v-model.number="equipmentConfigs[colIndex].daily_tests" class="vol-input text-center font-bold text-danger" min="0" />
@@ -649,7 +643,7 @@
                       </div>
                     </div>
 
-                    <div class="vol-right-col text-center">
+                    <div class="vol-right-col text-center" :style="equipmentConfigs[colIndex].brandFilter === 'EDAN' ? 'margin: 0 auto;' : ''">
                       <span class="vol-title-lbl">Pruebas Totales</span>
                       <div class="total-tests-underline">
                         {{ formatNumber(calculations[colIndex].volumetrics.total_tests) }}
@@ -1983,9 +1977,16 @@ export default {
         }
 
         // Volumetrics
-        const dailyTests = Number(cfg.daily_tests) || 0;
-        const monthlyTests = dailyTests * 30 * qty;
-        const annualTests = monthlyTests * 12;
+        let dailyTests = Number(cfg.daily_tests) || 0;
+        let monthlyTests = dailyTests * 30 * qty;
+        let annualTests = monthlyTests * 12;
+
+        if (cfg.brandFilter === 'EDAN') {
+          dailyTests = Number(cfg.edanPruebasDiarias) || 0;
+          monthlyTests = (Number(cfg.edanPruebasMensuales) || 0) * qty;
+          annualTests = (Number(cfg.edanDeterminaciones) || 0) * qty;
+        }
+
         const totalTests = monthlyTests * contractMonths;
 
         const pvp = Number(cfg.pvp_per_test) || 0;
