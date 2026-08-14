@@ -448,7 +448,7 @@ class SimulationController extends Controller
                     'apikey' => 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
                     'Authorization' => 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
                 ])->get('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos', [
-                    'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado',
+                    'select' => 'linea_negocio,modelo_equipo,cod_marca,tipo_producto,nacional_importado,cod_item,descripcion,fob',
                     'limit' => 1000,
                     'offset' => $offset
                 ]);
