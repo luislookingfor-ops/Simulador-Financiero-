@@ -555,6 +555,30 @@ app.put('/equipments/:id', (req, res) => {
   res.redirect(303, '/');
 });
 
+// Route: GET /api/catalyst-productos (Proxy for Catalyst APIs)
+app.get('/api/catalyst-productos', async (req, res) => {
+  const company = req.query.pcod_empresa;
+  let url = '';
+  if (company === '047') {
+    url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=047-1001089458071&pcod_empresa=047';
+  } else if (company === '079') {
+    url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=079-1001176123971&pcod_empresa=079';
+  } else {
+    return res.status(400).json({ error: 'Invalid company code' });
+  }
+
+  try {
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      return res.json(data);
+    }
+    return res.status(response.status).json({ error: 'Failed to fetch from Catalyst' });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Route: DELETE /equipments/:id (Delete equipment)
 app.delete('/equipments/:id', (req, res) => {
   const id = parseInt(req.params.id);
