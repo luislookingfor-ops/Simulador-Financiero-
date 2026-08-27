@@ -482,8 +482,8 @@ export default {
           ...data2.map(item => this.mapItem(item, 'JORGE ESTRELLA'))
         ];
         
-        // Filter out items with no stock and no expiry date to optimize rendering
-        this.rawData = rawMerged.filter(d => d.stock > 0 || !isNaN(d.vence.getTime()));
+        // Keep all items to match original Excel row counts exactly
+        this.rawData = rawMerged;
         
         this.lastUpdated = this.horaActual();
         
@@ -513,13 +513,16 @@ export default {
 
       const costo = Number(item.precioCompra) || Number(item.costoPromedio) || 0;
       const stock = Number(item.saldoDisponible) || 0;
+      const vendido = Number(item.vendido) || 0;
+      const aumento = Number(item.aumento) || 0;
+      const sinVender = stock - vendido + aumento;
       
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
       const dias = Math.round((venceDate - hoy) / 86400000);
 
       let zona = 'safe';
-      if (stock <= 0) {
+      if (sinVender <= 0) {
         zona = 'sold';
       } else if (isNaN(dias)) {
         zona = 'unknown';
@@ -536,24 +539,24 @@ export default {
       }
 
       return {
-        empresa: companyName,
+        empresa: item.empresa || companyName,
         codigo: item.codItem || '',
         desc: item.descripcion || '',
-        marca: item.nombreTipo || item.codMarca || 'Sin marca',
+        marca: item.nombreTipo || 'Sin marca',
         bodega: item.nombreSubGrupo || 'Sin bodega',
-        lote: item.referencia || item.regSanitario || 'S/L',
+        lote: item.referencia || 'S/L',
         vencimiento: rawDate || '',
         vence: venceDate,
         dias: dias,
         costo: costo,
         stock: stock,
-        vendido: 0,
-        aumento: 0,
-        sinVender: stock,
-        inconsistente: false,
-        valorRiesgo: Number((stock * costo).toFixed(2)),
+        vendido: vendido,
+        aumento: aumento,
+        sinVender: sinVender,
+        inconsistente: sinVender < 0,
+        valorRiesgo: Number((sinVender * costo).toFixed(2)),
         valorInicial: Number((stock * costo).toFixed(2)),
-        valorRecuperado: 0,
+        valorRecuperado: Number((vendido * costo).toFixed(2)),
         mesAno: isNaN(venceDate.getTime()) ? '' : `${venceDate.getFullYear()}-${String(venceDate.getMonth() + 1).padStart(2, '0')}`,
         zona: zona
       };

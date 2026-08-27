@@ -679,26 +679,22 @@ class SimulationController extends Controller
     public function getCatalystProducts(Request $request)
     {
         $company = $request->query('pcod_empresa');
-        if ($company === '047') {
-            $url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=047-1001089458071&pcod_empresa=047';
-        } elseif ($company === '079') {
-            $url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=079-1001176123971&pcod_empresa=079';
-        } else {
+        if ($company !== '047' && $company !== '079') {
             return response()->json(['error' => 'Invalid company code'], 400);
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
-                ->timeout(30)
-                ->get($url);
+            $scriptPath = base_path('app/Bin/parse_vencimientos.js');
+            $command = 'node ' . escapeshellarg($scriptPath) . ' ' . escapeshellarg($company);
+            $json = shell_exec($command);
             
-            if ($response->successful()) {
-                return response($response->body(), 200)
+            if ($json !== null) {
+                return response($json, 200)
                     ->header('Content-Type', 'application/json');
             }
-            return response()->json(['error' => 'Failed to fetch from Catalyst: ' . $response->body()], $response->status());
+            return response()->json(['error' => 'Failed to execute Excel parser script'], 500);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Proxy error: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Proxy parser error: ' . $e->getMessage()], 500);
         }
     }
 }

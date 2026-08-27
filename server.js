@@ -2,6 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getExcelData } from './app/Bin/parse_vencimientos.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -514,25 +515,16 @@ app.put('/equipments/:id', (req, res) => {
   return res.redirect(303, '/');
 });
 
-// Route: GET /api/catalyst-productos (Proxy for Catalyst APIs)
-app.get('/api/catalyst-productos', async (req, res) => {
+// Route: GET /api/catalyst-productos (Serves Excel vencimientos data)
+app.get('/api/catalyst-productos', (req, res) => {
   const company = req.query.pcod_empresa;
-  let url = '';
-  if (company === '047') {
-    url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=047-1001089458071&pcod_empresa=047';
-  } else if (company === '079') {
-    url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=079-1001176123971&pcod_empresa=079';
-  } else {
+  if (company !== '047' && company !== '079') {
     return res.status(400).json({ error: 'Invalid company code' });
   }
 
   try {
-    const response = await fetch(url);
-    if (response.ok) {
-      const data = await response.json();
-      return res.json(data);
-    }
-    return res.status(response.status).json({ error: 'Failed to fetch from Catalyst' });
+    const data = getExcelData(company);
+    return res.json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
