@@ -675,4 +675,30 @@ class SimulationController extends Controller
             }
         }
     }
+
+    public function getCatalystProducts(Request $request)
+    {
+        $company = $request->query('pcod_empresa');
+        if ($company === '047') {
+            $url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=047-1001089458071&pcod_empresa=047';
+        } elseif ($company === '079') {
+            $url = 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=079-1001176123971&pcod_empresa=079';
+        } else {
+            return response()->json(['error' => 'Invalid company code'], 400);
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
+                ->timeout(30)
+                ->get($url);
+            
+            if ($response->successful()) {
+                return response($response->body(), 200)
+                    ->header('Content-Type', 'application/json');
+            }
+            return response()->json(['error' => 'Failed to fetch from Catalyst: ' . $response->body()], $response->status());
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Proxy error: ' . $e->getMessage()], 500);
+        }
+    }
 }

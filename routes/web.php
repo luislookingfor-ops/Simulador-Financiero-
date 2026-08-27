@@ -31,6 +31,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/clientes/filtros', [SimulationController::class, 'getClientFilters'])->name('clientes.filtros');
     Route::get('/api/clientes', [SimulationController::class, 'searchClients'])->name('clientes.index');
 
+    // Catalyst proxy route
+    Route::get('/api/catalyst-productos', [SimulationController::class, 'getCatalystProducts'])->name('catalyst.productos');
+
     // Admin only routes
     Route::middleware([AdminMiddleware::class])->group(function () {
         Route::post('/simulations', [SimulationController::class, 'store'])->name('simulation.store');

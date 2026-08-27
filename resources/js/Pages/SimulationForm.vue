@@ -66,6 +66,15 @@
           Consolidado General
         </a>
         <a 
+          href="#" 
+          class="nav-item" 
+          :class="{ active: activeNavTab === 'caducidad' }"
+          @click.prevent="activeNavTab = 'caducidad'"
+        >
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          Control de Caducidad
+        </a>
+        <a 
           v-if="auth && auth.user && auth.user.role === 'admin'"
           href="#" 
           class="nav-item" 
@@ -1318,6 +1327,11 @@
         </div>
       </div>
 
+      <!-- Dashboard Grid: Tab - Control de Caducidad -->
+      <div v-else-if="activeNavTab === 'caducidad'" class="dashboard-grid single-view">
+        <CaducidadPanel />
+      </div>
+
       <!-- Dashboard Grid: Tab 7 - Gestión de Usuarios -->
       <div v-else-if="activeNavTab === 'users'" class="dashboard-grid single-view">
         <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; width: 100%; box-sizing: border-box; align-items: start;">
@@ -1543,6 +1557,7 @@
 
 <script>
 import EU5600ReagentSection from '../Components/EU5600ReagentSection.vue';
+import CaducidadPanel from '../Components/CaducidadPanel.vue';
 
 function flagCustomItems(customItems, eqName) {
   if (!customItems) return [];
@@ -1612,7 +1627,8 @@ function createEmptyConfig() {
 
 export default {
   components: {
-    EU5600ReagentSection
+    EU5600ReagentSection,
+    CaducidadPanel
   },
   props: {
     auth: {
