@@ -200,11 +200,6 @@ app.post('/login', (req, res) => {
       username: 'admin',
       role: 'admin'
     };
-    if (req.headers['x-inertia']) {
-      res.setHeader('X-Inertia', 'true');
-      res.setHeader('X-Inertia-Location', '/');
-      return res.status(303).json({});
-    }
     return res.redirect(303, '/');
   }
 
@@ -217,11 +212,6 @@ app.post('/login', (req, res) => {
       username: found.username,
       role: found.role
     };
-    if (req.headers['x-inertia']) {
-      res.setHeader('X-Inertia', 'true');
-      res.setHeader('X-Inertia-Location', '/');
-      return res.status(303).json({});
-    }
     return res.redirect(303, '/');
   }
 
@@ -235,12 +225,7 @@ app.post('/login', (req, res) => {
 // Route: POST /logout
 app.post('/logout', (req, res) => {
   loggedInUser = null;
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/login');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/login');
+  return res.redirect(303, '/login');
 });
 
 // Route: GET /users
@@ -273,12 +258,7 @@ app.post('/users', (req, res) => {
   users.push(newUser);
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
 
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: GET /api/productos/filtros (Mock API)
@@ -357,13 +337,7 @@ app.post('/simulations', (req, res) => {
   });
 
   // Redirect to GET / with 333/303 redirect as expected by Inertia
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: DELETE /simulations/:id (Delete scenario)
@@ -375,12 +349,7 @@ app.delete('/simulations/:id', (req, res) => {
     sims.splice(idx, 1);
     fs.writeFileSync(SIMULATIONS_FILE, JSON.stringify(sims, null, 2), 'utf8');
   }
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: POST /simulations/calculate
@@ -519,12 +488,7 @@ app.post('/equipments', (req, res) => {
     default_reagent_cost: Number(default_reagent_cost) || 0
   };
   EQUIPMENTS.push(newEq);
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: PUT /equipments/:id (Update equipment)
@@ -547,12 +511,7 @@ app.put('/equipments/:id', (req, res) => {
       default_reagent_cost: Number(default_reagent_cost) || 0
     };
   }
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: GET /api/catalyst-productos (Proxy for Catalyst APIs)
@@ -586,12 +545,7 @@ app.delete('/equipments/:id', (req, res) => {
   if (idx !== -1) {
     EQUIPMENTS.splice(idx, 1);
   }
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: POST /reagent-plannings (Create planning item)
@@ -605,12 +559,7 @@ app.post('/reagent-plannings', (req, res) => {
   item.total = Number(item.total) || 0;
   plannings.push(item);
   fs.writeFileSync(PLANNING_FILE, JSON.stringify(plannings, null, 2), 'utf8');
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: PUT /reagent-plannings/:id (Update planning item)
@@ -629,12 +578,7 @@ app.put('/reagent-plannings/:id', (req, res) => {
     };
     fs.writeFileSync(PLANNING_FILE, JSON.stringify(plannings, null, 2), 'utf8');
   }
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: DELETE /reagent-plannings/:id (Delete planning item)
@@ -646,12 +590,7 @@ app.delete('/reagent-plannings/:id', (req, res) => {
     plannings.splice(idx, 1);
     fs.writeFileSync(PLANNING_FILE, JSON.stringify(plannings, null, 2), 'utf8');
   }
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 // Route: POST /reagent-plannings/bulk-update (Bulk update plannings)
@@ -672,12 +611,7 @@ app.post('/reagent-plannings/bulk-update', (req, res) => {
     }
   });
   fs.writeFileSync(PLANNING_FILE, JSON.stringify(plannings, null, 2), 'utf8');
-  if (req.headers['x-inertia']) {
-    res.setHeader('X-Inertia', 'true');
-    res.setHeader('X-Inertia-Location', '/');
-    return res.status(303).json({});
-  }
-  res.redirect(303, '/');
+  return res.redirect(303, '/');
 });
 
 app.listen(PORT, () => {
