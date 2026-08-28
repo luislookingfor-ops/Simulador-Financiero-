@@ -8,7 +8,49 @@ const __dirname = path.dirname(__filename);
 // Excel file is in the project root (two levels up from app/Bin/)
 const excelPath = path.resolve(__dirname, '../../REPORTE VENCIMIENTOS  (1).xlsx');
 
-export function getExcelData(companyFilter) {
+export async function getExcelData(companyFilter) {
+  const apiStocks = new Map();
+  try {
+    const urls = {
+      '047': 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=047-1001089458071&pcod_empresa=047',
+      '079': 'https://funciones-digital-strategy-831038044.development.catalystserverless.com/productos?pautorizacion=079-1001176123971&pcod_empresa=079'
+    };
+    
+    const fetchPromises = [];
+    if (companyFilter === '047' || !companyFilter) {
+      fetchPromises.push(
+        fetch(urls['047']).then(res => res.json()).then(data => {
+          data.forEach(item => {
+            if (item.codItem) {
+              apiStocks.set('047_' + item.codItem, Number(item.saldoDisponible) || 0);
+            }
+          });
+        }).catch(err => console.error('Error fetching live stock 047:', err.message))
+      );
+    }
+    if (companyFilter === '079' || !companyFilter) {
+      fetchPromises.push(
+        fetch(urls['079']).then(res => res.json()).then(data => {
+          data.forEach(item => {
+            if (item.codItem) {
+              apiStocks.set('079_' + item.codItem, Number(item.saldoDisponible) || 0);
+            }
+          });
+        }).catch(err => console.error('Error fetching live stock 079:', err.message))
+      );
+    }
+    
+    // Fetch live API stocks with an 8-second safety timeout
+    if (fetchPromises.length > 0) {
+      await Promise.race([
+        Promise.all(fetchPromises),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('API timeout')), 8000))
+      ]);
+    }
+  } catch (err) {
+    console.warn('Could not fetch live stock from API, falling back to Excel stock:', err.message);
+  }
+
   try {
     const workbook = XLSX.readFile(excelPath);
     const sheet = workbook.Sheets['CADUCIDAD'];
@@ -30,6 +72,14 @@ export function getExcelData(companyFilter) {
         dateString = String(rawDate);
       }
 
+      // Overwrite Excel stock with live API stock if match found
+      const compCode = r.empresa === 'INGELAB S.A.S' ? '047' : '079';
+      const key = compCode + '_' + r.codigo;
+      let stock = Number(r.stock) || 0;
+      if (apiStocks.has(key)) {
+        stock = apiStocks.get(key);
+      }
+
       return {
         codItem: String(r.codigo || ''),
         descripcion: r.descripcion || '',
@@ -39,7 +89,7 @@ export function getExcelData(companyFilter) {
         fechaCaducaRegSanitario: dateString,
         precioCompra: Number(r.costo) || 0,
         costoPromedio: Number(r.costo) || 0,
-        saldoDisponible: Number(r.stock) || 0,
+        saldoDisponible: stock,
         empresa: r.empresa || '',
         vendido: Number(r.vendido) || 0,
         aumento: Number(r.aumento) || 0
@@ -62,6 +112,10 @@ export function getExcelData(companyFilter) {
 // If run directly from command line, print the output
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const companyFilter = process.argv[2];
-  const data = getExcelData(companyFilter);
-  process.stdout.write(JSON.stringify(data));
+  getExcelData(companyFilter).then(data => {
+    process.stdout.write(JSON.stringify(data));
+  }).catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
 }

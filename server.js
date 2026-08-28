@@ -516,14 +516,14 @@ app.put('/equipments/:id', (req, res) => {
 });
 
 // Route: GET /api/catalyst-productos (Serves Excel vencimientos data)
-app.get('/api/catalyst-productos', (req, res) => {
+app.get('/api/catalyst-productos', async (req, res) => {
   const company = req.query.pcod_empresa;
   if (company !== '047' && company !== '079') {
     return res.status(400).json({ error: 'Invalid company code' });
   }
 
   try {
-    const data = getExcelData(company);
+    const data = await getExcelData(company);
     return res.json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });
