@@ -324,6 +324,38 @@ app.put('/api/productos/:id', (req, res) => {
   res.json({ id, fob, pvp, success: true });
 });
 
+// Route: GET /api/clientes/filtros (Proxy to Supabase clients microservice)
+app.get('/api/clientes/filtros', async (req, res) => {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/clientes/filtros');
+    if (response.ok) {
+      const data = await response.json();
+      return res.json(data);
+    }
+    return res.status(response.status).json({ error: 'Error del microservicio de clientes' });
+  } catch (err) {
+    console.error('Error proxying /api/clientes/filtros:', err.message);
+    return res.status(500).json({ error: 'No se pudo conectar al microservicio de clientes (puerto 3000): ' + err.message });
+  }
+});
+
+// Route: GET /api/clientes (Proxy to Supabase clients microservice)
+app.get('/api/clientes', async (req, res) => {
+  try {
+    const qs = new URLSearchParams(req.query).toString();
+    const url = 'http://127.0.0.1:3000/api/clientes' + (qs ? `?${qs}` : '');
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      return res.json(data);
+    }
+    return res.status(response.status).json({ error: 'Error del microservicio de clientes' });
+  } catch (err) {
+    console.error('Error proxying /api/clientes:', err.message);
+    return res.status(500).json({ error: 'No se pudo conectar al microservicio de clientes (puerto 3000): ' + err.message });
+  }
+});
+
 // Route: POST /simulations (Save scenario)
 app.post('/simulations', (req, res) => {
   const { name, global_settings, equipment_settings } = req.body;
