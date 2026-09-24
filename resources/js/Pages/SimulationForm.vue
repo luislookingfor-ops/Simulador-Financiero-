@@ -320,14 +320,14 @@
                       <div class="excel-form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-bottom: none; padding-bottom: 2px;">
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Línea de Negocio</label>
-                          <select v-model="equipmentConfigs[colIndex].lineFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                          <select v-model="equipmentConfigs[colIndex].lineFilter" @change="onFilterChange(colIndex, 'lineFilter')" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODAS LAS LÍNEAS</option>
                             <option v-for="opt in getFilteredOptions(colIndex, 'linea_negocio')" :key="opt" :value="opt">{{ opt.toUpperCase() }}</option>
                           </select>
                         </div>
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Modelo</label>
-                          <select v-model="equipmentConfigs[colIndex].modelFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                          <select v-model="equipmentConfigs[colIndex].modelFilter" @change="onFilterChange(colIndex, 'modelFilter')" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODOS LOS MODELOS</option>
                             <option v-for="opt in getFilteredOptions(colIndex, 'modelo_equipo')" :key="opt" :value="opt">{{ opt }}</option>
                           </select>
@@ -337,21 +337,21 @@
                       <div class="excel-form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; border-bottom: none; padding-top: 2px; padding-bottom: 2px;">
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Marca</label>
-                          <select v-model="equipmentConfigs[colIndex].brandFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                          <select v-model="equipmentConfigs[colIndex].brandFilter" @change="onFilterChange(colIndex, 'brandFilter')" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODAS LAS MARCAS</option>
                             <option v-for="opt in getFilteredOptions(colIndex, 'cod_marca')" :key="opt" :value="opt">{{ opt }}</option>
                           </select>
                         </div>
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Tipo de Producto</label>
-                          <select v-model="equipmentConfigs[colIndex].typeFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                          <select v-model="equipmentConfigs[colIndex].typeFilter" @change="onFilterChange(colIndex, 'typeFilter')" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODOS LOS TIPOS</option>
                             <option v-for="opt in getFilteredOptions(colIndex, 'tipo_producto')" :key="opt" :value="opt">{{ opt }}</option>
                           </select>
                         </div>
                         <div>
                           <label style="font-size: 0.7rem; font-weight: 700; color: #475569; display: block; margin-bottom: 2px; text-align: left;">Procedencia</label>
-                          <select v-model="equipmentConfigs[colIndex].nacionalImportadoFilter" @change="onFilterChange(colIndex)" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
+                          <select v-model="equipmentConfigs[colIndex].nacionalImportadoFilter" @change="onFilterChange(colIndex, 'nacionalImportadoFilter')" class="excel-select font-bold" style="font-size: 0.8rem; padding: 4px;">
                             <option value="">TODAS</option>
                             <option v-for="opt in getFilteredOptions(colIndex, 'nacional_importado')" :key="opt" :value="opt">
                               {{ opt === 'N' || opt.toUpperCase().startsWith('NAC') ? 'NACIONAL' : 'IMPORTADO' }}
@@ -366,7 +366,7 @@
                           <input 
                             type="text" 
                             v-model="equipmentConfigs[colIndex].searchQuery" 
-                            @input="onFilterChange(colIndex)" 
+                            @input="onFilterChange(colIndex, 'search')" 
                             placeholder="Escribe para buscar..." 
                             class="excel-input" 
                             style="font-size: 0.8rem; padding: 4px 8px; background: white; color: black; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; width: 100%;" 
@@ -1816,11 +1816,11 @@ export default {
       }
     };
   },
-  created() {
+  async created() {
     if (this.auth && this.auth.user && this.auth.user.role === 'user') {
       this.activeNavTab = 'planning';
     }
-    this.fetchFilterOptions();
+    await this.fetchFilterOptions();
     this.onFilterChange(0);
     this.onFilterChange(1);
     this.onFilterChange(2);
@@ -3172,9 +3172,13 @@ export default {
         console.error("Error fetching filters:", err);
       }
     },
-    async onFilterChange(colIndex) {
+    async onFilterChange(colIndex, changedField) {
       const cfg = this.equipmentConfigs[colIndex];
       if (!cfg) return;
+
+      if (changedField) {
+        this.validateFilters(colIndex, changedField);
+      }
 
       const params = new URLSearchParams();
       if (cfg.lineFilter) params.append('linea_negocio', cfg.lineFilter);
@@ -3371,6 +3375,50 @@ export default {
       this.scenarioName = client.nombre;
       this.showClientSearchDropdown = false;
     },
+    normalizeFilterVal(val) {
+      if (!val) return '';
+      return String(val).normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
+    },
+    matchFilterVal(a, b) {
+      if (!a && !b) return true;
+      if (!a || !b) return false;
+      return this.normalizeFilterVal(a) === this.normalizeFilterVal(b);
+    },
+    validateFilters(colIndex, changedField) {
+      const cfg = this.equipmentConfigs[colIndex];
+      if (!cfg || !this.allProductsMetadata || this.allProductsMetadata.length === 0) return;
+
+      if (changedField !== 'lineFilter' && cfg.lineFilter) {
+        const valid = this.getFilteredOptions(colIndex, 'linea_negocio');
+        if (!valid.some(opt => this.matchFilterVal(opt, cfg.lineFilter))) {
+          cfg.lineFilter = '';
+        }
+      }
+      if (changedField !== 'modelFilter' && cfg.modelFilter) {
+        const valid = this.getFilteredOptions(colIndex, 'modelo_equipo');
+        if (!valid.some(opt => this.matchFilterVal(opt, cfg.modelFilter))) {
+          cfg.modelFilter = '';
+        }
+      }
+      if (changedField !== 'brandFilter' && cfg.brandFilter) {
+        const valid = this.getFilteredOptions(colIndex, 'cod_marca');
+        if (!valid.some(opt => this.matchFilterVal(opt, cfg.brandFilter))) {
+          cfg.brandFilter = '';
+        }
+      }
+      if (changedField !== 'typeFilter' && cfg.typeFilter) {
+        const valid = this.getFilteredOptions(colIndex, 'tipo_producto');
+        if (!valid.some(opt => this.matchFilterVal(opt, cfg.typeFilter))) {
+          cfg.typeFilter = '';
+        }
+      }
+      if (changedField !== 'nacionalImportadoFilter' && cfg.nacionalImportadoFilter) {
+        const valid = this.getFilteredOptions(colIndex, 'nacional_importado');
+        if (!valid.some(opt => this.matchFilterVal(opt, cfg.nacionalImportadoFilter))) {
+          cfg.nacionalImportadoFilter = '';
+        }
+      }
+    },
     getFilteredOptions(colIndex, field) {
       const cfg = this.equipmentConfigs[colIndex];
       if (!cfg) return [];
@@ -3386,19 +3434,19 @@ export default {
       let list = this.allProductsMetadata;
 
       if (field !== 'linea_negocio' && cfg.lineFilter) {
-        list = list.filter(p => p.linea_negocio === cfg.lineFilter);
+        list = list.filter(p => this.matchFilterVal(p.linea_negocio, cfg.lineFilter));
       }
       if (field !== 'modelo_equipo' && cfg.modelFilter) {
-        list = list.filter(p => p.modelo_equipo === cfg.modelFilter);
+        list = list.filter(p => this.matchFilterVal(p.modelo_equipo, cfg.modelFilter));
       }
       if (field !== 'cod_marca' && cfg.brandFilter) {
-        list = list.filter(p => p.cod_marca === cfg.brandFilter);
+        list = list.filter(p => this.matchFilterVal(p.cod_marca, cfg.brandFilter));
       }
       if (field !== 'tipo_producto' && cfg.typeFilter) {
-        list = list.filter(p => p.tipo_producto === cfg.typeFilter);
+        list = list.filter(p => this.matchFilterVal(p.tipo_producto, cfg.typeFilter));
       }
       if (field !== 'nacional_importado' && cfg.nacionalImportadoFilter) {
-        list = list.filter(p => p.nacional_importado === cfg.nacionalImportadoFilter);
+        list = list.filter(p => this.matchFilterVal(p.nacional_importado, cfg.nacionalImportadoFilter));
       }
 
       const values = list.map(p => p[field]).filter(Boolean);
@@ -3419,19 +3467,19 @@ export default {
       let list = this.allProductsMetadata;
 
       if (field !== 'linea_negocio' && cfg.lineFilter) {
-        list = list.filter(p => p.linea_negocio === cfg.lineFilter);
+        list = list.filter(p => this.matchFilterVal(p.linea_negocio, cfg.lineFilter));
       }
       if (field !== 'modelo_equipo' && cfg.modelFilter) {
-        list = list.filter(p => p.modelo_equipo === cfg.modelFilter);
+        list = list.filter(p => this.matchFilterVal(p.modelo_equipo, cfg.modelFilter));
       }
       if (field !== 'cod_marca' && cfg.brandFilter) {
-        list = list.filter(p => p.cod_marca === cfg.brandFilter);
+        list = list.filter(p => this.matchFilterVal(p.cod_marca, cfg.brandFilter));
       }
       if (field !== 'tipo_producto' && cfg.typeFilter) {
-        list = list.filter(p => p.tipo_producto === cfg.typeFilter);
+        list = list.filter(p => this.matchFilterVal(p.tipo_producto, cfg.typeFilter));
       }
       if (field !== 'nacional_importado' && cfg.nacionalImportadoFilter) {
-        list = list.filter(p => p.nacional_importado === cfg.nacionalImportadoFilter);
+        list = list.filter(p => this.matchFilterVal(p.nacional_importado, cfg.nacionalImportadoFilter));
       }
 
       const values = list.map(p => p[field]).filter(Boolean);

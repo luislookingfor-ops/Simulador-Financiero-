@@ -262,65 +262,150 @@ app.post('/users', (req, res) => {
   return res.redirect(303, '/');
 });
 
-// Route: GET /api/productos/filtros (Mock API)
-app.get('/api/productos/filtros', (req, res) => {
-  const lineas = Array.from(new Set(EQUIPMENTS.map(e => e.line))).sort();
-  const modelos = Array.from(new Set(EQUIPMENTS.map(e => e.code))).sort();
-  const marcas = ['MINDRAY', 'LIFOTRONIC', 'TECO', 'YHLO', 'EDAN', 'SEAMATY', 'HORRON', 'BIOSENS', 'COAGULOMETRO', 'AFIAS'].sort();
-  const tipos = ['EQUIPO', 'REACTIVO', 'REPUESTO'].sort();
-  const nacional_importado = ['N', 'I'];
-  res.json({ lineas, modelos, marcas, tipos, nacional_importado });
+const PRODUCTS_CACHE_FILE = path.join(__dirname, 'supabase_products_cache.json');
+let cachedProducts = [];
+
+function loadProductsCache() {
+  if (fs.existsSync(PRODUCTS_CACHE_FILE)) {
+    try {
+      cachedProducts = JSON.parse(fs.readFileSync(PRODUCTS_CACHE_FILE, 'utf8'));
+    } catch (e) {
+      console.error('Error reading products cache:', e.message);
+    }
+  }
+}
+loadProductsCache();
+
+async function refreshProductsFromSupabase() {
+  try {
+    const offsets = [0, 1000, 2000, 3000, 4000, 5000];
+    const promises = offsets.map(offset => 
+      fetch('https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos?select=id,cod_item,descripcion,modelo_equipo,linea_negocio,cod_marca,tipo_producto,nacional_importado,pvp,fob,stock&limit=1000&offset=' + offset, {
+        headers: {
+          'apikey': 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+          'Authorization': 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8'
+        }
+      }).then(r => r.json())
+    );
+    const results = await Promise.all(promises);
+    const all = results.flat();
+    if (all && all.length > 0) {
+      cachedProducts = all;
+      fs.writeFileSync(PRODUCTS_CACHE_FILE, JSON.stringify(all, null, 2), 'utf8');
+    }
+  } catch (err) {
+    console.warn('Could not refresh products from Supabase, using existing cache:', err.message);
+  }
+}
+
+// Route: GET /api/productos/filtros
+app.get('/api/productos/filtros', async (req, res) => {
+  if (!cachedProducts || cachedProducts.length === 0) {
+    await refreshProductsFromSupabase();
+  }
+
+  const lineas = Array.from(new Set(cachedProducts.map(p => p.linea_negocio).filter(Boolean))).sort();
+  const modelos = Array.from(new Set(cachedProducts.map(p => p.modelo_equipo).filter(Boolean))).sort();
+  const marcas = Array.from(new Set(cachedProducts.map(p => p.cod_marca).filter(Boolean))).sort();
+  const tipos = Array.from(new Set(cachedProducts.map(p => p.tipo_producto).filter(Boolean))).sort();
+  const nacional_importado = Array.from(new Set(cachedProducts.map(p => p.nacional_importado).filter(Boolean))).sort();
+
+  res.json({
+    lineas,
+    modelos,
+    marcas,
+    tipos,
+    nacional_importado,
+    productos: cachedProducts
+  });
 });
 
-// Route: GET /api/productos (Mock API)
-app.get('/api/productos', (req, res) => {
+// Route: GET /api/productos
+app.get('/api/productos', async (req, res) => {
+  if (!cachedProducts || cachedProducts.length === 0) {
+    await refreshProductsFromSupabase();
+  }
+
   const { linea_negocio, modelo_equipo, cod_marca, tipo_producto, nacional_importado, search } = req.query;
-  let list = EQUIPMENTS.map(e => ({
-    id: e.id,
-    cod_item: e.code,
-    descripcion: e.name,
-    modelo_equipo: e.code,
-    linea_negocio: e.line,
-    cod_marca: e.code.includes('MND') ? 'MINDRAY' : (e.code.includes('LFT') ? 'LIFOTRONIC' : 'OTRO'),
-    tipo_producto: 'EQUIPO',
-    nacional_importado: e.code.includes('MND') ? 'I' : 'N',
-    fob: e.fob,
-    pvp: e.default_reagent_cost * 1.5,
-    stock: 5,
-    ups: e.ups,
-    pc: e.pc,
-    impresora: e.impresora,
-    control: e.control,
-    calibrador: e.calibrador
-  }));
+  let list = cachedProducts;
 
   if (linea_negocio) {
-    list = list.filter(p => p.linea_negocio === linea_negocio);
+    const lNorm = linea_negocio.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    list = list.filter(p => (p.linea_negocio || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase() === lNorm);
   }
   if (modelo_equipo) {
-    list = list.filter(p => p.modelo_equipo === modelo_equipo);
+    const mNorm = modelo_equipo.toUpperCase();
+    list = list.filter(p => (p.modelo_equipo || '').toUpperCase() === mNorm);
   }
   if (cod_marca) {
-    list = list.filter(p => p.cod_marca === cod_marca);
+    const bNorm = cod_marca.toUpperCase();
+    list = list.filter(p => (p.cod_marca || '').toUpperCase() === bNorm);
   }
   if (tipo_producto) {
-    list = list.filter(p => p.tipo_producto === tipo_producto);
+    const tNorm = tipo_producto.toUpperCase();
+    list = list.filter(p => (p.tipo_producto || '').toUpperCase() === tNorm);
   }
   if (nacional_importado) {
-    list = list.filter(p => p.nacional_importado === nacional_importado);
+    const nNorm = nacional_importado.toUpperCase();
+    list = list.filter(p => (p.nacional_importado || '').toUpperCase() === nNorm);
   }
   if (search) {
     const s = search.toLowerCase();
-    list = list.filter(p => p.descripcion.toLowerCase().includes(s) || p.cod_item.toLowerCase().includes(s));
+    list = list.filter(p => 
+      (p.descripcion && p.descripcion.toLowerCase().includes(s)) || 
+      (p.cod_item && p.cod_item.toLowerCase().includes(s))
+    );
   }
 
-  res.json(list.slice(0, 200));
+  const mapped = list.map(p => ({
+    id: p.id,
+    cod_item: p.cod_item,
+    descripcion: p.descripcion,
+    modelo_equipo: p.modelo_equipo,
+    linea_negocio: p.linea_negocio,
+    cod_marca: p.cod_marca,
+    tipo_producto: p.tipo_producto,
+    nacional_importado: p.nacional_importado,
+    fob: Number(p.fob) || 0,
+    pvp: Number(p.pvp) || 0,
+    stock: Number(p.stock) || 0,
+    ups: 0,
+    pc: 0,
+    impresora: 0,
+    control: 0,
+    calibrador: 0,
+    default_reagent_cost: Number(p.pvp) ? (Number(p.pvp) / 1.5) : 0.35
+  }));
+
+  res.json(mapped.slice(0, 300));
 });
 
-// Route: PUT /api/productos/:id (Mock API)
-app.put('/api/productos/:id', (req, res) => {
+// Route: PUT /api/productos/:id (Update product price)
+app.put('/api/productos/:id', async (req, res) => {
   const { id } = req.params;
   const { fob, pvp } = req.body;
+
+  const idx = cachedProducts.findIndex(p => String(p.id) === String(id));
+  if (idx !== -1) {
+    cachedProducts[idx].fob = fob;
+    cachedProducts[idx].pvp = pvp;
+  }
+
+  try {
+    fetch(`https://dqinbvdedshhhqpjwviq.supabase.co/rest/v1/productos?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': 'sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+        'Authorization': 'Bearer sb_publishable_gbNggyxHLAPscA-lzhuebw_PuN4Z7U8',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ fob, pvp })
+    }).catch(e => console.error('Error updating Supabase:', e.message));
+  } catch (e) {
+    // ignore
+  }
+
   res.json({ id, fob, pvp, success: true });
 });
 
